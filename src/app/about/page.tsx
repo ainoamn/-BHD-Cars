@@ -20,10 +20,10 @@ export default function Page() {
         kicker={L("عن المنصة", "About")}
         title={L("بُنيت لتكون أهدأ من سوق الإعلانات، وأكمل من صفحة تأمين.", "Built to be calmer than a classifieds grid, and more complete than an insurance page.")}
       />
-      <div className="mx-auto max-w-3xl space-y-10 px-5 py-14">
+      <div className="mx-auto grid max-w-4xl gap-4 px-5 py-10">
         {points.map(([title, text]) => (
-          <section key={title.en}>
-            <h2 className="font-display text-3xl">{tx(title)}</h2>
+          <section key={title.en} className="surface-card p-6 md:p-8">
+            <h2 className="text-2xl font-bold tracking-tight text-night">{tx(title)}</h2>
             <p className="mt-3 leading-relaxed text-muted">{tx(text)}</p>
           </section>
         ))}

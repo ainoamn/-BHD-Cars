@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { DemoNote, Field, PageHeader, Primary, Receipt, fieldClass } from "@/components/ui";
+import { ChoiceCard, DemoNote, Field, FormShell, PageHeader, Primary, Receipt, fieldClass } from "@/components/ui";
 import { appraisers, carBySlug, cars, centers } from "@/lib/data";
 import { usePrefs } from "@/lib/prefs";
 import { useStore } from "@/lib/store";
@@ -39,11 +39,11 @@ export function ValuationDesk() {
         title={L("رقم من مثمن، لا من البائع.", "A figure from an appraiser, not from the seller.")}
         lead={L("الطلب يذهب إلى مثمن مرخّص حسب المدينة. التقرير يصل خلال المدة المعلنة، ويصلح للبيع أو التمويل أو النزاع.", "The request goes to a licensed appraiser by city. The report arrives within the stated time, and serves a sale, finance, or a dispute.")}
       />
-      <div className="mx-auto max-w-3xl px-5 py-12">
+      <div className="mx-auto max-w-3xl px-5 py-10">
         {sent ? (
           <Receipt refCode={sent} title={tx(L("المثمن استلم الطلب.", "The appraiser has the request."))} detail={tx(L("قد يطلب صوراً للهيكل والعداد. الرسم يُحصّل مع التسليم.", "They may ask for photos of the body and the odometer. The fee is taken with delivery."))} />
         ) : (
-          <div className="grid gap-4">
+          <FormShell>
             <Field label={tx(L("السيارة", "Car"))}>
               <select className={fieldClass} value={carSlug} onChange={(event) => setCarSlug(event.target.value)}>
                 <option value="">{tx(L("سيارة خارج السوق", "A car outside the market"))}</option>
@@ -51,32 +51,42 @@ export function ValuationDesk() {
               </select>
             </Field>
             <Field label={tx(L("الغرض", "Purpose"))}>
-              <select className={fieldClass} value={purpose} onChange={(event) => setPurpose(event.target.value)}>
-                <option value="sale">{tx(L("بيع", "Sale"))}</option>
-                <option value="finance">{tx(L("تمويل", "Finance"))}</option>
-                <option value="insurance">{tx(L("تأمين", "Insurance"))}</option>
-                <option value="dispute">{tx(L("نزاع أو تركة", "Dispute or estate"))}</option>
-              </select>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  ["sale", L("بيع", "Sale")],
+                  ["finance", L("تمويل", "Finance")],
+                  ["insurance", L("تأمين", "Insurance")],
+                  ["dispute", L("نزاع أو تركة", "Dispute or estate")],
+                ] as const).map(([id, label]) => (
+                  <button key={id} type="button" onClick={() => setPurpose(id)} className={purpose === id ? "chip chip-active" : "chip"}>
+                    {tx(label)}
+                  </button>
+                ))}
+              </div>
             </Field>
             <Field label={tx(L("المثمن", "Appraiser"))}>
-              <select className={fieldClass} value={appraiser} onChange={(event) => setAppraiser(event.target.value)}>
-                <option value="auto">{tx(L("أقرب مثمن متاح", "Nearest available"))}</option>
+              <div className="grid gap-3">
+                <ChoiceCard
+                  selected={appraiser === "auto"}
+                  title={tx(L("أقرب مثمن متاح", "Nearest available"))}
+                  meta={tx(L("نوزّع حسب المدينة والوقت.", "We assign by city and availability."))}
+                  onSelect={() => setAppraiser("auto")}
+                />
                 {appraisers.map((item) => (
-                  <option key={item.id} value={item.id}>{tx(item.name)} · {tx(item.cities)} · {money(item.feeOmr)}</option>
+                  <ChoiceCard
+                    key={item.id}
+                    selected={appraiser === item.id}
+                    title={tx(item.name)}
+                    price={money(item.feeOmr)}
+                    meta={`${item.license} · ${tx(item.cities)} · ${item.hours} ${tx(L("ساعة", "hours"))}`}
+                    onSelect={() => setAppraiser(item.id)}
+                  />
                 ))}
-              </select>
+              </div>
             </Field>
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {appraisers.map((item) => (
-                <li key={item.id} className="border border-line p-4 text-sm">
-                  <p>{tx(item.name)}</p>
-                  <p className="mt-1 text-xs text-muted">{item.license} · {tx(item.cities)} · {item.hours} {tx(L("ساعة", "hours"))}</p>
-                </li>
-              ))}
-            </ul>
             <Primary onClick={submit}>{tx(L("أرسل طلب التثمين", "Send the valuation"))}</Primary>
             <DemoNote />
-          </div>
+          </FormShell>
         )}
       </div>
     </div>
@@ -113,13 +123,13 @@ export function InspectionDesk() {
         title={L("يفحصها المختبر قبل أن تراها.", "The lab sees it before you have to.")}
         lead={L("موعد، مستوى فحص، وتقرير بالصور. مناسب للشراء المحلي ولسيارات الميناء.", "A slot, a level of inspection, and a photo report. For a local purchase and for cars at the port.")}
       />
-      <div className="mx-auto max-w-3xl px-5 py-12">
+      <div className="mx-auto max-w-3xl px-5 py-10">
         {sent ? (
           <div className="space-y-6">
             <Receipt refCode={sent} title={tx(L("الموعد محجوز بصورة مبدئية.", "The slot is held, pending confirmation."))} detail={tx(L("يصل التقرير على صفحة الطلبات: الهيكل، الكمبيوتر، تجربة الطريق، والملاحظات.", "The report lands on the requests page: structure, computer, road test, and notes."))} />
-            <div className="border border-line p-5 text-sm leading-relaxed">
-              <p className="text-xs text-brass">{tx(L("شكل التقرير", "What the report contains"))}</p>
-              <ul className="mt-3 list-disc space-y-1 ps-5">
+            <div className="surface-card p-5 text-sm leading-relaxed">
+              <p className="eyebrow">{tx(L("شكل التقرير", "What the report contains"))}</p>
+              <ul className="mt-3 list-disc space-y-1 ps-5 text-muted">
                 <li>{tx(L("مطابقة رقم الهيكل", "VIN match"))}</li>
                 <li>{tx(L("هيكل وطلاء", "Structure and paint"))}</li>
                 <li>{tx(L("قراءة الأعطال", "Fault codes"))}</li>
@@ -129,7 +139,7 @@ export function InspectionDesk() {
             </div>
           </div>
         ) : (
-          <div className="grid gap-4">
+          <FormShell>
             <Field label={tx(L("السيارة", "Car"))}>
               <select className={fieldClass} value={carSlug} onChange={(event) => setCarSlug(event.target.value)}>
                 <option value="">{tx(L("سيارة برابط أو رقم هيكل لاحقاً", "A car, with a link or VIN later"))}</option>
@@ -137,25 +147,48 @@ export function InspectionDesk() {
               </select>
             </Field>
             <Field label={tx(L("المختبر", "Lab"))}>
-              <select className={fieldClass} value={centerId} onChange={(event) => { setCenterId(event.target.value); setTierId("full"); }}>
-                {centers.map((item) => <option key={item.id} value={item.id}>{tx(item.name)} · {tx(item.city)}</option>)}
-              </select>
+              <div className="grid gap-3">
+                {centers.map((item) => (
+                  <ChoiceCard
+                    key={item.id}
+                    selected={centerId === item.id}
+                    title={tx(item.name)}
+                    meta={tx(item.city)}
+                    onSelect={() => { setCenterId(item.id); setTierId(item.tiers[1]?.id ?? item.tiers[0].id); }}
+                  />
+                ))}
+              </div>
             </Field>
             <Field label={tx(L("المستوى", "Level"))}>
-              <select className={fieldClass} value={tierId} onChange={(event) => setTierId(event.target.value)}>
-                {center.tiers.map((item) => <option key={item.id} value={item.id}>{tx(item.name)} · {money(item.feeOmr)} · {tx(item.note)}</option>)}
-              </select>
+              <div className="grid gap-3">
+                {center.tiers.map((item) => (
+                  <ChoiceCard
+                    key={item.id}
+                    selected={tierId === item.id}
+                    title={tx(item.name)}
+                    price={money(item.feeOmr)}
+                    meta={tx(item.note)}
+                    onSelect={() => setTierId(item.id)}
+                  />
+                ))}
+              </div>
             </Field>
             <Field label={tx(L("الوقت", "Time"))}>
-              <select className={fieldClass} value={slot} onChange={(event) => setSlot(event.target.value)}>
-                <option value="tomorrow-morning">{tx(L("غداً صباحاً", "Tomorrow morning"))}</option>
-                <option value="tomorrow-evening">{tx(L("غداً مساءً", "Tomorrow evening"))}</option>
-                <option value="port">{tx(L("عند وصولها الميناء", "When it reaches the port"))}</option>
-              </select>
+              <div className="flex flex-wrap gap-2">
+                {([
+                  ["tomorrow-morning", L("غداً صباحاً", "Tomorrow morning")],
+                  ["tomorrow-evening", L("غداً مساءً", "Tomorrow evening")],
+                  ["port", L("عند وصولها الميناء", "When it reaches the port")],
+                ] as const).map(([id, label]) => (
+                  <button key={id} type="button" onClick={() => setSlot(id)} className={slot === id ? "chip chip-active" : "chip"}>
+                    {tx(label)}
+                  </button>
+                ))}
+              </div>
             </Field>
             <Primary onClick={submit}>{tx(L("احجز الفحص", "Book the inspection"))}</Primary>
             <DemoNote />
-          </div>
+          </FormShell>
         )}
       </div>
     </div>

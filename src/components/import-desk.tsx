@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CarCard } from "@/components/car-card";
-import { DemoNote, Field, PageHeader, Primary, Receipt, fieldClass } from "@/components/ui";
+import { DemoNote, Field, FormShell, PageHeader, Primary, Receipt, fieldClass } from "@/components/ui";
 import { cars } from "@/lib/data";
 import { usePrefs } from "@/lib/prefs";
 import { useStore } from "@/lib/store";
@@ -39,15 +39,22 @@ export function ImportDesk() {
         title={L("اطلب سيارة، أو اشترِ حادثاً معلناً.", "Order a car, or buy a declared salvage.")}
         lead={L("مكتب واحد للمصدر والشحن والجمارك، وقسم منفصل لسيارات الحوادث حتى لا تختلط بالجاهز.", "One desk for source, freight, and duty, and a separate section for accident cars so they do not mix with ready stock.")}
       />
-      <div className="mx-auto max-w-6xl px-5 py-12">
-        <div className="flex gap-6 border-b border-line text-sm">
-          <button type="button" className={tab === "order" ? "border-b border-night pb-3" : "pb-3 text-muted"} onClick={() => setTab("order")}>{tx(L("طلب استيراد", "Order an import"))}</button>
-          <button type="button" className={tab === "salvage" ? "border-b border-night pb-3" : "pb-3 text-muted"} onClick={() => setTab("salvage")}>{tx(L("سيارات حوادث للبيع", "Salvage for sale"))}</button>
+      <div className="mx-auto max-w-6xl px-5 py-10">
+        <div className="mb-8 flex flex-wrap gap-2">
+          <button type="button" className={tab === "order" ? "chip chip-active" : "chip"} onClick={() => setTab("order")}>
+            {tx(L("طلب استيراد", "Order an import"))}
+          </button>
+          <button type="button" className={tab === "salvage" ? "chip chip-active" : "chip"} onClick={() => setTab("salvage")}>
+            {tx(L("سيارات حوادث للبيع", "Salvage for sale"))}
+          </button>
         </div>
+
         {tab === "order" && (
-          <div className="mt-8 max-w-2xl">
-            {sent ? <Receipt refCode={sent} title={tx(L("المكتب يبحث عن المطابقة.", "The desk is looking for a match."))} detail={tx(L("ستصلك خيارات مع تقدير شحن وجمارك وفحص قبل الشراء.", "You will receive options with freight, duty, and an inspection before you buy."))} /> : (
-              <div className="grid gap-4">
+          <div className="max-w-3xl">
+            {sent ? (
+              <Receipt refCode={sent} title={tx(L("المكتب يبحث عن المطابقة.", "The desk is looking for a match."))} detail={tx(L("ستصلك خيارات مع تقدير شحن وجمارك وفحص قبل الشراء.", "You will receive options with freight, duty, and an inspection before you buy."))} />
+            ) : (
+              <FormShell>
                 <Field label={tx(L("المصدر", "Origin"))}>
                   <select className={fieldClass} value={origin} onChange={(event) => setOrigin(event.target.value)}>
                     <option value="us">{tx(L("الولايات المتحدة", "United States"))}</option>
@@ -58,35 +65,43 @@ export function ImportDesk() {
                     <option value="ae">{tx(L("من داخل الخليج", "Inside the Gulf"))}</option>
                   </select>
                 </Field>
-                <Field label={tx(L("الميزانية بالريال العُماني شاملة الشحن", "Budget in Omani rial, freight included"))}>
-                  <input className={fieldClass} value={budget} onChange={(event) => setBudget(event.target.value)} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={tx(L("الميزانية بالريال العُماني", "Budget in Omani rial"))}>
+                    <input className={fieldClass} value={budget} onChange={(event) => setBudget(event.target.value)} />
+                  </Field>
+                  <Field label={tx(L("ميناء الوصول", "Arrival port"))}>
+                    <select className={fieldClass} value={port} onChange={(event) => setPort(event.target.value)}>
+                      <option value="sohar">{tx(L("صحار", "Sohar"))}</option>
+                      <option value="salalah">{tx(L("صلالة", "Salalah"))}</option>
+                      <option value="dubai">{tx(L("دبي ثم برّاً", "Dubai then overland"))}</option>
+                    </select>
+                  </Field>
+                </div>
+                <Field label={tx(L("مستوى الضرر المقبول", "Accepted damage level"))}>
+                  <div className="flex flex-wrap gap-2">
+                    {([
+                      ["clean", L("بدون حادث", "No damage")],
+                      ["light", L("خفيف", "Light")],
+                      ["heavy", L("ثقيل معلن", "Heavy declared")],
+                    ] as const).map(([id, label]) => (
+                      <button key={id} type="button" onClick={() => setDamage(id)} className={damage === id ? "chip chip-active" : "chip"}>
+                        {tx(label)}
+                      </button>
+                    ))}
+                  </div>
                 </Field>
-                <Field label={tx(L("ما الذي تريده", "What you want"))}>
-                  <textarea className={fieldClass} rows={4} value={spec} onChange={(event) => setSpec(event.target.value)} placeholder={tx(L("لاند كروزر 2022، ماشي دون 80 ألف، بدون حادث هيكلي.", "Land Cruiser 2022, under 80,000 km, no structural damage."))} />
+                <Field label={tx(L("المواصفات المطلوبة", "Required specs"))}>
+                  <textarea className={fieldClass} rows={3} value={spec} onChange={(event) => setSpec(event.target.value)} placeholder={tx(L("باترول 2021، دفع رباعي، أقل من 80 ألف كم", "Patrol 2021, 4WD, under 80k km"))} />
                 </Field>
-                <Field label={tx(L("قبول الضرر", "Damage tolerance"))}>
-                  <select className={fieldClass} value={damage} onChange={(event) => setDamage(event.target.value)}>
-                    <option value="none">{tx(L("سليمة فقط", "Clean only"))}</option>
-                    <option value="light">{tx(L("ضرر تجميلي مقبول", "Cosmetic damage is fine"))}</option>
-                    <option value="repair">{tx(L("للإصلاح وإعادة البيع", "For repair and resale"))}</option>
-                  </select>
-                </Field>
-                <Field label={tx(L("ميناء الوصول", "Arrival port"))}>
-                  <select className={fieldClass} value={port} onChange={(event) => setPort(event.target.value)}>
-                    <option value="sohar">{tx(L("صحار", "Sohar"))}</option>
-                    <option value="sultan">{tx(L("السلطان قابوس", "Sultan Qaboos"))}</option>
-                    <option value="salalah">{tx(L("صلالة", "Salalah"))}</option>
-                    <option value="jebel">{tx(L("جبل علي ثم برّاً", "Jebel Ali, then by road"))}</option>
-                  </select>
-                </Field>
-                <Primary onClick={submit}>{tx(L("أرسل الطلب", "Send the request"))}</Primary>
+                <Primary onClick={submit}>{tx(L("أرسل طلب الاستيراد", "Send the import request"))}</Primary>
                 <DemoNote />
-              </div>
+              </FormShell>
             )}
           </div>
         )}
+
         {tab === "salvage" && (
-          <div className="mt-8 grid gap-8 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {salvage.map((car) => <CarCard key={car.slug} car={car} />)}
           </div>
         )}

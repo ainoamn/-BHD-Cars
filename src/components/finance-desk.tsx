@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { DemoNote, Field, PageHeader, Primary, Receipt, Steps, fieldClass } from "@/components/ui";
+import { ChoiceCard, DemoNote, Field, FormShell, PageHeader, Primary, Receipt, Steps, fieldClass } from "@/components/ui";
 import { banks, carBySlug, cars } from "@/lib/data";
 import { financeOffers } from "@/lib/quotes";
 import { usePrefs } from "@/lib/prefs";
@@ -53,11 +53,11 @@ export function FinanceDesk() {
         title={L("القسط يُقارن هنا، والملف يذهب للبنك.", "The instalment is compared here. The file goes to the bank.")}
         lead={L("ليست حاسبة منفصلة عن السيارة. تختار العرض ثم يُرسل الطلب للجهة، ويبقى القرار لها بعد المستندات.", "This is not a calculator sitting apart from the car. You choose an offer, the request goes to that house, and the decision stays with them after the documents.")}
       />
-      <div className="mx-auto max-w-3xl px-5 py-12">
+      <div className="mx-auto max-w-3xl px-5 py-10">
         {sent ? (
           <Receipt refCode={sent} title={tx(L("الملف عند الجهة المختارة.", "The file is with the house you chose."))} detail={tx(L("سيراجعون الدخل ونوع العمل. لا يُخصم قسط قبل الموافقة.", "They review income and employment. No instalment is taken before approval."))} />
         ) : (
-          <div className="space-y-8">
+          <FormShell>
             <Steps labels={labels} index={step} />
             {step === 0 && (
               <div className="grid gap-4">
@@ -78,15 +78,19 @@ export function FinanceDesk() {
                 <Field label={tx(L("سعر السيارة بالريال العُماني", "Car price in Omani rial"))}>
                   <input className={fieldClass} inputMode="decimal" value={price} onChange={(event) => setPrice(event.target.value)} />
                 </Field>
-                <Field label={tx(L("الدفعة المقدمة", "Down payment")) + ` ${down}%`}>
-                  <input type="range" min={0} max={50} value={down} onChange={(event) => setDown(Number(event.target.value))} className="w-full" />
+                <Field label={tx(L("الدفعة المقدمة", "Down payment")) + ` ${down}%`} hint={tx(L("حرّك الشريط حتى يظهر القسط المناسب.", "Move the slider until the instalment fits."))}>
+                  <input type="range" min={0} max={50} value={down} onChange={(event) => setDown(Number(event.target.value))} className="mt-2 w-full accent-[var(--color-brass)]" />
                 </Field>
                 <Field label={tx(L("المدة", "Term"))}>
-                  <select className={fieldClass} value={years} onChange={(event) => setYears(Number(event.target.value))}>
-                    {[3, 4, 5, 6, 7].map((year) => <option key={year} value={year}>{year}</option>)}
-                  </select>
+                  <div className="flex flex-wrap gap-2">
+                    {[3, 4, 5, 6, 7].map((year) => (
+                      <button key={year} type="button" onClick={() => setYears(year)} className={years === year ? "chip chip-active" : "chip"}>
+                        {year} {tx(L("سنوات", "years"))}
+                      </button>
+                    ))}
+                  </div>
                 </Field>
-                <Primary onClick={() => setStep(1)}>{tx(L("التالي", "Continue"))}</Primary>
+                <Primary onClick={() => setStep(1)} className="w-full sm:w-auto">{tx(L("التالي", "Continue"))}</Primary>
               </div>
             )}
             {step === 1 && (
@@ -95,13 +99,19 @@ export function FinanceDesk() {
                   <input className={fieldClass} value={income} onChange={(event) => setIncome(event.target.value)} />
                 </Field>
                 <Field label={tx(L("جهة العمل", "Employer"))}>
-                  <select className={fieldClass} value={employer} onChange={(event) => setEmployer(event.target.value)}>
-                    <option value="government">{tx(L("حكومي", "Government"))}</option>
-                    <option value="private">{tx(L("خاص", "Private"))}</option>
-                    <option value="self">{tx(L("عمل حر", "Self-employed"))}</option>
-                  </select>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {([
+                      ["government", L("حكومي", "Government")],
+                      ["private", L("خاص", "Private")],
+                      ["self", L("عمل حر", "Self-employed")],
+                    ] as const).map(([id, label]) => (
+                      <button key={id} type="button" onClick={() => setEmployer(id)} className={employer === id ? "chip chip-active justify-center" : "chip justify-center"}>
+                        {tx(label)}
+                      </button>
+                    ))}
+                  </div>
                 </Field>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Primary onClick={() => setStep(0)}>{tx(L("رجوع", "Back"))}</Primary>
                   <Primary onClick={() => { if (offers[0]) setChosen(offers[0].bank.id); setStep(2); }}>{tx(L("اعرض العروض", "Show offers"))}</Primary>
                 </div>
@@ -110,23 +120,26 @@ export function FinanceDesk() {
             {step === 2 && (
               <div className="space-y-4">
                 {offers.length === 0 && <p className="text-sm text-muted">{tx(L("لا توجد جهة تقبل هذه الدفعة والمدة. عدّل الاختيار.", "No house accepts this down payment and term. Adjust the selection."))}</p>}
-                {offers.map((offer) => (
-                  <label key={offer.bank.id} className={`block border p-4 ${chosen === offer.bank.id ? "border-night" : "border-line"}`}>
-                    <input type="radio" name="bank" className="me-2" checked={chosen === offer.bank.id} onChange={() => setChosen(offer.bank.id)} />
-                    <span className="font-medium">{tx(offer.bank.name)}</span>
-                    <span className="mt-2 block text-sm">{tx(L("قسط شهري", "Monthly"))} {money(offer.monthly)} · {offer.bank.apr}%</span>
-                    <span className="mt-1 block text-xs text-muted">{tx(offer.bank.note)} · {tx(L("إجمالي", "Total"))} {money(offer.total)}</span>
-                  </label>
-                ))}
-                <p className="text-xs text-muted">{tx(L("جهة العمل المسجّلة", "Employer on file"))}: {employer === "government" ? tx(L("حكومي", "Government")) : employer === "self" ? tx(L("عمل حر", "Self-employed")) : tx(L("خاص", "Private"))}</p>
-                <div className="flex gap-3">
+                <div className="grid gap-3">
+                  {offers.map((offer) => (
+                    <ChoiceCard
+                      key={offer.bank.id}
+                      selected={chosen === offer.bank.id}
+                      title={tx(offer.bank.name)}
+                      price={money(offer.monthly)}
+                      meta={`${offer.bank.apr}% · ${tx(L("إجمالي", "Total"))} ${money(offer.total)} · ${tx(offer.bank.note)}`}
+                      onSelect={() => setChosen(offer.bank.id)}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-3">
                   <Primary onClick={() => setStep(1)}>{tx(L("رجوع", "Back"))}</Primary>
                   <Primary onClick={submit}>{tx(L("أرسل الملف", "Send the file"))}</Primary>
                 </div>
                 <DemoNote />
               </div>
             )}
-          </div>
+          </FormShell>
         )}
       </div>
     </div>

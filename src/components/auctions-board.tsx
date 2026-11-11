@@ -45,16 +45,16 @@ function LotRow({ auction }: { auction: Auction }) {
   const high = highBid(auction, bids[auction.slug]);
 
   return (
-    <Link href={`/auctions/${auction.slug}`} className="grid overflow-hidden border border-line bg-paper md:grid-cols-[320px_1fr]">
+    <Link href={`/auctions/${auction.slug}`} className="surface-card surface-card-hover grid overflow-hidden md:grid-cols-[320px_1fr]">
       <Photo src={auction.image} alt={tx(auction.title)} className="h-56 w-full md:h-full" />
       <div className="p-6">
-        <p className="flex items-center gap-2 text-xs text-live">
+        <p className="flex items-center gap-2 text-xs font-medium text-live">
           <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-live" />
           <span className="tabular-nums">{left === null ? "—" : formatRemain(left)}</span>
         </p>
-        <h2 className="mt-2 font-display text-3xl">{tx(auction.title)}</h2>
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-night md:text-3xl">{tx(auction.title)}</h2>
         <p className="mt-2 text-sm text-muted">{tx(auction.city)} · {tx(auction.origin)} · {tx(auction.specs)}</p>
-        <p className="mt-4 text-lg">{money(high)}</p>
+        <p className="mt-4 text-2xl font-bold text-night">{money(high)}</p>
         <p className="mt-1 text-xs text-muted">
           {auction.reserveMet ? tx(L("السعر السري مكسور", "Reserve met")) : tx(L("السعر السري لم يُكسر", "Reserve not met"))}
         </p>

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { DemoNote, Field, PageHeader, Primary, Receipt, Steps, fieldClass } from "@/components/ui";
+import { ChoiceCard, DemoNote, Field, FormShell, PageHeader, Primary, Receipt, Steps, fieldClass } from "@/components/ui";
 import { carBySlug, cars, insurers } from "@/lib/data";
 import { insuranceQuotes, type Cover } from "@/lib/quotes";
 import { usePrefs } from "@/lib/prefs";
@@ -49,7 +49,7 @@ export function InsuranceDesk() {
         title={L("قارن، ثم ادفع بعد صدور الوثيقة.", "Compare, then pay once the policy exists.")}
         lead={L("نفس منطق وسيط التأمين: عرض من أكثر من شركة، ثم مستندات، ثم إصدار. التغطية لا تبدأ قبل صدور الوثيقة.", "The same logic as an insurance desk: offers from more than one company, then documents, then issue. Cover does not start before the policy exists.")}
       />
-      <div className="mx-auto max-w-3xl px-5 py-12">
+      <div className="mx-auto max-w-3xl px-5 py-10">
         {sent ? (
           <Receipt
             refCode={sent}
@@ -57,7 +57,7 @@ export function InsuranceDesk() {
             detail={tx(L("المطلوب: ملكية، رخصة، وأربع صور للسيارة مع عداد المسافة إن طلبته الشركة. الإصدار المعتاد بعد المراجعة، لا قبلها.", "Needed: ownership, licence, and four photos of the car with the odometer if the company asks. Issue follows review."))}
           />
         ) : (
-          <div className="space-y-8">
+          <FormShell>
             <Steps labels={labels} index={step} />
             {step === 0 && (
               <div className="grid gap-3">
@@ -66,10 +66,13 @@ export function InsuranceDesk() {
                   ["tpl", L("طرف ثالث", "Third party"), L("يغطي الضرر الذي تسببه للغير.", "Covers damage you cause to others.")],
                   ["border", L("حدود", "Border"), L("لخروج السيارة أو دخولها.", "For a car leaving or entering.")],
                 ] as const).map(([id, title, text]) => (
-                  <button key={id} type="button" onClick={() => { setCover(id); setStep(1); }} className="border border-line p-4 text-start hover:border-night">
-                    <span className="block text-lg">{tx(title)}</span>
-                    <span className="mt-1 block text-sm text-muted">{tx(text)}</span>
-                  </button>
+                  <ChoiceCard
+                    key={id}
+                    selected={cover === id}
+                    title={tx(title)}
+                    meta={tx(text)}
+                    onSelect={() => { setCover(id); setStep(1); }}
+                  />
                 ))}
               </div>
             )}
@@ -86,16 +89,18 @@ export function InsuranceDesk() {
                     {cars.map((item) => <option key={item.slug} value={item.slug}>{tx(item.title)}</option>)}
                   </select>
                 </Field>
-                <Field label={tx(L("سنة الصنع", "Year"))}>
-                  <input className={fieldClass} value={year} onChange={(event) => setYear(event.target.value)} />
-                </Field>
-                <Field label={tx(L("قيمة السيارة بالريال العُماني", "Car value in Omani rial"))}>
-                  <input className={fieldClass} value={value} onChange={(event) => setValue(event.target.value)} />
-                </Field>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label={tx(L("سنة الصنع", "Year"))}>
+                    <input className={fieldClass} value={year} onChange={(event) => setYear(event.target.value)} />
+                  </Field>
+                  <Field label={tx(L("قيمة السيارة بالريال العُماني", "Car value in Omani rial"))}>
+                    <input className={fieldClass} value={value} onChange={(event) => setValue(event.target.value)} />
+                  </Field>
+                </div>
                 <Field label={tx(L("رقم اللوحة أو الهيكل", "Plate or VIN"))}>
                   <input className={fieldClass} value={plate} onChange={(event) => setPlate(event.target.value)} />
                 </Field>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <Primary onClick={() => setStep(0)}>{tx(L("رجوع", "Back"))}</Primary>
                   <Primary onClick={() => { if (quotes[0]) setChosen(quotes[0].insurer.id); setStep(2); }}>{tx(L("قارن العروض", "Compare offers"))}</Primary>
                 </div>
@@ -103,27 +108,31 @@ export function InsuranceDesk() {
             )}
             {step === 2 && (
               <div className="space-y-4">
-                {quotes.map((quote) => (
-                  <label key={quote.insurer.id} className={`block border p-4 ${chosen === quote.insurer.id ? "border-night" : "border-line"}`}>
-                    <input type="radio" className="me-2" name="insurer" checked={chosen === quote.insurer.id} onChange={() => setChosen(quote.insurer.id)} />
-                    <span className="text-lg">{tx(quote.insurer.name)}</span>
-                    <span className="mt-1 block">{money(quote.priceOmr)}</span>
-                    <span className="mt-1 block text-xs text-muted">
-                      {tx(quote.insurer.focus)}
-                      {quote.excessOmr ? ` · ${tx(L("تحمّل", "Excess"))} ${money(quote.excessOmr)}` : ""}
-                      {quote.insurer.agencyRepair ? ` · ${tx(L("إصلاح وكالة", "Agency repair"))}` : ` · ${tx(L("إصلاح معتمد", "Approved repair"))}`}
-                      {quote.insurer.roadside ? ` · ${tx(L("مساعدة طريق", "Roadside"))}` : ""}
-                    </span>
-                  </label>
-                ))}
-                <div className="flex gap-3">
+                <div className="grid gap-3">
+                  {quotes.map((quote) => (
+                    <ChoiceCard
+                      key={quote.insurer.id}
+                      selected={chosen === quote.insurer.id}
+                      title={tx(quote.insurer.name)}
+                      price={money(quote.priceOmr)}
+                      meta={[
+                        tx(quote.insurer.focus),
+                        quote.excessOmr ? `${tx(L("تحمّل", "Excess"))} ${money(quote.excessOmr)}` : null,
+                        quote.insurer.agencyRepair ? tx(L("إصلاح وكالة", "Agency repair")) : tx(L("إصلاح معتمد", "Approved repair")),
+                        quote.insurer.roadside ? tx(L("مساعدة طريق", "Roadside")) : null,
+                      ].filter(Boolean).join(" · ")}
+                      onSelect={() => setChosen(quote.insurer.id)}
+                    />
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-3">
                   <Primary onClick={() => setStep(1)}>{tx(L("رجوع", "Back"))}</Primary>
-                  <Primary onClick={submit}>{tx(L("اطلب هذا العرض", "Request this offer"))}</Primary>
+                  <Primary onClick={submit}>{tx(L("أرسل الطلب", "Send the request"))}</Primary>
                 </div>
                 <DemoNote />
               </div>
             )}
-          </div>
+          </FormShell>
         )}
       </div>
     </div>
