@@ -119,8 +119,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {tx(L("طلباتي", "Requests"))}
                 {requests.length > 0 ? ` (${requests.length})` : ""}
               </Link>
-              <Link href="/sell" className="btn-primary px-3 py-2 text-xs sm:px-4">
-                {tx(L("بيع سيارة", "Sell a car"))}
+              <Link href="/sell" className="btn-primary px-2.5 py-2 text-[11px] sm:px-4 sm:text-xs">
+                {tx(L("بيع", "Sell"))}
+                <span className="hidden min-[360px]:inline">{locale === "ar" ? " سيارة" : " a car"}</span>
               </Link>
               <button type="button" className="btn-secondary px-3 py-2 text-xs lg:hidden" onClick={() => setOpen((value) => !value)}>
                 {open ? tx(L("إغلاق", "Close")) : tx(L("القائمة", "Menu"))}

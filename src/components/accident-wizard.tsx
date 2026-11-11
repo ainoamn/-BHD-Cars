@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import { BrandLogo, ModelName } from "@/components/brand-logo";
 import { Receipt } from "@/components/ui";
 import {
   bodyTypes,
@@ -284,14 +285,10 @@ export function AccidentWizard() {
 
           <div className="mt-3 flex flex-wrap items-center gap-3">
             {title && (
-              <div className="inline-flex items-center gap-2 rounded-full border border-line bg-soft/70 px-3 py-1.5 text-sm text-night">
-                {make && (
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-night text-[10px] font-bold text-ivory">
-                    {make.mark}
-                  </span>
-                )}
-                <span className="font-medium">{title}</span>
-                <span className="rounded-full bg-live/10 px-2 py-0.5 text-[11px] font-medium text-live">
+              <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-line bg-soft/70 px-3 py-1.5 text-sm text-night">
+                {make && <BrandLogo id={make.id} mark={make.mark} name={tx(make.name)} className="h-7 w-7 shrink-0" />}
+                <span className="truncate font-medium">{title}</span>
+                <span className="shrink-0 rounded-full bg-live/10 px-2 py-0.5 text-[11px] font-medium text-live">
                   {tx(L("حادث معلن", "Declared"))}
                 </span>
               </div>
@@ -326,16 +323,16 @@ export function AccidentWizard() {
                 placeholder={tx(L("ابحث عن المصنع", "Search for a make"))}
               />
 
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-4">
                 {filteredMakes.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => patch({ makeId: item.id, modelId: "", trim: "", body: "" })}
-                    className={`rounded-2xl border p-3 text-center ${draft.makeId === item.id ? "border-night bg-soft" : "border-line"}`}
+                    className={`rounded-2xl border p-3 text-center ${draft.makeId === item.id ? "border-night bg-soft ring-1 ring-night/20" : "border-line"}`}
                   >
-                    <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-night text-xs font-bold text-ivory">{item.mark}</span>
-                    <span className="mt-2 block text-xs font-medium">{tx(item.name)}</span>
+                    <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="mx-auto h-12 w-12 sm:h-14 sm:w-14" />
+                    <ModelName name={item.name} locale={locale} className="mt-2" />
                   </button>
                 ))}
               </div>
@@ -343,7 +340,7 @@ export function AccidentWizard() {
               {make && (
                 <div>
                   <p className="mb-2 text-sm font-medium">{tx(L("الطراز", "Model"))}</p>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:grid-cols-3">
                     {make.models.map((item) => (
                       <button
                         key={item.id}
@@ -355,10 +352,12 @@ export function AccidentWizard() {
                             trim: item.trims[0] ?? "",
                           })
                         }
-                        className={`overflow-hidden rounded-2xl border text-start ${draft.modelId === item.id ? "border-night" : "border-line"}`}
+                        className={`overflow-hidden rounded-2xl border text-start ${draft.modelId === item.id ? "border-night ring-1 ring-night/20" : "border-line"}`}
                       >
-                        <img src={item.image} alt={tx(item.name)} className="aspect-[4/3] w-full object-cover" />
-                        <span className="block px-2 py-2 text-sm font-semibold">{tx(item.name)}</span>
+                        <img src={item.image} alt={`${item.name.ar} / ${item.name.en}`} className="aspect-[16/10] w-full object-cover" />
+                        <span className="block px-2 py-2">
+                          <ModelName name={item.name} locale={locale} />
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -648,7 +647,7 @@ export function AccidentWizard() {
             </section>
           )}
 
-          <div className="mt-8 flex items-center gap-3 border-t border-line pt-4">
+          <div className="sticky bottom-0 z-10 -mx-4 mt-8 flex items-center gap-3 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:bg-transparent md:px-0 md:backdrop-blur-none">
             {step > 0 && (
               <button type="button" onClick={back} className="btn-secondary px-4" aria-label={tx(L("رجوع", "Back"))}>
                 {locale === "ar" ? "→" : "←"}

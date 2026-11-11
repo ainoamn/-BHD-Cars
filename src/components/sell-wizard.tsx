@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import { BrandLogo, ModelName } from "@/components/brand-logo";
 import { Receipt } from "@/components/ui";
 import {
   bodyTypes,
@@ -282,13 +283,9 @@ export function SellWizard() {
           </ol>
 
           {title && (
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-line bg-soft/70 px-3 py-1.5 text-sm text-night">
-              {make && (
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-night text-[10px] font-bold text-ivory">
-                  {make.mark}
-                </span>
-              )}
-              <span className="font-medium">{title}</span>
+            <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-line bg-soft/70 px-3 py-1.5 text-sm text-night">
+              {make && <BrandLogo id={make.id} mark={make.mark} name={tx(make.name)} className="h-7 w-7 shrink-0" />}
+              <span className="truncate font-medium">{title}</span>
             </div>
           )}
         </div>
@@ -308,20 +305,18 @@ export function SellWizard() {
                 className="field"
                 placeholder={tx(L("ابحث عن المصنع", "Search for a make"))}
               />
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 xs:grid-cols-3 sm:grid-cols-4">
                 {filteredMakes.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => pickMake(item.id)}
                     className={`rounded-2xl border p-3 text-center transition hover:border-brass/50 ${
-                      draft.makeId === item.id ? "border-night bg-soft" : "border-line bg-paper"
+                      draft.makeId === item.id ? "border-night bg-soft ring-1 ring-night/20" : "border-line bg-paper"
                     }`}
                   >
-                    <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-night text-sm font-bold text-ivory">
-                      {item.mark}
-                    </span>
-                    <span className="mt-2 block text-sm font-medium text-night">{tx(item.name)}</span>
+                    <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="mx-auto h-14 w-14 sm:h-16 sm:w-16" />
+                    <ModelName name={item.name} locale={locale} className="mt-2" />
                   </button>
                 ))}
               </div>
@@ -340,18 +335,20 @@ export function SellWizard() {
                 className="field"
                 placeholder={tx(L("ابحث عن الطراز", "Search for a model"))}
               />
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:grid-cols-3">
                 {filteredModels.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => pickModel(item.id)}
                     className={`overflow-hidden rounded-2xl border text-start transition hover:border-brass/50 ${
-                      draft.modelId === item.id ? "border-night" : "border-line"
+                      draft.modelId === item.id ? "border-night ring-1 ring-night/20" : "border-line"
                     }`}
                   >
-                    <img src={item.image} alt={tx(item.name)} className="aspect-[4/3] w-full object-cover" />
-                    <span className="block px-3 py-2 text-sm font-semibold text-night">{tx(item.name)}</span>
+                    <img src={item.image} alt={`${item.name.ar} / ${item.name.en}`} className="aspect-[16/10] w-full object-cover" />
+                    <span className="block px-3 py-2.5">
+                      <ModelName name={item.name} locale={locale} />
+                    </span>
                   </button>
                 ))}
               </div>
@@ -664,7 +661,7 @@ export function SellWizard() {
             </section>
           )}
 
-          <div className="mt-8 flex items-center gap-3 border-t border-line pt-4">
+          <div className="sticky bottom-0 z-10 -mx-4 mt-8 flex items-center gap-3 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:bg-transparent md:px-0 md:backdrop-blur-none">
             {step > 0 && (
               <button type="button" onClick={back} className="btn-secondary px-4" aria-label={tx(L("رجوع", "Back"))}>
                 {locale === "ar" ? "→" : "←"}

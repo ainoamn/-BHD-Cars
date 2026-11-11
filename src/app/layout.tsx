@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s · BHD Cars",
   },
   description:
-    "منصة سيارات للشراء والبيع والمزاد، مع تثمين معتمد وتمويل وتأمين وفحص بالنيابة واستيراد وتأجير وقطع غيار.",
+    "BHD Cars — car marketplace for Oman and the Gulf: buy, sell, auctions, valuation, finance, insurance, inspection, import, rental, and parts. منصة سيارات للشراء والبيع والمزاد مع تثمين وتمويل وتأمين وفحص.",
   icons: {
     icon: "/brand/bhd-mark.svg",
     apple: "/brand/bhd-mark.svg",

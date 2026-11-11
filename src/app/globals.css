@@ -185,3 +185,16 @@ textarea {
   letter-spacing: 0.14em;
   color: var(--color-brass);
 }
+
+@media (max-width: 380px) {
+  .btn-primary,
+  .btn-secondary,
+  .btn-teal {
+    padding: 0.7rem 0.85rem;
+    font-size: 0.85rem;
+  }
+}
+
+.wizard-shell {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
