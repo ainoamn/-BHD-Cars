@@ -1,57 +1,68 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-const BODY_FALLBACK: Record<string, string> = {
-  sedan: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&w=900&q=80",
-  suv: "https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=900&q=80",
-  coupe: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=80",
-  pickup: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?auto=format&fit=crop&w=900&q=80",
-  hatch: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=900&q=80",
-  van: "https://images.unsplash.com/photo-1527786356703-4b100091cd2c?auto=format&fit=crop&w=900&q=80",
-  moto: "https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=900&q=80",
-  truck: "https://images.unsplash.com/photo-1601584115197-04ecc1da58d4?auto=format&fit=crop&w=900&q=80",
-  ev: "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=900&q=80",
+/** AI sticker art by body shape — never real photographs. */
+const STICKERS: Record<string, string> = {
+  sedan: "/stickers/sedan.jpg",
+  suv: "/stickers/suv.jpg",
+  coupe: "/stickers/coupe.jpg",
+  pickup: "/stickers/pickup.jpg",
+  hatch: "/stickers/hatch.jpg",
+  van: "/stickers/van.jpg",
+  moto: "/stickers/moto.jpg",
+  truck: "/stickers/truck.jpg",
+  ev: "/stickers/ev.jpg",
 };
 
+function hueForId(id?: string) {
+  if (!id) return 0;
+  let hash = 0;
+  for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  return hash % 48; // subtle variety so stickers don't look identical across models
+}
+
+function resolveBody(body?: string, modelId?: string) {
+  const id = (modelId ?? "").toLowerCase();
+  if (body === "ev" || /ev|seal|ioniq|model-|atto|dolphin|cyber|mach-e|id\d|eq[a-z]|lyriq|air|gravity/.test(id)) {
+    return "ev";
+  }
+  if (body && STICKERS[body]) return body;
+  return "sedan";
+}
+
 export function ModelThumb({
-  src,
   alt,
   body = "sedan",
-  makeId,
   modelId,
-  className = "aspect-[16/10] w-full object-cover bg-soft",
+  className = "aspect-square w-full object-contain",
+  /** kept for API compatibility — ignored so we never show real photos */
+  src: _src,
+  makeId: _makeId,
 }: {
-  src: string;
+  src?: string;
   alt: string;
   body?: string;
   makeId?: string;
   modelId?: string;
   className?: string;
 }) {
-  const fallback = BODY_FALLBACK[body] || BODY_FALLBACK.sedan;
-  const candidates = useMemo(() => {
-    const list: string[] = [];
-    if (makeId && modelId) {
-      for (const ext of [".jpg", ".png", ".webp"]) {
-        list.push(`/models/${makeId}--${modelId}${ext}`);
-      }
-    }
-    if (src) list.push(src);
-    list.push(fallback);
-    return [...new Set(list)];
-  }, [src, makeId, modelId, fallback]);
-
-  const [index, setIndex] = useState(0);
-  const current = candidates[Math.min(index, candidates.length - 1)];
+  const shape = resolveBody(body, modelId);
+  const sticker = STICKERS[shape] || STICKERS.sedan;
+  const hue = hueForId(modelId || alt);
 
   return (
-    <img
-      src={current}
-      alt={alt}
-      className={className}
-      loading="lazy"
-      onError={() => setIndex((value) => Math.min(value + 1, candidates.length - 1))}
-    />
+    <span className="relative block overflow-hidden bg-[#f3f4f6]">
+      <img
+        src={sticker}
+        alt={alt}
+        className={className}
+        loading="lazy"
+        style={{ filter: `hue-rotate(${hue}deg) saturate(1.05)` }}
+      />
+      <span className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-black/5" />
+    </span>
   );
+}
+
+export function stickerForBody(body?: string, modelId?: string) {
+  return STICKERS[resolveBody(body, modelId)] || STICKERS.sedan;
 }

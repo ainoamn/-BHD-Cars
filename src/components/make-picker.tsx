@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { BrandLogo, ModelName } from "@/components/brand-logo";
+import { BrandLogo } from "@/components/brand-logo";
 import { allMakes, type SellMake } from "@/lib/makes-full";
 import { L } from "@/lib/sell-catalog";
 import { usePrefs } from "@/lib/prefs";
@@ -63,7 +63,7 @@ export function MakePicker({
             {tx(title ?? L("المُصنّعون الأكثر رواجاً", "Most popular manufacturers"))}
           </h2>
           <p className="mt-1 text-sm text-muted">
-            {tx(subtitle ?? L("اختر الوكالة ثم الطراز الفرعي.", "Pick the make, then the sub-model."))}
+            {tx(subtitle ?? L("شعارات رسمية حقيقية — اختر الوكالة ثم صور الفئة.", "Real official logos — pick the make, then category photos."))}
           </p>
         </div>
         <div className="inline-flex rounded-full border border-line bg-soft p-1 text-sm">
@@ -105,7 +105,7 @@ export function MakePicker({
 
       <div
         ref={scrollerRef}
-        className="grid max-h-[22rem] auto-cols-[minmax(6.5rem,1fr)] grid-flow-col grid-rows-2 gap-2.5 overflow-x-auto overscroll-x-contain pb-2 scroll-smooth sm:auto-cols-[7.25rem]"
+        className="grid max-h-[22rem] auto-cols-[minmax(5.75rem,1fr)] grid-flow-col grid-rows-2 gap-2 overflow-x-auto overscroll-x-contain pb-2 scroll-smooth sm:auto-cols-[6.5rem]"
       >
         {filtered.map((item: SellMake) => {
           const active = selectedId === item.id;
@@ -114,12 +114,15 @@ export function MakePicker({
               key={item.id}
               type="button"
               onClick={() => onSelect(item.id)}
-              className={`flex w-[6.5rem] shrink-0 flex-col items-center rounded-2xl border bg-white p-2.5 text-center shadow-sm transition hover:border-brass/40 sm:w-[7.25rem] ${
-                active ? "border-night ring-1 ring-night/25" : "border-line/80"
+              title={tx(item.name)}
+              className={`flex w-[5.75rem] shrink-0 flex-col items-center rounded-2xl border bg-white p-2 text-center shadow-sm transition hover:border-brass/40 sm:w-[6.5rem] ${
+                active ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/30" : "border-line/80"
               }`}
             >
-              <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="h-12 w-12 sm:h-14 sm:w-14" />
-              <ModelName name={item.name} locale={locale} className="mt-1.5 w-full text-[11px] sm:text-xs" />
+              <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="h-14 w-14 sm:h-16 sm:w-16" />
+              <span className="mt-1.5 line-clamp-2 w-full text-[10px] leading-tight text-muted sm:text-[11px]">
+                {locale === "ar" ? item.name.ar : item.name.en}
+              </span>
             </button>
           );
         })}

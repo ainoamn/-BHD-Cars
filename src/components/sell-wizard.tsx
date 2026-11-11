@@ -24,9 +24,10 @@ const L = (ar: string, en: string): Copy => ({ ar, en });
 
 const STEPS = [
   L("الشركة", "Make"),
-  L("الطراز", "Model"),
-  L("الحالة", "Condition"),
-  L("المواصفات", "Specs"),
+  L("الفئة", "Category"),
+  L("سنة الصنع", "Year"),
+  L("نوع الهيكل", "Body type"),
+  L("نوع الوقود", "Fuel type"),
   L("الصور", "Photos"),
   L("السعر والنشر", "Price & publish"),
 ] as const;
@@ -149,10 +150,11 @@ export function SellWizard() {
   function canNext() {
     if (step === 0) return Boolean(draft.makeId);
     if (step === 1) return Boolean(draft.modelId);
-    if (step === 2) return Boolean(draft.year && draft.mileageBand && draft.trim && draft.body);
-    if (step === 3) return Boolean(draft.fuel && draft.gearbox && draft.exterior && draft.interior);
-    if (step === 4) return draft.photos.length > 0;
-    if (step === 5) return Boolean(draft.price && draft.city);
+    if (step === 2) return Boolean(draft.year && draft.mileageBand && draft.trim);
+    if (step === 3) return Boolean(draft.body);
+    if (step === 4) return Boolean(draft.fuel && draft.gearbox && draft.exterior && draft.interior);
+    if (step === 5) return draft.photos.length > 0;
+    if (step === 6) return Boolean(draft.price && draft.city);
     return false;
   }
 
@@ -294,24 +296,27 @@ export function SellWizard() {
 
           {step === 1 && make && (
             <section className="space-y-5">
-              <div>
-                <h2 className="text-lg font-semibold text-night">{tx(L("اختر الطراز", "Choose the model"))}</h2>
-                <p className="mt-1 text-sm text-muted">{tx(L("صور حقيقية للطراز، لا أسماء فقط.", "Real model photos, not names alone."))}</p>
+              <div className="flex items-center gap-3">
+                <BrandLogo id={make.id} mark={make.mark} name={tx(make.name)} className="h-12 w-12" />
+                <div>
+                  <h2 className="text-lg font-semibold text-night">{tx(L("اختر الفئة", "Choose the category"))}</h2>
+                  <p className="mt-0.5 text-sm text-muted">{tx(L("ملصقات بالذكاء الاصطناعي بشكل السيارة — وليست صوراً فوتوغرافية.", "AI stickers shaped like the car — not real photographs."))}</p>
+                </div>
               </div>
               <input
                 value={modelQuery}
                 onChange={(event) => setModelQuery(event.target.value)}
                 className="field"
-                placeholder={tx(L("ابحث عن الطراز", "Search for a model"))}
+                placeholder={tx(L("ابحث عن الفئة", "Search category / model"))}
               />
-              <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                 {filteredModels.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => pickModel(item.id)}
-                    className={`overflow-hidden rounded-2xl border text-start transition hover:border-brass/50 ${
-                      draft.modelId === item.id ? "border-night ring-1 ring-night/20" : "border-line"
+                    className={`overflow-hidden rounded-2xl border bg-white text-center transition hover:border-brass/50 ${
+                      draft.modelId === item.id ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/25" : "border-line"
                     }`}
                   >
                     <ModelThumb
@@ -320,9 +325,10 @@ export function SellWizard() {
                       body={item.body}
                       makeId={make?.id}
                       modelId={item.id}
+                      className="aspect-square w-full object-cover"
                     />
-                    <span className="block px-3 py-2.5">
-                      <ModelName name={item.name} locale={locale} />
+                    <span className="block px-2 py-2">
+                      <ModelName name={item.name} locale={locale} className="text-xs" />
                     </span>
                   </button>
                 ))}
@@ -333,8 +339,8 @@ export function SellWizard() {
           {step === 2 && (
             <section className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-night">{tx(L("السنة والممشى والأصل", "Year, mileage, and origin"))}</h2>
-                <p className="mt-1 text-sm text-muted">{tx(L("نقترح الهيكل والفئة من الطراز — عدّل إن لزم.", "Body and trim are suggested from the model — change if needed."))}</p>
+                <h2 className="text-lg font-semibold text-night">{tx(L("سنة الصنع", "Year of manufacture"))}</h2>
+                <p className="mt-1 text-sm text-muted">{tx(L("ثم الممشى والأصل والتجهيز — قبل الهيكل والوقود.", "Then mileage, origin, and trim — before body and fuel."))}</p>
               </div>
 
               <div>
@@ -369,7 +375,7 @@ export function SellWizard() {
 
               {model && (
                 <div>
-                  <p className="mb-2 text-sm font-medium text-night">{tx(L("الفئة", "Trim"))}</p>
+                  <p className="mb-2 text-sm font-medium text-night">{tx(L("التجهيز", "Trim"))}</p>
                   <div className="flex flex-wrap gap-2">
                     {model.trims.map((trim) => (
                       <Chip key={trim} active={draft.trim === trim} onClick={() => patch({ trim })}>{trim}</Chip>
@@ -377,23 +383,6 @@ export function SellWizard() {
                   </div>
                 </div>
               )}
-
-              <div>
-                <p className="mb-2 text-sm font-medium text-night">{tx(L("نوع الهيكل", "Body type"))}</p>
-                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-                  {bodyTypes.map((body) => (
-                    <button
-                      key={body.id}
-                      type="button"
-                      onClick={() => patch({ body: body.id })}
-                      className={`overflow-hidden rounded-2xl border text-center ${draft.body === body.id ? "border-night" : "border-line"}`}
-                    >
-                      <img src={body.image} alt={tx(body.name)} className="aspect-[4/3] w-full object-cover" />
-                      <span className="block px-1 py-2 text-xs font-medium">{tx(body.name)}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
 
               <div className="rounded-2xl border border-dashed border-line bg-soft/40 p-4">
                 <label className="flex items-center gap-2 text-sm">
@@ -423,14 +412,39 @@ export function SellWizard() {
           )}
 
           {step === 3 && (
+            <section className="space-y-5">
+              <div>
+                <h2 className="text-lg font-semibold text-night">{tx(L("نوع الهيكل", "Body type"))}</h2>
+                <p className="mt-1 text-sm text-muted">{tx(L("نقترح هيكلاً من الفئة — يمكنك تغييره.", "Suggested from the category — you can change it."))}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+                {bodyTypes.map((body) => (
+                  <button
+                    key={body.id}
+                    type="button"
+                    onClick={() => {
+                      patch({ body: body.id });
+                      setStep(4);
+                    }}
+                    className={`overflow-hidden rounded-2xl border text-center ${draft.body === body.id ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/25" : "border-line"}`}
+                  >
+                    <img src={body.image} alt={tx(body.name)} className="aspect-[4/3] w-full object-cover" />
+                    <span className="block px-1 py-2 text-xs font-medium">{tx(body.name)}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {step === 4 && (
             <section className="space-y-6">
               <div>
-                <h2 className="text-lg font-semibold text-night">{tx(L("المواصفات والألوان", "Specs and colours"))}</h2>
-                <p className="mt-1 text-sm text-muted">{tx(L("اختيار باللمس — بلا قوائم منسدلة متعبة.", "Tap to choose — no tired dropdowns."))}</p>
+                <h2 className="text-lg font-semibold text-night">{tx(L("نوع الوقود والمواصفات", "Fuel type & specs"))}</h2>
+                <p className="mt-1 text-sm text-muted">{tx(L("الوقود أولاً كما في ترتيب كارس، ثم باقي المواصفات.", "Fuel first like Cars order, then the rest of the specs."))}</p>
               </div>
 
               <div>
-                <p className="mb-2 text-sm font-medium">{tx(L("الوقود", "Fuel"))}</p>
+                <p className="mb-2 text-sm font-medium">{tx(L("نوع الوقود", "Fuel type"))}</p>
                 <div className="flex flex-wrap gap-2">
                   {([
                     ["petrol", L("بترول", "Petrol")],
@@ -509,7 +523,7 @@ export function SellWizard() {
             </section>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <section className="space-y-5">
               <div>
                 <h2 className="text-lg font-semibold text-night">
@@ -551,7 +565,7 @@ export function SellWizard() {
             </section>
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <section className="space-y-6">
               <div>
                 <h2 className="text-lg font-semibold text-night">{tx(L("السعر والمنطقة والنشر", "Price, area, and publish"))}</h2>

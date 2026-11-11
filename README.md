@@ -25,23 +25,49 @@ Next.js 15 · React 19 · TypeScript · Tailwind CSS 4 · Vercel
 ## كتالوج الوكالات والطرازات
 
 - المصدر الرئيسي للوكالات: `src/lib/makes-full.ts` + الطبقة الموسّعة `src/lib/generated-models.json`
-- **144 وكالة** مع شعارات حقيقية في `public/makes/` (SVG/PNG من Wikimedia وSimple Icons ومصادر رسمية)
+- **144 وكالة** مع شعارات رسمية حقيقية في `public/makes/` (من الويب — وليست رسوماً بالذكاء الاصطناعي)
 - **~751 طرازاً** بأسماء عربية/إنجليزية وفئات تجهيز
-- صور رمزية للطرازات في `public/models/` باسم `{makeId}--{modelId}.jpg|png`
-- واجهة الاختيار: `MakePicker` (صفّان + بحث + فئات) و`ModelThumb` (سلسلة سقوط للصورة)
+- ربط أسماء الإعلانات بالكتالوج: `src/lib/make-map.ts`
+
+### ملصقات الطرازات (AI stickers)
+
+واجهة اختيار الفئة **لا** تعرض صوراً فوتوغرافية. تستخدم ملصقات مولَّدة بالذكاء الاصطناعي حسب شكل الهيكل في `public/stickers/`:
+
+| ملف | الشكل |
+|-----|--------|
+| `sedan.jpg` | سيدان |
+| `suv.jpg` | دفع رباعي |
+| `coupe.jpg` | كوبيه |
+| `pickup.jpg` | بيك أب |
+| `hatch.jpg` | هاتشباك |
+| `van.jpg` | فان |
+| `moto.jpg` | دراجة |
+| `truck.jpg` | شاحنة |
+| `ev.jpg` | كهرباء |
+
+المكوّن: `src/components/model-thumb.tsx` — يتجاهل روابط الصور الحقيقية ويعرض الملصق المناسب مع تدرّج لوني خفيف لكل طراز.
+
+### ترتيب الاختيار (مثل موقع كارس)
+
+1. **الشركة** — شبكة شعارات حقيقية  
+2. **الفئة / الموديل** — ملصقات الشكل  
+3. **سنة الصنع**  
+4. **نوع الهيكل**  
+5. **نوع الوقود**
+
+يُطبَّق في:
+- فلتر السوق: `src/components/cars-browser.tsx` → `/cars`
+- معالج البيع: `src/components/sell-wizard.tsx` → `/sell/ready`
 
 ### تحديث الكتالوج محلياً
 
 ```bash
-# توليد قائمة الطرازات بسرعة (بدون شبكة)
 node scripts/emit-models-fast.js
-
-# إثراء الصور من ويكيبيديا/Commons (بطيء بسبب حدود المعدل)
 node scripts/enrich-model-images.js
 node scripts/enrich-model-images-pass2.js
 ```
 
-بيانات الأسماء قابلة للتعديل في `scripts/model-catalog-data.js`.
+بيانات الأسماء: `scripts/model-catalog-data.js`.
 
 ## مسارات البيع
 
@@ -51,17 +77,15 @@ node scripts/enrich-model-images-pass2.js
 | `/sell/ready` | معالج إعلان سيارة جاهزة |
 | `/sell/accident` | معالج إعلان سيارة متضررة مع بوابة شفافية الضرر |
 
-المكوّنات: `src/components/sell-wizard.tsx` · `src/components/accident-wizard.tsx`
-
 ## النشر
-
-المستودع مرتبط بـ GitHub وVercel. الدفع إلى `main` يحدّث الإنتاج:
 
 ```bash
 git push origin main
-# أو يدوياً:
+# أو:
 vercel --prod
 ```
+
+الدفع إلى `main` يحدّث الإنتاج على Vercel.
 
 ## الهوية
 

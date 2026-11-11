@@ -5,14 +5,12 @@ export const L = (ar: string, en: string): Copy => ({ ar, en });
 export type { SellMake, SellModel };
 export const sellMakes: SellMake[] = allMakes;
 
-const u = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=80`;
-
 export const bodyTypes = [
-  { id: "sedan", name: L("سيدان", "Sedan"), image: u("photo-1549317661-bd32c8ce0db2") },
-  { id: "suv", name: L("دفع رباعي", "SUV"), image: u("photo-1519641471654-76ce0107ad1b") },
-  { id: "coupe", name: L("كوبيه", "Coupe"), image: u("photo-1584345604476-8ec5e12e42db") },
-  { id: "pickup", name: L("بيك أب", "Pickup"), image: u("photo-1559416523-140ddc3d238c") },
-  { id: "hatch", name: L("هاتشباك", "Hatchback"), image: u("photo-1552519507-da3b142c6e3d") },
+  { id: "sedan", name: L("سيدان", "Sedan"), image: "/stickers/sedan.jpg" },
+  { id: "suv", name: L("دفع رباعي", "SUV"), image: "/stickers/suv.jpg" },
+  { id: "coupe", name: L("كوبيه", "Coupe"), image: "/stickers/coupe.jpg" },
+  { id: "pickup", name: L("بيك أب", "Pickup"), image: "/stickers/pickup.jpg" },
+  { id: "hatch", name: L("هاتشباك", "Hatchback"), image: "/stickers/hatch.jpg" },
 ];
 
 export const exteriorColors = [
