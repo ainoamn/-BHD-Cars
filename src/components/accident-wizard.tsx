@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { BrandLogo, ModelName } from "@/components/brand-logo";
+import { MakePicker } from "@/components/make-picker";
+import { ModelThumb } from "@/components/model-thumb";
 import { Receipt } from "@/components/ui";
 import {
   bodyTypes,
@@ -121,7 +123,6 @@ export function AccidentWizard() {
   const { addRequest } = useStore();
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<Draft>(empty);
-  const [makeQuery, setMakeQuery] = useState("");
   const [sent, setSent] = useState<string | null>(null);
   const damageRef = useRef<HTMLInputElement>(null);
   const beforeRef = useRef<HTMLInputElement>(null);
@@ -161,12 +162,6 @@ export function AccidentWizard() {
   const title = [make ? tx(make.name) : "", model ? tx(model.name) : "", draft.year ?? ""]
     .filter(Boolean)
     .join(" ");
-
-  const filteredMakes = sellMakes.filter((item) => {
-    const q = makeQuery.trim().toLowerCase();
-    if (!q) return true;
-    return item.name.ar.includes(makeQuery) || item.name.en.toLowerCase().includes(q) || item.id.includes(q);
-  });
 
   function patch(partial: Partial<Draft>) {
     setDraft((prev) => ({ ...prev, ...partial }));
@@ -316,26 +311,12 @@ export function AccidentWizard() {
                 <p className="mt-1 text-sm text-muted">{tx(L("نفس وضوح الإعلان العادي — ثم ننتقل للضرر.", "The same clarity as a normal listing — then we move to the damage."))}</p>
               </div>
 
-              <input
-                value={makeQuery}
-                onChange={(event) => setMakeQuery(event.target.value)}
-                className="field"
-                placeholder={tx(L("ابحث عن المصنع", "Search for a make"))}
+              <MakePicker
+                selectedId={draft.makeId}
+                onSelect={(id) => patch({ makeId: id, modelId: "", trim: "", body: "" })}
+                title={L("اختر الشركة", "Choose the make")}
+                subtitle={L("ثم اختر الطراز أدناه.", "Then pick the model below.")}
               />
-
-              <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-3 sm:grid-cols-4">
-                {filteredMakes.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => patch({ makeId: item.id, modelId: "", trim: "", body: "" })}
-                    className={`rounded-2xl border p-3 text-center ${draft.makeId === item.id ? "border-night bg-soft ring-1 ring-night/20" : "border-line"}`}
-                  >
-                    <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="mx-auto h-12 w-12 sm:h-14 sm:w-14" />
-                    <ModelName name={item.name} locale={locale} className="mt-2" />
-                  </button>
-                ))}
-              </div>
 
               {make && (
                 <div>
@@ -354,7 +335,13 @@ export function AccidentWizard() {
                         }
                         className={`overflow-hidden rounded-2xl border text-start ${draft.modelId === item.id ? "border-night ring-1 ring-night/20" : "border-line"}`}
                       >
-                        <img src={item.image} alt={`${item.name.ar} / ${item.name.en}`} className="aspect-[16/10] w-full object-cover" />
+                        <ModelThumb
+                          src={item.image}
+                          alt={`${item.name.ar} / ${item.name.en}`}
+                          body={item.body}
+                          makeId={make?.id}
+                          modelId={item.id}
+                        />
                         <span className="block px-2 py-2">
                           <ModelName name={item.name} locale={locale} />
                         </span>

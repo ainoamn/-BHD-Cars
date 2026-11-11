@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 
+const EXTS = [".svg", ".png", ".webp", ".jpg"] as const;
+
+function logoCandidates(id: string) {
+  if (id === "mercedes") {
+    return ["/makes/mercedes-star.svg", "/makes/mercedes.svg", ...EXTS.map((ext) => `/makes/${id}${ext}`)];
+  }
+  return EXTS.map((ext) => `/makes/${id}${ext}`);
+}
+
 export function BrandLogo({
   id,
   mark,
@@ -13,10 +22,11 @@ export function BrandLogo({
   name: string;
   className?: string;
 }) {
-  const [failed, setFailed] = useState(false);
-  const src = id === "mercedes" ? "/makes/mercedes-star.svg" : `/makes/${id}.svg`;
+  const candidates = logoCandidates(id);
+  const [index, setIndex] = useState(0);
+  const exhausted = index >= candidates.length;
 
-  if (failed) {
+  if (exhausted) {
     return (
       <span className={`inline-flex items-center justify-center rounded-full bg-night text-xs font-bold text-ivory ${className}`}>
         {mark}
@@ -27,11 +37,11 @@ export function BrandLogo({
   return (
     <span className={`inline-flex items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 ${className}`}>
       <img
-        src={src}
+        src={candidates[index]}
         alt={name}
         className="h-full w-full object-contain"
         loading="lazy"
-        onError={() => setFailed(true)}
+        onError={() => setIndex((value) => value + 1)}
       />
     </span>
   );
