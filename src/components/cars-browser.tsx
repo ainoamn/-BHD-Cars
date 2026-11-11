@@ -227,7 +227,7 @@ export function CarsBrowser() {
                       type="button"
                       onClick={() => pickMake(item.id)}
                       className={`flex flex-col items-center rounded-xl border bg-white p-1.5 transition ${
-                        active ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/30" : "border-line hover:border-brass/40"
+                        active ? "border-brass ring-2 ring-brass/30" : "border-line hover:border-brass/40"
                       }`}
                       title={tx(item.name)}
                     >
@@ -271,7 +271,7 @@ export function CarsBrowser() {
                           type="button"
                           onClick={() => pickModel(item.id)}
                           className={`overflow-hidden rounded-xl border bg-white text-center transition ${
-                            active ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/25" : "border-line hover:border-brass/40"
+                            active ? "border-brass ring-2 ring-brass/30" : "border-line hover:border-brass/40"
                           }`}
                         >
                           <ModelThumb
@@ -280,9 +280,9 @@ export function CarsBrowser() {
                             body={item.body}
                             makeId={selectedMake.id}
                             modelId={item.id}
-                            className="aspect-square w-full object-cover"
+                            className="aspect-[5/4] w-full object-contain p-1"
                           />
-                          <span className="block truncate px-1 py-1.5 text-[10px] font-medium text-night">
+                          <span className="block truncate border-t border-line/70 px-1 py-1.5 text-[10px] font-medium text-muted">
                             {locale === "ar" ? item.name.ar : item.name.en}
                           </span>
                         </button>

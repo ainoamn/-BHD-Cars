@@ -300,7 +300,7 @@ export function SellWizard() {
                 <BrandLogo id={make.id} mark={make.mark} name={tx(make.name)} className="h-12 w-12" />
                 <div>
                   <h2 className="text-lg font-semibold text-night">{tx(L("اختر الفئة", "Choose the category"))}</h2>
-                  <p className="mt-0.5 text-sm text-muted">{tx(L("ملصقات بالذكاء الاصطناعي بشكل السيارة — وليست صوراً فوتوغرافية.", "AI stickers shaped like the car — not real photographs."))}</p>
+                  <p className="mt-0.5 text-sm text-muted">{tx(L("صور كتالوج واقعية بألوان هوية BHD — مثل سوق كارس.", "Photoreal catalog shots in BHD brand colors — Sooq Cars style."))}</p>
                 </div>
               </div>
               <input
@@ -309,14 +309,14 @@ export function SellWizard() {
                 className="field"
                 placeholder={tx(L("ابحث عن الفئة", "Search category / model"))}
               />
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-3 md:grid-cols-4">
                 {filteredModels.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => pickModel(item.id)}
                     className={`overflow-hidden rounded-2xl border bg-white text-center transition hover:border-brass/50 ${
-                      draft.modelId === item.id ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/25" : "border-line"
+                      draft.modelId === item.id ? "border-brass ring-2 ring-brass/25" : "border-line"
                     }`}
                   >
                     <ModelThumb
@@ -325,10 +325,10 @@ export function SellWizard() {
                       body={item.body}
                       makeId={make?.id}
                       modelId={item.id}
-                      className="aspect-square w-full object-cover"
+                      className="aspect-[5/4] w-full object-contain p-1.5"
                     />
-                    <span className="block px-2 py-2">
-                      <ModelName name={item.name} locale={locale} className="text-xs" />
+                    <span className="block border-t border-line/70 px-1.5 py-2 text-[11px] font-medium text-muted sm:text-xs">
+                      {locale === "ar" ? item.name.ar : item.name.en}
                     </span>
                   </button>
                 ))}
@@ -426,7 +426,7 @@ export function SellWizard() {
                       patch({ body: body.id });
                       setStep(4);
                     }}
-                    className={`overflow-hidden rounded-2xl border text-center ${draft.body === body.id ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/25" : "border-line"}`}
+                    className={`overflow-hidden rounded-2xl border bg-white text-center ${draft.body === body.id ? "border-brass ring-2 ring-brass/25" : "border-line"}`}
                   >
                     <img src={body.image} alt={tx(body.name)} className="aspect-[4/3] w-full object-cover" />
                     <span className="block px-1 py-2 text-xs font-medium">{tx(body.name)}</span>

@@ -1,7 +1,11 @@
 "use client";
 
-/** AI sticker art by body shape — never real photographs. */
-const STICKERS: Record<string, string> = {
+/**
+ * Catalog-style model thumbnails (Sooq Cars look):
+ * photoreal AI renders on white — never cartoon drawings, never outdoor photos.
+ * Colorways follow BHD identity (night green, teal brass, navy).
+ */
+const CATALOG: Record<string, string> = {
   sedan: "/stickers/sedan.jpg",
   suv: "/stickers/suv.jpg",
   coupe: "/stickers/coupe.jpg",
@@ -13,19 +17,12 @@ const STICKERS: Record<string, string> = {
   ev: "/stickers/ev.jpg",
 };
 
-function hueForId(id?: string) {
-  if (!id) return 0;
-  let hash = 0;
-  for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  return hash % 48; // subtle variety so stickers don't look identical across models
-}
-
 function resolveBody(body?: string, modelId?: string) {
   const id = (modelId ?? "").toLowerCase();
-  if (body === "ev" || /ev|seal|ioniq|model-|atto|dolphin|cyber|mach-e|id\d|eq[a-z]|lyriq|air|gravity/.test(id)) {
+  if (body === "ev" || /ev|seal|ioniq|model-|atto|dolphin|cyber|mach-e|id\d|eq[a-z]|lyriq|air|gravity|zeekr|byd/.test(id)) {
     return "ev";
   }
-  if (body && STICKERS[body]) return body;
+  if (body && CATALOG[body]) return body;
   return "sedan";
 }
 
@@ -33,8 +30,7 @@ export function ModelThumb({
   alt,
   body = "sedan",
   modelId,
-  className = "aspect-square w-full object-contain",
-  /** kept for API compatibility — ignored so we never show real photos */
+  className = "aspect-square w-full object-contain p-2",
   src: _src,
   makeId: _makeId,
 }: {
@@ -46,23 +42,15 @@ export function ModelThumb({
   className?: string;
 }) {
   const shape = resolveBody(body, modelId);
-  const sticker = STICKERS[shape] || STICKERS.sedan;
-  const hue = hueForId(modelId || alt);
+  const image = CATALOG[shape] || CATALOG.sedan;
 
   return (
-    <span className="relative block overflow-hidden bg-[#f3f4f6]">
-      <img
-        src={sticker}
-        alt={alt}
-        className={className}
-        loading="lazy"
-        style={{ filter: `hue-rotate(${hue}deg) saturate(1.05)` }}
-      />
-      <span className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-black/5" />
+    <span className="relative block overflow-hidden bg-white">
+      <img src={image} alt={alt} className={className} loading="lazy" />
     </span>
   );
 }
 
 export function stickerForBody(body?: string, modelId?: string) {
-  return STICKERS[resolveBody(body, modelId)] || STICKERS.sedan;
+  return CATALOG[resolveBody(body, modelId)] || CATALOG.sedan;
 }
