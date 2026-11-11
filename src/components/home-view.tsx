@@ -20,9 +20,9 @@ const categories: { href: string; title: Copy; text: Copy; image: string; count:
     count: L("سوق يومي", "Daily market"),
   },
   {
-    href: "/import",
-    title: L("حوادث واستيراد", "Salvage & import"),
-    text: L("ضرر معلن وطلب استيراد واضح", "Declared damage and clear import requests"),
+    href: "/sell/accident",
+    title: L("حوادث معلنة", "Declared accidents"),
+    text: L("أعلن الضرر بخريطة وصور — أو تصفّح المستورد", "Declare damage with a map and photos — or browse imports"),
     image: cars.find((car) => car.condition === "accident")?.images[0] ?? cars[0].images[0],
     count: L("ملف شفاف", "Clear file"),
   },

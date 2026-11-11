@@ -213,3 +213,83 @@ export function estimateMarketOmr(input: {
   const raw = (baseByMake[input.makeId] ?? 8000) + (bodyBoost[input.body] ?? 0) - ageHit - mileHit + originHit;
   return Math.max(1200, Math.round(raw / 50) * 50);
 }
+
+export const damageZones = [
+  { id: "front", name: L("مقدمة", "Front") },
+  { id: "rear", name: L("خلفية", "Rear") },
+  { id: "left", name: L("جانب أيسر", "Left side") },
+  { id: "right", name: L("جانب أيمن", "Right side") },
+  { id: "roof", name: L("سقف", "Roof") },
+  { id: "undercarriage", name: L("أسفل الهيكل", "Undercarriage") },
+  { id: "airbags", name: L("وسائد هوائية", "Airbags") },
+  { id: "engine", name: L("محرك / علبة", "Engine / gearbox") },
+  { id: "interior", name: L("مقصورة", "Cabin") },
+  { id: "flood", name: L("غرق / ماء", "Flood / water") },
+  { id: "fire", name: L("حريق", "Fire") },
+  { id: "electrical", name: L("كهرباء", "Electrical") },
+] as const;
+
+export const damageSeverities = [
+  { id: "cosmetic", name: L("تجميلي", "Cosmetic"), hit: 0.12 },
+  { id: "light", name: L("خفيف", "Light"), hit: 0.22 },
+  { id: "medium", name: L("متوسط", "Medium"), hit: 0.38 },
+  { id: "heavy", name: L("ثقيل", "Heavy"), hit: 0.55 },
+  { id: "total", name: L("خسارة كلية معلنة", "Declared total loss"), hit: 0.7 },
+] as const;
+
+export const repairStates = [
+  { id: "as-is", name: L("كما هي — بدون إصلاح", "As-is — unrepaired"), note: L("أفضل للمشتري الذي يصلح بنفسه", "Best for a buyer who will repair") },
+  { id: "partial", name: L("إصلاح جزئي", "Partially repaired"), note: L("اذكر ما أُصلح وما بقي", "Say what was fixed and what remains") },
+  { id: "full", name: L("إصلاح كامل معلن", "Fully repaired, declared"), note: L("يحتاج صوراً قبل وبعد إن وُجدت", "Needs before/after photos if you have them") },
+] as const;
+
+export const titleStatuses = [
+  { id: "clean", name: L("ملكية نظيفة", "Clean title") },
+  { id: "salvage", name: L("ملكية حادث / سكراب", "Salvage title") },
+  { id: "insurance", name: L("شطب تأمين", "Insurance write-off") },
+  { id: "unknown", name: L("غير مؤكد بعد", "Not confirmed yet") },
+] as const;
+
+export function estimateAccidentOmr(input: {
+  makeId: string;
+  year: number;
+  mileage: number;
+  body: string;
+  origin: "gcc" | "import";
+  severity: string;
+  zones: string[];
+  repair: string;
+  runs: boolean;
+}) {
+  const clean = estimateMarketOmr(input);
+  const severity = damageSeverities.find((item) => item.id === input.severity)?.hit ?? 0.35;
+  const zoneExtra = Math.min(0.25, input.zones.length * 0.03);
+  const floodFire = input.zones.includes("flood") || input.zones.includes("fire") ? 0.12 : 0;
+  const repairBoost = input.repair === "full" ? 0.08 : input.repair === "partial" ? 0.03 : 0;
+  const runHit = input.runs ? 0 : 0.1;
+  const factor = Math.min(0.85, severity + zoneExtra + floodFire + runHit - repairBoost);
+  return Math.max(400, Math.round((clean * (1 - factor)) / 50) * 50);
+}
+
+export function transparencyScore(input: {
+  zones: string[];
+  severity: string;
+  repair: string;
+  title: string;
+  damagePhotos: number;
+  beforePhotos: number;
+  vin: boolean;
+  note: boolean;
+}) {
+  let score = 20;
+  if (input.zones.length) score += 15;
+  if (input.severity) score += 10;
+  if (input.repair) score += 10;
+  if (input.title && input.title !== "unknown") score += 10;
+  if (input.damagePhotos >= 3) score += 15;
+  else if (input.damagePhotos >= 1) score += 8;
+  if (input.beforePhotos >= 1) score += 10;
+  if (input.vin) score += 5;
+  if (input.note) score += 5;
+  return Math.min(100, score);
+}

@@ -250,7 +250,7 @@ export function SellWizard() {
               {tx(L("أنشئ إعلانك بخطوات واضحة", "Build your listing in clear steps"))}
             </h1>
           </div>
-          <Link href="/" className="rounded-full border border-line px-3 py-2 text-sm text-muted hover:text-night">
+          <Link href="/sell" className="rounded-full border border-line px-3 py-2 text-sm text-muted hover:text-night">
             {tx(L("إغلاق", "Close"))}
           </Link>
         </div>
