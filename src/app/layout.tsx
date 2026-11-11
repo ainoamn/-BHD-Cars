@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Arabic, Instrument_Serif } from "next/font/google";
+import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { Shell } from "@/components/shell";
 import { PrefsProvider } from "@/lib/prefs";
 import { StoreProvider } from "@/lib/store";
@@ -12,13 +12,6 @@ const plex = IBM_Plex_Sans_Arabic({
   display: "swap",
 });
 
-const serif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-serif",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   title: {
     default: "BHD Cars",
@@ -26,11 +19,15 @@ export const metadata: Metadata = {
   },
   description:
     "منصة سيارات للشراء والبيع والمزاد، مع تثمين معتمد وتمويل وتأمين وفحص بالنيابة واستيراد وتأجير وقطع غيار.",
+  icons: {
+    icon: "/brand/bhd-mark.svg",
+    apple: "/brand/bhd-mark.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${plex.variable} ${serif.variable}`}>
+    <html lang="ar" dir="rtl" className={plex.variable}>
       <body>
         <PrefsProvider>
           <StoreProvider>

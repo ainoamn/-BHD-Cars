@@ -14,8 +14,8 @@ export function PageHeader({ kicker, title, lead }: { kicker: Copy; title: Copy;
   return (
     <header className="border-b border-line">
       <div className="mx-auto max-w-6xl px-5 py-14">
-        <p className="text-xs text-brass">{tx(kicker)}</p>
-        <h1 className="mt-3 max-w-3xl font-display text-4xl leading-[1.15] text-night md:text-5xl">{tx(title)}</h1>
+        <p className="text-xs font-medium tracking-[0.14em] text-brass">{tx(kicker)}</p>
+        <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-[1.15] text-night md:text-5xl">{tx(title)}</h1>
         {lead && <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">{tx(lead)}</p>}
       </div>
     </header>
@@ -46,7 +46,7 @@ export function Field({ label, children }: { label: string; children: React.Reac
 
 export function Primary({ children, type = "button", onClick }: { children: React.ReactNode; type?: "button" | "submit"; onClick?: () => void }) {
   return (
-    <button type={type} onClick={onClick} className="bg-night px-5 py-3 text-sm text-ivory transition hover:bg-ink">
+    <button type={type} onClick={onClick} className="bg-night px-5 py-3 text-sm text-ivory transition hover:bg-navy">
       {children}
     </button>
   );

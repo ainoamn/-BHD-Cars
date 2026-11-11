@@ -49,9 +49,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-40 border-b border-line/80 bg-ivory/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3">
           <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-            <span className="grid h-9 w-9 place-items-center border border-night bg-night font-display text-lg text-brass-2">B</span>
+            <img src="/brand/bhd-mark.svg" alt="BHD" className="bhd-mark" />
             <span className="leading-tight">
-              <span className="block font-display text-lg tracking-wide">BHD Cars</span>
+              <span className="block text-lg font-semibold tracking-wide text-night">BHD Cars</span>
               <span className="block text-[11px] text-muted">{tx(L("منصة السيارات", "The car desk"))}</span>
             </span>
           </Link>
@@ -150,7 +150,11 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <footer className="mt-20 bg-night text-ivory">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-4">
           <div>
-            <p className="font-display text-2xl">BHD Cars</p>
+            <span className="inline-flex rounded-md bg-paper px-3 py-2">
+              <img src="/brand/bhd-mark.svg" alt="BHD" className="bhd-mark" />
+            </span>
+            <p className="mt-4 text-xl font-semibold">BHD Cars</p>
+            <p className="mt-2 text-xs tracking-[0.14em] text-brass">{tx(L("ابنِ أحلامًا أكبر.", "Build Higher Dreams."))}</p>
             <p className="mt-3 text-sm leading-relaxed text-ivory/70">
               {tx(L(
                 "منصة واحدة للشراء والبيع والمزاد، مع تثمين وفحص وتمويل وتأمين واستيراد. الأرقام في هذه النسخة توضيحية حتى ربط الشركاء.",
@@ -163,7 +167,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <FooterCol title={tx(L("الشركة", "House"))} links={[["/about", L("عن المنصة", "About")], ["/contact", L("تواصل", "Contact")], ["/requests", L("متابعة الطلب", "Track a request")], ["/reports", L("سجل السيارة", "History")], ["/service", L("الصيانة", "Service")]]} />
         </div>
         <div className="border-t border-white/10 px-5 py-4 text-center text-xs text-ivory/50">
-          BHD Cars · {new Date().getFullYear()}
+          BHD Cars · Bin Hamood Development · {new Date().getFullYear()}
         </div>
       </footer>
     </div>
@@ -174,7 +178,7 @@ function FooterCol({ title, links }: { title: string; links: [string, Copy][] })
   const { tx } = usePrefs();
   return (
     <div>
-      <p className="text-xs tracking-[0.18em] text-brass-2">{title}</p>
+      <p className="text-xs tracking-[0.18em] text-brass">{title}</p>
       <ul className="mt-3 space-y-2 text-sm text-ivory/80">
         {links.map(([href, label]) => (
           <li key={href}><Link href={href} className="hover:text-ivory">{tx(label)}</Link></li>

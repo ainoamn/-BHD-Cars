@@ -43,8 +43,8 @@ export function HomeView() {
     <div>
       <section className="grid lg:grid-cols-2">
         <div className="flex flex-col justify-end px-5 py-16 md:px-10 lg:min-h-[86vh] lg:py-20">
-          <p className="text-xs text-brass">{tx(L("عُمان والخليج، بمعيار واحد", "Oman and the Gulf, on one standard"))}</p>
-          <h1 className="mt-4 max-w-xl font-display text-5xl leading-[1.08] text-night md:text-6xl">
+          <p className="text-xs font-medium tracking-[0.14em] text-brass">{tx(L("عُمان والخليج، بمعيار واحد", "Oman and the Gulf, on one standard"))}</p>
+          <h1 className="mt-4 max-w-xl text-5xl font-semibold leading-[1.12] text-night md:text-6xl">
             {tx(L("عنوان واحد لكل قرار يخص السيارة.", "One address for every decision a car asks of you."))}
           </h1>
           <p className="mt-6 max-w-md text-base leading-relaxed text-muted">
@@ -71,18 +71,18 @@ export function HomeView() {
               <option value="20000">{tx(L("حتى 20,000 ر.ع", "Up to 20,000 OMR"))}</option>
               <option value="40000">{tx(L("حتى 40,000 ر.ع", "Up to 40,000 OMR"))}</option>
             </select>
-            <button className="bg-night px-4 py-3 text-sm text-ivory">{tx(L("اعرض السيارات", "Show cars"))}</button>
+            <button className="bg-night px-4 py-3 text-sm font-medium text-ivory transition hover:bg-navy">{tx(L("اعرض السيارات", "Show cars"))}</button>
           </form>
         </div>
         <div className="relative min-h-[70vh]">
           <Photo src={cars[4] ? cars[0].images[0] : ""} alt={tx(cars[0].title)} className="absolute inset-0 h-full w-full" />
           <div className="absolute inset-0 bg-gradient-to-t from-night/70 via-night/10 to-transparent" />
           <Link href={`/auctions/${live.slug}`} className="absolute bottom-6 start-6 end-6 border border-white/30 bg-night/80 p-5 text-ivory backdrop-blur-sm md:end-auto md:max-w-sm">
-            <p className="flex items-center gap-2 text-xs text-brass-2">
+            <p className="flex items-center gap-2 text-xs text-brass">
               <span className="pulse-dot inline-block h-2 w-2 rounded-full bg-live" />
               {tx(L("مزاد مفتوح", "Auction open"))}
             </p>
-            <p className="mt-2 font-display text-2xl">{tx(live.title)}</p>
+            <p className="mt-2 text-2xl font-semibold">{tx(live.title)}</p>
             <p className="mt-1 text-sm text-ivory/80">{money(live.bids[0]?.amountOmr ?? live.openingOmr)} · {tx(live.city)}</p>
           </Link>
         </div>
