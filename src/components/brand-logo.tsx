@@ -1,14 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
-const EXTS = [".svg", ".png", ".webp", ".jpg"] as const;
+/** PNG emblems first at filter size; SVG next. Never use mercedes-star placeholder. */
+const EXTS = [".png", ".svg", ".webp", ".jpg"] as const;
 
 function logoCandidates(id: string) {
-  if (id === "mercedes") {
-    return ["/makes/mercedes-star.svg", "/makes/mercedes.svg", ...EXTS.map((ext) => `/makes/${id}${ext}`)];
-  }
-  return EXTS.map((ext) => `/makes/${id}${ext}`);
+  return [...new Set(EXTS.map((ext) => `/makes/${id}${ext}`))];
 }
 
 export function BrandLogo({
@@ -22,7 +20,7 @@ export function BrandLogo({
   name: string;
   className?: string;
 }) {
-  const candidates = logoCandidates(id);
+  const candidates = useMemo(() => logoCandidates(id), [id]);
   const [index, setIndex] = useState(0);
   const exhausted = index >= candidates.length;
 
@@ -37,6 +35,7 @@ export function BrandLogo({
   return (
     <span className={`inline-flex items-center justify-center overflow-hidden rounded-xl bg-white p-1.5 ${className}`}>
       <img
+        key={candidates[index]}
         src={candidates[index]}
         alt={name}
         className="h-full w-full object-contain"
