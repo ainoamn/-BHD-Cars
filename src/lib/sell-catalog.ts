@@ -14,22 +14,33 @@ export const bodyTypes = [
 ];
 
 export const exteriorColors = [
-  { id: "white", name: L("أبيض", "White"), hex: "#f5f5f5" },
-  { id: "silver", name: L("فضي", "Silver"), hex: "#c0c0c0" },
-  { id: "grey", name: L("رمادي", "Grey"), hex: "#7a7a7a" },
   { id: "black", name: L("أسود", "Black"), hex: "#1a1a1a" },
   { id: "red", name: L("أحمر", "Red"), hex: "#b91c1c" },
-  { id: "blue", name: L("أزرق", "Blue"), hex: "#1d4ed8" },
-  { id: "green", name: L("أخضر", "Green"), hex: "#166534" },
+  { id: "white", name: L("أبيض", "White"), hex: "#f5f5f5" },
+  { id: "brown", name: L("بني", "Brown"), hex: "#7c4a2d" },
+  { id: "purple", name: L("بنفسجي", "Purple"), hex: "#6d28d9" },
   { id: "gold", name: L("ذهبي", "Gold"), hex: "#b58d55" },
+  { id: "sandy", name: L("رملي", "Sandy"), hex: "#c2a878" },
+  { id: "blue", name: L("أزرق", "Blue"), hex: "#1d4ed8" },
+  { id: "grey", name: L("رمادي", "Grey"), hex: "#7a7a7a" },
+  { id: "silver", name: L("فضي", "Silver"), hex: "#c0c0c0" },
+  { id: "orange", name: L("برتقالي", "Orange"), hex: "#ea580c" },
+  { id: "yellow", name: L("أصفر", "Yellow"), hex: "#eab308" },
   { id: "beige", name: L("بيج", "Beige"), hex: "#d6c3a3" },
+  { id: "green", name: L("أخضر", "Green"), hex: "#166534" },
+  { id: "maroon", name: L("عنابي", "Maroon"), hex: "#7f1d1d" },
 ];
 
 export const interiorColors = [
-  { id: "beige", name: L("بيج", "Beige"), hex: "#d6c3a3" },
+  { id: "silver", name: L("فضي", "Silver"), hex: "#c0c0c0" },
   { id: "black", name: L("أسود", "Black"), hex: "#1a1a1a" },
   { id: "red", name: L("أحمر", "Red"), hex: "#991b1b" },
+  { id: "white", name: L("أبيض", "White"), hex: "#f5f5f5" },
   { id: "grey", name: L("رمادي", "Grey"), hex: "#9ca3af" },
+  { id: "blue", name: L("أزرق", "Blue"), hex: "#1d4ed8" },
+  { id: "beige", name: L("بيج", "Beige"), hex: "#d6c3a3" },
+  { id: "yellow", name: L("أصفر", "Yellow"), hex: "#eab308" },
+  { id: "orange", name: L("برتقالي", "Orange"), hex: "#ea580c" },
   { id: "brown", name: L("بني", "Brown"), hex: "#7c4a2d" },
   { id: "maroon", name: L("عنابي", "Maroon"), hex: "#7f1d1d" },
 ];

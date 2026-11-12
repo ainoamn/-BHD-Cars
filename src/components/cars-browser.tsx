@@ -9,40 +9,156 @@ import { PageHeader } from "@/components/ui";
 import { cars } from "@/lib/data";
 import { makeIdFromLabel, makeLabelFromId, popularMakeIds } from "@/lib/make-map";
 import { allMakes } from "@/lib/makes-full";
+import { omanRegions, regionForCity } from "@/lib/oman-regions";
 import { usePrefs } from "@/lib/prefs";
-import { bodyTypes, years } from "@/lib/sell-catalog";
+import { bodyTypes, exteriorColors, interiorColors, years } from "@/lib/sell-catalog";
 import type { Copy } from "@/lib/types";
 
 const L = (ar: string, en: string): Copy => ({ ar, en });
 
 const FUELS = [
   { id: "", label: L("الكل", "All") },
-  { id: "petrol", label: L("بنزين", "Petrol"), match: ["بنزين", "petrol", "بترول"] },
-  { id: "diesel", label: L("ديزل", "Diesel"), match: ["ديزل", "diesel"] },
+  { id: "petrol", label: L("بترول", "Petrol"), match: ["بنزين", "petrol", "بترول"] },
   { id: "hybrid", label: L("هايبرد", "Hybrid"), match: ["هايبرد", "hybrid"] },
-  { id: "ev", label: L("كهرباء", "Electric"), match: ["كهرباء", "electric", "ev"] },
+  { id: "diesel", label: L("ديزل", "Diesel"), match: ["ديزل", "diesel"] },
+  { id: "ev", label: L("كهربائي", "Electric"), match: ["كهرباء", "electric", "ev"] },
 ] as const;
+
+const GEARS = [
+  { id: "", label: L("الكل", "All") },
+  { id: "auto", label: L("أوتوماتيك", "Automatic"), match: ["أوتوماتيك", "automatic", "pdk", "cvt"] },
+  { id: "manual", label: L("يدوي", "Manual"), match: ["يدوي", "عادي", "manual"] },
+] as const;
+
+const DRIVES = [
+  { id: "", label: L("الكل", "All") },
+  { id: "fwd", label: L("دفع أمامي", "Front-wheel"), match: ["أمامي", "fwd"] },
+  { id: "rwd", label: L("دفع خلفي", "Rear-wheel"), match: ["خلفي", "rwd"] },
+  { id: "awd", label: L("4x4", "4x4"), match: ["رباعي", "4wd", "awd", "4x4"] },
+] as const;
+
+const ORIGINS = [
+  { id: "", label: L("الكل", "All") },
+  { id: "gcc", label: L("خليجي", "GCC"), match: ["خليجي", "gcc"] },
+  {
+    id: "import",
+    label: L("السيارات المستوردة", "Imported cars"),
+    match: ["مستورد", "أمريكي", "أوروبي", "يابان", "كوريا", "us ", "import", "american", "european", "japan", "korea", "auction"],
+  },
+] as const;
+
+const CYLINDERS = ["", "3", "4", "6", "8", "10", "12"] as const;
+
+function Pill({
+  active,
+  children,
+  onClick,
+  round = false,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+  round?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${round ? "h-10 min-w-10 rounded-full px-3" : "rounded-full px-3.5 py-2"} text-xs font-medium transition ${
+        active ? "bg-navy text-ivory" : "border border-line bg-paper text-night hover:border-navy/35"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
 
 function FilterSection({
   title,
+  icon,
   open,
   onToggle,
   children,
 }: {
   title: string;
+  icon?: string;
   open: boolean;
   onToggle: () => void;
   children: React.ReactNode;
 }) {
   return (
     <div className="border-b border-line/80 pb-3 last:border-b-0">
-      <button type="button" onClick={onToggle} className="flex w-full items-center justify-between gap-2 py-2 text-start">
-        <span className="text-sm font-semibold text-night">{title}</span>
+      <button type="button" onClick={onToggle} className="flex w-full items-center justify-between gap-2 py-2.5 text-start">
+        <span className="inline-flex items-center gap-2 text-sm font-semibold text-night">
+          {icon ? <span aria-hidden className="text-base opacity-70">{icon}</span> : null}
+          {title}
+        </span>
         <span className="text-muted">{open ? "▴" : "▾"}</span>
       </button>
       {open && <div className="pt-1">{children}</div>}
     </div>
   );
+}
+
+function ColorSwatches({
+  items,
+  value,
+  onChange,
+}: {
+  items: { id: string; name: Copy; hex: string }[];
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const { tx } = usePrefs();
+  return (
+    <div className="grid grid-cols-5 gap-2">
+      {items.map((item) => {
+        const active = value === item.id;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onChange(active ? "" : item.id)}
+            className="flex flex-col items-center gap-1"
+            title={tx(item.name)}
+          >
+            <span
+              className={`h-8 w-8 rounded-full border-2 ${active ? "border-navy ring-2 ring-navy/25" : "border-line"}`}
+              style={{ background: item.hex }}
+            />
+            <span className="line-clamp-1 text-[10px] text-muted">{tx(item.name)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function carText(car: (typeof cars)[number]) {
+  return [
+    car.title.ar,
+    car.title.en,
+    car.make,
+    car.model,
+    car.fuel.ar,
+    car.fuel.en,
+    car.gearbox.ar,
+    car.gearbox.en,
+    car.body.ar,
+    car.body.en,
+    car.drive.ar,
+    car.drive.en,
+    car.color.ar,
+    car.color.en,
+    car.city.ar,
+    car.city.en,
+    car.vin,
+    ...car.highlights.map((item) => `${item.ar} ${item.en}`),
+    car.description.ar,
+    car.description.en,
+  ]
+    .join(" ")
+    .toLowerCase();
 }
 
 function parseList(value: string | null) {
@@ -63,10 +179,23 @@ export function CarsBrowser() {
 
   const [makeIds, setMakeIds] = useState<string[]>([...new Set(initialMakes)]);
   const [modelIds, setModelIds] = useState<string[]>([...new Set(initialModels)]);
+  const [trimIds, setTrimIds] = useState<string[]>([]);
+  const [trimQuery, setTrimQuery] = useState("");
   const [yearFrom, setYearFrom] = useState(params.get("yearFrom") ?? "");
   const [yearTo, setYearTo] = useState(params.get("yearTo") ?? "");
   const [body, setBody] = useState(params.get("body") ?? "");
   const [fuel, setFuel] = useState(params.get("fuel") ?? "");
+  const [gear, setGear] = useState(params.get("gear") ?? "");
+  const [drive, setDrive] = useState(params.get("drive") ?? "");
+  const [origin, setOrigin] = useState(params.get("origin") ?? "");
+  const [cylinders, setCylinders] = useState(params.get("cylinders") ?? "");
+  const [priceMin, setPriceMin] = useState(params.get("priceMin") ?? "");
+  const [priceMax, setPriceMax] = useState(params.get("priceMax") ?? "");
+  const [exterior, setExterior] = useState(params.get("exterior") ?? "");
+  const [interior, setInterior] = useState(params.get("interior") ?? "");
+  const [regionId, setRegionId] = useState(params.get("region") ?? "");
+  const [cityKey, setCityKey] = useState(params.get("city") ?? "");
+  const [regionQuery, setRegionQuery] = useState("");
   const [condition, setCondition] = useState(params.get("condition") ?? "");
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [sort, setSort] = useState("newest");
@@ -76,9 +205,19 @@ export function CarsBrowser() {
   const [open, setOpen] = useState({
     make: true,
     model: true,
+    trim: true,
     year: true,
-    body: true,
+    body: false,
+    origin: true,
+    gear: true,
+    drive: true,
     fuel: true,
+    cylinders: true,
+    price: true,
+    exterior: true,
+    interior: true,
+    region: true,
+    city: true,
   });
 
   const selectedMakes = useMemo(
@@ -88,6 +227,8 @@ export function CarsBrowser() {
         .filter(Boolean) as typeof allMakes,
     [makeIds],
   );
+
+  const selectedRegion = omanRegions.find((item) => item.id === regionId);
 
   const brandOptions = useMemo(() => {
     const popular = popularMakeIds
@@ -114,8 +255,29 @@ export function CarsBrowser() {
 
   const modelOptions = useMemo(() => modelGroups.flatMap((group) => group.models), [modelGroups]);
 
+  const trimGroups = useMemo(() => {
+    const selected = modelOptions.filter((item) => modelIds.includes(`${item.makeId}:${item.id}`) || modelIds.includes(item.id));
+    const source = selected.length > 0 ? selected : modelOptions;
+    const q = trimQuery.trim().toLowerCase();
+    return source
+      .map((model) => {
+        const make = selectedMakes.find((item) => item.id === model.makeId);
+        const trims = (model.trims ?? []).filter((trim) => !q || trim.toLowerCase().includes(q));
+        return { make, model, trims };
+      })
+      .filter((group) => group.trims.length > 0);
+  }, [modelOptions, modelIds, selectedMakes, trimQuery]);
+
+  const filteredRegions = useMemo(() => {
+    const q = regionQuery.trim().toLowerCase();
+    if (!q) return omanRegions;
+    return omanRegions.filter((region) => region.name.ar.includes(regionQuery) || region.name.en.toLowerCase().includes(q));
+  }, [regionQuery]);
+
   const list = useMemo(() => {
     const filtered = cars.filter((car) => {
+      const hay = carText(car);
+
       if (makeIds.length > 0) {
         const carMakeId = makeIdFromLabel(car.make);
         const matchesMake = makeIds.some((id) => {
@@ -132,27 +294,91 @@ export function CarsBrowser() {
           .some((model) => modelHay.includes(model.name.en.toLowerCase()) || modelHay.includes(model.name.ar));
         if (!matchesModel) return false;
       }
+      if (trimIds.length > 0) {
+        if (!trimIds.some((trim) => hay.includes(trim.toLowerCase()))) return false;
+      }
       if (yearFrom && car.year < Number(yearFrom)) return false;
       if (yearTo && car.year > Number(yearTo)) return false;
       if (body) {
         const bodyMeta = bodyTypes.find((item) => item.id === body);
         if (bodyMeta) {
-          const hay = `${car.body.ar} ${car.body.en}`.toLowerCase();
-          if (!hay.includes(bodyMeta.name.en.toLowerCase()) && !hay.includes(bodyMeta.name.ar)) return false;
+          const bodyHay = `${car.body.ar} ${car.body.en}`.toLowerCase();
+          if (!bodyHay.includes(bodyMeta.name.en.toLowerCase()) && !bodyHay.includes(bodyMeta.name.ar)) return false;
+        }
+      }
+      if (origin) {
+        const meta = ORIGINS.find((item) => item.id === origin);
+        if (meta && "match" in meta && !meta.match.some((token) => hay.includes(token.toLowerCase()))) return false;
+      }
+      if (gear) {
+        const meta = GEARS.find((item) => item.id === gear);
+        if (meta && "match" in meta) {
+          const gearHay = `${car.gearbox.ar} ${car.gearbox.en}`.toLowerCase();
+          if (!meta.match.some((token) => gearHay.includes(token.toLowerCase()))) return false;
+        }
+      }
+      if (drive) {
+        const meta = DRIVES.find((item) => item.id === drive);
+        if (meta && "match" in meta) {
+          const driveHay = `${car.drive.ar} ${car.drive.en}`.toLowerCase();
+          if (!meta.match.some((token) => driveHay.includes(token.toLowerCase()))) return false;
         }
       }
       if (fuel) {
         const fuelMeta = FUELS.find((item) => item.id === fuel);
         if (fuelMeta && "match" in fuelMeta) {
-          const hay = `${car.fuel.ar} ${car.fuel.en}`.toLowerCase();
-          if (!fuelMeta.match.some((token) => hay.includes(token.toLowerCase()))) return false;
+          const fuelHay = `${car.fuel.ar} ${car.fuel.en}`.toLowerCase();
+          if (!fuelMeta.match.some((token) => fuelHay.includes(token.toLowerCase()))) return false;
+        }
+      }
+      if (cylinders) {
+        const cylHay = `${hay} ${car.title.en} ${car.title.ar}`;
+        const patterns = [new RegExp(`\\b${cylinders}\\s*(cyl|cylinder|أسطوان)`, "i"), new RegExp(`v${cylinders}\\b`, "i")];
+        if (!patterns.some((pattern) => pattern.test(cylHay))) {
+          // soft pass when listing has no cylinder data yet
+          if (/\b(v?\d+|cyl|أسطوان)/i.test(cylHay)) return false;
+        }
+      }
+      if (priceMin && car.priceOmr < Number(priceMin)) return false;
+      if (priceMax && car.priceOmr > Number(priceMax)) return false;
+      if (exterior) {
+        const color = exteriorColors.find((item) => item.id === exterior);
+        if (color) {
+          const colorHay = `${car.color.ar} ${car.color.en}`.toLowerCase();
+          if (!colorHay.includes(color.name.en.toLowerCase()) && !colorHay.includes(color.name.ar)) return false;
+        }
+      }
+      if (interior) {
+        const color = interiorColors.find((item) => item.id === interior);
+        if (color) {
+          const hit =
+            hay.includes(`${color.name.en.toLowerCase()} interior`) ||
+            hay.includes(`interior ${color.name.en.toLowerCase()}`) ||
+            hay.includes(`${color.name.ar} داخلي`) ||
+            hay.includes(`داخلي ${color.name.ar}`);
+          const mentionsOther = interiorColors.some(
+            (item) =>
+              item.id !== interior &&
+              (hay.includes(`${item.name.en.toLowerCase()} interior`) ||
+                hay.includes(`داخلي ${item.name.ar}`) ||
+                hay.includes(`${item.name.ar} داخلي`)),
+          );
+          // Soft until listings carry structured interior color: only exclude clear conflicts.
+          if (mentionsOther && !hit) return false;
+        }
+      }
+      if (regionId) {
+        const region = regionForCity(car.city.en, car.city.ar);
+        if (!region || region.id !== regionId) return false;
+      }
+      if (cityKey) {
+        if (car.city.en !== cityKey && car.city.ar !== cityKey) {
+          const city = selectedRegion?.cities.find((item) => item.id === cityKey || item.name.en === cityKey || item.name.ar === cityKey);
+          if (!city || (car.city.en !== city.name.en && car.city.ar !== city.name.ar)) return false;
         }
       }
       if (condition && car.condition !== condition) return false;
-      if (query) {
-        const haystack = `${car.make} ${car.model} ${car.title.ar} ${car.title.en} ${car.vin}`.toLowerCase();
-        if (!haystack.includes(query.toLowerCase())) return false;
-      }
+      if (query && !hay.includes(query.toLowerCase())) return false;
       return true;
     });
 
@@ -162,15 +388,51 @@ export function CarsBrowser() {
       if (sort === "mileage") return a.mileage - b.mileage;
       return b.year - a.year;
     });
-  }, [makeIds, modelIds, modelOptions, yearFrom, yearTo, body, fuel, condition, query, sort]);
+  }, [
+    makeIds,
+    modelIds,
+    modelOptions,
+    trimIds,
+    yearFrom,
+    yearTo,
+    body,
+    origin,
+    gear,
+    drive,
+    fuel,
+    cylinders,
+    priceMin,
+    priceMax,
+    exterior,
+    interior,
+    regionId,
+    cityKey,
+    selectedRegion,
+    condition,
+    query,
+    sort,
+  ]);
 
   function clearFilters() {
     setMakeIds([]);
     setModelIds([]);
+    setTrimIds([]);
+    setTrimQuery("");
     setYearFrom("");
     setYearTo("");
     setBody("");
     setFuel("");
+    setGear("");
+    setDrive("");
+    setOrigin("");
+    setCylinders("");
+    setPriceMin("");
+    setPriceMax("");
+    setExterior("");
+    setInterior("");
+    setRegionId("");
+    setCityKey("");
+    setRegionQuery("");
     setCondition("");
     setQuery("");
     setModelsExpanded({});
@@ -183,6 +445,7 @@ export function CarsBrowser() {
       const bareIds = new Set((allMakes.find((item) => item.id === id)?.models ?? []).map((model) => model.id));
       setMakeIds((current) => current.filter((item) => item !== id));
       setModelIds((models) => models.filter((key) => !key.startsWith(`${id}:`) && !bareIds.has(key)));
+      setTrimIds([]);
       setModelsExpanded((prev) => {
         const next = { ...prev };
         delete next[id];
@@ -196,7 +459,7 @@ export function CarsBrowser() {
     } else {
       setMakeIds((current) => [...current, id]);
       setModelsExpanded((prev) => ({ ...prev, [id]: true }));
-      setOpen((prev) => ({ ...prev, model: true, year: true }));
+      setOpen((prev) => ({ ...prev, model: true, trim: true, year: true }));
     }
   }
 
@@ -204,9 +467,14 @@ export function CarsBrowser() {
     const key = `${makeId}:${id}`;
     setModelIds((current) => {
       if (current.includes(key)) return current.filter((item) => item !== key);
-      // drop legacy bare ids for this model when toggling on
       return [...current.filter((item) => item !== id), key];
     });
+    setTrimIds([]);
+    setOpen((prev) => ({ ...prev, trim: true }));
+  }
+
+  function pickTrim(trim: string) {
+    setTrimIds((current) => (current.includes(trim) ? current.filter((item) => item !== trim) : [...current, trim]));
   }
 
   function isMakeModelsOpen(makeId: string) {
@@ -219,8 +487,8 @@ export function CarsBrowser() {
         kicker={L("السوق", "The market")}
         title={L("سيارات جاهزة، واضحة، وقابلة للمقارنة.", "Ready cars, clear and comparable.")}
         lead={L(
-          "اختر شركة أو أكثر، ثم الموديلات لكل شركة، ثم السنة والهيكل والوقود.",
-          "Pick one or more makes, then models per make, then year, body, and fuel.",
+          "فلاتر كاملة: الشركات، الموديلات، التجهيز، السنة، المواصفات، والألوان والمناطق.",
+          "Full filters: makes, models, trims, year, specs, colors, and regions.",
         )}
         actions={<a href="/sell" className="btn-primary">{tx(L("أضف إعلانك", "Add your listing"))}</a>}
       />
@@ -244,8 +512,8 @@ export function CarsBrowser() {
           ))}
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="surface-card h-fit space-y-1 p-4 lg:sticky lg:top-28">
+        <div className="grid gap-6 xl:grid-cols-[340px_minmax(0,1fr)] lg:grid-cols-[300px_minmax(0,1fr)]">
+          <aside className="surface-card h-fit max-h-[calc(100vh-7rem)] space-y-1 overflow-y-auto p-4 lg:sticky lg:top-28">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-night">{tx(L("تصفية النتائج", "Filter results"))}</h2>
               <button type="button" onClick={clearFilters} className="text-xs text-brass hover:underline">
@@ -263,11 +531,7 @@ export function CarsBrowser() {
               />
             </label>
 
-            <FilterSection
-              title={tx(L("التصنيع", "Make"))}
-              open={open.make}
-              onToggle={() => setOpen((prev) => ({ ...prev, make: !prev.make }))}
-            >
+            <FilterSection title={tx(L("التصنيع", "Make"))} icon="◎" open={open.make} onToggle={() => setOpen((prev) => ({ ...prev, make: !prev.make }))}>
               <p className="mb-2 text-[11px] text-muted">{tx(L("يمكنك اختيار أكثر من شركة.", "You can select more than one make."))}</p>
               <div className="grid grid-cols-4 gap-2">
                 {brandOptions.map((item) => {
@@ -291,29 +555,18 @@ export function CarsBrowser() {
                   );
                 })}
               </div>
-              <button
-                type="button"
-                onClick={() => setShowAllMakes((value) => !value)}
-                className="mt-2 w-full rounded-xl border border-line bg-soft/60 py-2 text-xs font-medium text-night hover:bg-soft"
-              >
+              <button type="button" onClick={() => setShowAllMakes((value) => !value)} className="mt-2 w-full rounded-xl border border-line bg-soft/60 py-2 text-xs font-medium text-night hover:bg-soft">
                 {showAllMakes ? tx(L("عرض أقل", "Show less")) : tx(L("عرض المزيد", "Show more"))}
               </button>
             </FilterSection>
 
-            <FilterSection
-              title={tx(L("الموديل الفرعي", "Sub-model"))}
-              open={open.model}
-              onToggle={() => setOpen((prev) => ({ ...prev, model: !prev.model }))}
-            >
+            <FilterSection title={tx(L("الموديل", "Model"))} icon="▣" open={open.model} onToggle={() => setOpen((prev) => ({ ...prev, model: !prev.model }))}>
               {selectedMakes.length === 0 ? (
                 <p className="rounded-xl bg-soft/50 px-3 py-4 text-center text-xs text-muted">
                   {tx(L("اختر شركة واحدة أو أكثر أولاً.", "Pick one or more makes first."))}
                 </p>
               ) : (
                 <div className="space-y-2">
-                  <p className="text-[11px] text-muted">
-                    {tx(L("موديلات كل شركة منفصلة — يمكنك طي أو توسيع أي قسم.", "Models are grouped by make — expand or collapse each section."))}
-                  </p>
                   {modelGroups.map(({ make, models }) => {
                     const groupOpen = isMakeModelsOpen(make.id);
                     const showAll = Boolean(modelsShowAll[make.id]);
@@ -323,13 +576,8 @@ export function CarsBrowser() {
                       <div key={make.id} className="overflow-hidden rounded-xl border border-line bg-white">
                         <button
                           type="button"
-                          onClick={() =>
-                            setModelsExpanded((prev) => ({
-                              ...prev,
-                              [make.id]: !(prev[make.id] !== false),
-                            }))
-                          }
-                          className="flex w-full items-center justify-between gap-2 bg-soft/40 px-2.5 py-2 text-start transition hover:bg-soft/70"
+                          onClick={() => setModelsExpanded((prev) => ({ ...prev, [make.id]: !(prev[make.id] !== false) }))}
+                          className="flex w-full items-center justify-between gap-2 bg-soft/40 px-2.5 py-2 text-start hover:bg-soft/70"
                         >
                           <span className="inline-flex min-w-0 items-center gap-2">
                             <BrandLogo id={make.id} mark={make.mark} name={tx(make.name)} className="h-7 w-7 shrink-0" />
@@ -361,9 +609,7 @@ export function CarsBrowser() {
                                       active ? "border-brass ring-2 ring-brass/30" : "border-line hover:border-brass/40"
                                     }`}
                                   >
-                                    {active && (
-                                      <span className="absolute end-1 top-1 z-10 rounded-full bg-navy px-1 text-[9px] text-ivory">✓</span>
-                                    )}
+                                    {active && <span className="absolute end-1 top-1 z-10 rounded-full bg-navy px-1 text-[9px] text-ivory">✓</span>}
                                     <ModelThumb
                                       src={item.image}
                                       alt={`${item.name.ar} / ${item.name.en}`}
@@ -397,11 +643,46 @@ export function CarsBrowser() {
               )}
             </FilterSection>
 
-            <FilterSection
-              title={tx(L("سنة الصنع", "Year"))}
-              open={open.year}
-              onToggle={() => setOpen((prev) => ({ ...prev, year: !prev.year }))}
-            >
+            <FilterSection title={tx(L("الموديل الفرعي", "Sub-model"))} icon="⌕" open={open.trim} onToggle={() => setOpen((prev) => ({ ...prev, trim: !prev.trim }))}>
+              {selectedMakes.length === 0 ? (
+                <p className="rounded-xl bg-soft/50 px-3 py-4 text-center text-xs text-muted">
+                  {tx(L("اختر الشركة والموديل أولاً.", "Pick make and model first."))}
+                </p>
+              ) : (
+                <>
+                  <input
+                    value={trimQuery}
+                    onChange={(event) => setTrimQuery(event.target.value)}
+                    className="field mb-3"
+                    placeholder={tx(L("البحث عن موديل فرعي", "Search for a sub-model"))}
+                  />
+                  <div className="space-y-3">
+                    {trimGroups.length === 0 ? (
+                      <p className="text-xs text-muted">{tx(L("لا توجد تجهيزات مطابقة.", "No matching trims."))}</p>
+                    ) : (
+                      trimGroups.map(({ make, model, trims }) => (
+                        <div key={`${model.makeId}:${model.id}`}>
+                          <p className="mb-1.5 text-[11px] font-semibold text-night">
+                            {make ? tx(make.name) : model.makeId}
+                            <span className="mx-1 text-muted">·</span>
+                            {locale === "ar" ? model.name.ar : model.name.en}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {trims.map((trim) => (
+                              <Pill key={`${model.id}:${trim}`} active={trimIds.includes(trim)} onClick={() => pickTrim(trim)}>
+                                {trim}
+                              </Pill>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </FilterSection>
+
+            <FilterSection title={tx(L("السنة", "Year"))} icon="📅" open={open.year} onToggle={() => setOpen((prev) => ({ ...prev, year: !prev.year }))}>
               <div className="grid grid-cols-2 gap-2">
                 <label className="text-xs text-muted">
                   {tx(L("من", "From"))}
@@ -428,11 +709,47 @@ export function CarsBrowser() {
               </div>
             </FilterSection>
 
-            <FilterSection
-              title={tx(L("نوع الهيكل", "Body type"))}
-              open={open.body}
-              onToggle={() => setOpen((prev) => ({ ...prev, body: !prev.body }))}
-            >
+            <FilterSection title={tx(L("المواصفات", "Specifications"))} icon="⚙" open={open.origin} onToggle={() => setOpen((prev) => ({ ...prev, origin: !prev.origin }))}>
+              <div className="flex flex-wrap gap-2">
+                {ORIGINS.map((item) => (
+                  <Pill key={item.id || "all-origin"} active={origin === item.id} onClick={() => setOrigin(item.id)}>
+                    {tx(item.label)}
+                  </Pill>
+                ))}
+              </div>
+            </FilterSection>
+
+            <FilterSection title={tx(L("ناقل الحركة", "Transmission"))} icon="⚙" open={open.gear} onToggle={() => setOpen((prev) => ({ ...prev, gear: !prev.gear }))}>
+              <div className="flex flex-wrap gap-2">
+                {GEARS.map((item) => (
+                  <Pill key={item.id || "all-gear"} active={gear === item.id} onClick={() => setGear(item.id)}>
+                    {tx(item.label)}
+                  </Pill>
+                ))}
+              </div>
+            </FilterSection>
+
+            <FilterSection title={tx(L("نظام الدفع", "Drive system"))} icon="◎" open={open.drive} onToggle={() => setOpen((prev) => ({ ...prev, drive: !prev.drive }))}>
+              <div className="flex flex-wrap gap-2">
+                {DRIVES.map((item) => (
+                  <Pill key={item.id || "all-drive"} active={drive === item.id} onClick={() => setDrive(item.id)}>
+                    {tx(item.label)}
+                  </Pill>
+                ))}
+              </div>
+            </FilterSection>
+
+            <FilterSection title={tx(L("نوع الوقود", "Fuel type"))} icon="⛽" open={open.fuel} onToggle={() => setOpen((prev) => ({ ...prev, fuel: !prev.fuel }))}>
+              <div className="flex flex-wrap gap-2">
+                {FUELS.map((item) => (
+                  <Pill key={item.id || "all-fuel"} active={fuel === item.id} onClick={() => setFuel(item.id)}>
+                    {tx(item.label)}
+                  </Pill>
+                ))}
+              </div>
+            </FilterSection>
+
+            <FilterSection title={tx(L("نوع الهيكل", "Body type"))} icon="▣" open={open.body} onToggle={() => setOpen((prev) => ({ ...prev, body: !prev.body }))}>
               <div className="grid grid-cols-2 gap-2">
                 {bodyTypes.map((item) => {
                   const active = body === item.id;
@@ -451,23 +768,90 @@ export function CarsBrowser() {
               </div>
             </FilterSection>
 
-            <FilterSection
-              title={tx(L("نوع الوقود", "Fuel type"))}
-              open={open.fuel}
-              onToggle={() => setOpen((prev) => ({ ...prev, fuel: !prev.fuel }))}
-            >
+            <FilterSection title={tx(L("عدد الأسطوانات", "Cylinders"))} icon="◉" open={open.cylinders} onToggle={() => setOpen((prev) => ({ ...prev, cylinders: !prev.cylinders }))}>
               <div className="flex flex-wrap gap-2">
-                {FUELS.map((item) => (
-                  <button
-                    key={item.id || "all-fuel"}
-                    type="button"
-                    onClick={() => setFuel(item.id)}
-                    className={fuel === item.id ? "chip chip-active" : "chip"}
-                  >
-                    {tx(item.label)}
-                  </button>
+                {CYLINDERS.map((item) => (
+                  <Pill key={item || "all-cyl"} active={cylinders === item} onClick={() => setCylinders(item)} round>
+                    {item || tx(L("الكل", "All"))}
+                  </Pill>
                 ))}
               </div>
+            </FilterSection>
+
+            <FilterSection title={tx(L("السعر", "Price"))} icon="$" open={open.price} onToggle={() => setOpen((prev) => ({ ...prev, price: !prev.price }))}>
+              <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+                <input
+                  inputMode="decimal"
+                  value={priceMin}
+                  onChange={(event) => setPriceMin(event.target.value)}
+                  className="field"
+                  placeholder={tx(L("الأدنى", "Min"))}
+                />
+                <span className="text-muted">—</span>
+                <input
+                  inputMode="decimal"
+                  value={priceMax}
+                  onChange={(event) => setPriceMax(event.target.value)}
+                  className="field"
+                  placeholder={tx(L("الأعلى", "Max"))}
+                />
+              </div>
+            </FilterSection>
+
+            <FilterSection title={tx(L("اللون الخارجي", "Exterior color"))} icon="◐" open={open.exterior} onToggle={() => setOpen((prev) => ({ ...prev, exterior: !prev.exterior }))}>
+              <ColorSwatches items={exteriorColors} value={exterior} onChange={setExterior} />
+            </FilterSection>
+
+            <FilterSection title={tx(L("اللون الداخلي", "Interior color"))} icon="◑" open={open.interior} onToggle={() => setOpen((prev) => ({ ...prev, interior: !prev.interior }))}>
+              <ColorSwatches items={interiorColors} value={interior} onChange={setInterior} />
+            </FilterSection>
+
+            <FilterSection title={tx(L("المنطقة", "Region"))} icon="⌖" open={open.region} onToggle={() => setOpen((prev) => ({ ...prev, region: !prev.region }))}>
+              <input
+                value={regionQuery}
+                onChange={(event) => setRegionQuery(event.target.value)}
+                className="field mb-2"
+                placeholder={tx(L("البحث عن منطقة", "Search for a region"))}
+              />
+              <div className="max-h-48 space-y-1 overflow-y-auto rounded-xl border border-line p-2">
+                {filteredRegions.map((region) => {
+                  const active = regionId === region.id;
+                  return (
+                    <label key={region.id} className="flex cursor-pointer items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm hover:bg-soft/60">
+                      <span>{tx(region.name)}</span>
+                      <input
+                        type="checkbox"
+                        checked={active}
+                        onChange={() => {
+                          setRegionId(active ? "" : region.id);
+                          setCityKey("");
+                          setOpen((prev) => ({ ...prev, city: true }));
+                        }}
+                        className="h-4 w-4 accent-[var(--color-navy)]"
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </FilterSection>
+
+            <FilterSection title={tx(L("المدينة", "City"))} icon="⌖" open={open.city} onToggle={() => setOpen((prev) => ({ ...prev, city: !prev.city }))}>
+              {!selectedRegion ? (
+                <p className="rounded-xl border border-dashed border-line bg-soft/40 px-3 py-4 text-center text-xs text-muted">
+                  {tx(L("اختر المنطقة أولاً", "Choose the region first"))}
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {selectedRegion.cities.map((city) => {
+                    const active = cityKey === city.id || cityKey === city.name.en || cityKey === city.name.ar;
+                    return (
+                      <Pill key={city.id} active={active} onClick={() => setCityKey(active ? "" : city.id)}>
+                        {tx(city.name)}
+                      </Pill>
+                    );
+                  })}
+                </div>
+              )}
             </FilterSection>
           </aside>
 
@@ -483,6 +867,11 @@ export function CarsBrowser() {
                 {modelIds.length > 0 && (
                   <span className="rounded-full border border-line bg-soft px-2 py-1 text-xs text-muted">
                     {locale === "ar" ? `${modelIds.length} موديل` : `${modelIds.length} models`}
+                  </span>
+                )}
+                {trimIds.length > 0 && (
+                  <span className="rounded-full border border-line bg-soft px-2 py-1 text-xs text-muted">
+                    {locale === "ar" ? `${trimIds.length} تجهيز` : `${trimIds.length} trims`}
                   </span>
                 )}
                 <p className="text-sm text-muted">{locale === "ar" ? `${list.length} إعلان` : `${list.length} listings`}</p>
