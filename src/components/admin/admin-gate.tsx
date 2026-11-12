@@ -4,9 +4,11 @@ import { adminLoginHref } from "@/lib/admin/access";
 export function AdminGate({
   locale,
   reason,
+  accountHint,
 }: {
   locale: "ar" | "en";
   reason: "login" | "forbidden" | "auth-config";
+  accountHint?: string;
 }) {
   const ar = locale === "ar";
   const copy = {
@@ -42,6 +44,11 @@ export function AdminGate({
         <p className="admin-eyebrow">BHD CARS · ADMIN</p>
         <h1>{copy.title}</h1>
         <p>{copy.body}</p>
+        {accountHint ? (
+          <p style={{ marginTop: "0.75rem", direction: "ltr", fontSize: "0.78rem", color: "#5f736c" }}>
+            {accountHint}
+          </p>
+        ) : null}
         <div className="admin-actions" style={{ justifyContent: "center", marginTop: "1.1rem" }}>
           <Link className="primary" href={copy.href}>
             {copy.cta}

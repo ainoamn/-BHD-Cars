@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { AdminChrome } from "@/components/admin/admin-chrome";
 import { AdminGate } from "@/components/admin/admin-gate";
-import { resolveAdminAccessOrDev } from "@/lib/admin/access";
+import { readAdminSession, resolveAdminAccessOrDev } from "@/lib/admin/access";
 import "../admin.css";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +22,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const result = await resolveAdminAccessOrDev();
 
   if (result.kind !== "ok") {
-    return <AdminGate locale={locale} reason={result.kind} />;
+    const session = result.kind === "forbidden" ? await readAdminSession() : null;
+    return (
+      <AdminGate
+        locale={locale}
+        reason={result.kind}
+        accountHint={session ? `${session.email} · ${session.sub}` : undefined}
+      />
+    );
   }
 
   return (
