@@ -404,6 +404,77 @@ body:has(.site-admin-shell) {
   line-height: 1.55;
 }
 
+.admin-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: end;
+}
+
+.admin-field {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 8rem;
+  font-size: 0.72rem;
+  color: #5f736c;
+  font-weight: 700;
+}
+
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
+  min-width: 8.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid #dde8e3;
+  border-radius: 0.55rem;
+  background: #fff;
+  color: #092d24;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admin-inline-form button.primary {
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.7rem;
+  border: 1px solid #092d24;
+  background: #092d24;
+  color: #fbfaf7;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-inline-form button.primary:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.site-notice {
+  padding: 0.65rem 1rem;
+  background: #174b70;
+  color: #fff;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.site-maintenance {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+}
+
+.site-maintenance__card {
+  width: min(440px, 100%);
+  padding: 1.5rem;
+  border-radius: 1.1rem;
+  border: 1px solid #dde8e3;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 18px 40px rgb(9 45 36 / 0.08);
+}
+
 @media (max-width: 920px) {
   .site-admin-frame {
     grid-template-columns: 1fr;

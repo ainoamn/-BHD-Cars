@@ -1,46 +1,137 @@
-import { AdminDeskPage } from "@/components/admin/admin-desk";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { AdminActionForm } from "@/components/admin/admin-action-form";
+import { listAccounts } from "@/lib/admin/store";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminUsersPage() {
+export default async function AdminUsersPage() {
+  const jar = await cookies();
+  const ar = jar.get("bhd_locale")?.value !== "en";
+  const accounts = await listAccounts();
+
   return (
-    <AdminDeskPage
-      leadAr="حسابات المنصة: مشترو السوق، بائعو الأفراد، ومشغّلو المعارض."
-      leadEn="Platform accounts: market buyers, private sellers, and dealer operators."
-      panels={[
-        {
-          titleAr: "الأعضاء",
-          titleEn: "Members",
-          bodyAr: "بحث وتعليق وإعادة تفعيل حسابات الهوية المرتبطة بسيارات BHD.",
-          bodyEn: "Search, suspend, and restore identity accounts linked to BHD Cars.",
-          statusAr: "يحتاج SSO + قاعدة مستخدمين",
-          statusEn: "Needs SSO + user DB",
-        },
-        {
-          titleAr: "حسابات المعارض",
-          titleEn: "Dealer accounts",
-          bodyAr: "ربط مستخدمي المعرض بالملف التجاري والصلاحيات داخل المعرض.",
-          bodyEn: "Bind dealer users to the commercial profile and in-house roles.",
-          href: "/admin/dealers",
-          ctaAr: "المعارض",
-          ctaEn: "Dealers",
-        },
-        {
-          titleAr: "التوثيق",
-          titleEn: "Verification",
-          bodyAr: "مراجعة الهوية المدنية وبيانات التواصل قبل فتح البيع.",
-          bodyEn: "Review civil ID and contact details before enabling selling.",
-          statusAr: "طابور لاحق",
-          statusEn: "Queue later",
-        },
-      ]}
-      columns={[
-        { key: "name", ar: "الاسم", en: "Name" },
-        { key: "email", ar: "البريد", en: "Email" },
-        { key: "kind", ar: "النوع", en: "Kind" },
-        { key: "status", ar: "الحالة", en: "Status" },
-      ]}
-      rows={[]}
-    />
+    <div>
+      <AdminPageHeader
+        actions={
+          <>
+            <Link href="/admin/delegates">{ar ? "الصلاحيات" : "Permissions"}</Link>
+            <Link href="/admin/dealers">{ar ? "المعارض" : "Dealers"}</Link>
+          </>
+        }
+      />
+      <div className="admin-panel" style={{ marginBottom: "1rem" }}>
+        <div className="admin-panel__head">
+          <h2>{ar ? "إضافة / تحديث حساب" : "Add / update account"}</h2>
+        </div>
+        <div style={{ padding: "1rem" }}>
+          <AdminActionForm
+            action="/api/admin/users"
+            method="PUT"
+            submitLabel={ar ? "حفظ الحساب" : "Save account"}
+            fields={[
+              { name: "email", label: "Email", required: true },
+              { name: "name", label: ar ? "الاسم" : "Name", required: true },
+              {
+                name: "kind",
+                label: ar ? "النوع" : "Kind",
+                type: "select",
+                defaultValue: "member",
+                options: [
+                  { value: "member", label: "member" },
+                  { value: "dealer", label: "dealer" },
+                  { value: "partner", label: "partner" },
+                  { value: "owner", label: "owner" },
+                ],
+              },
+              {
+                name: "status",
+                label: ar ? "الحالة" : "Status",
+                type: "select",
+                defaultValue: "active",
+                options: [
+                  { value: "active", label: "active" },
+                  { value: "suspended", label: "suspended" },
+                ],
+              },
+              { name: "dealerSlug", label: ar ? "معرض مرتبط" : "Dealer slug" },
+              { name: "identitySub", label: "Identity sub" },
+            ]}
+          />
+        </div>
+      </div>
+      <div className="admin-panel">
+        <div className="admin-panel__head">
+          <h2>{ar ? `الحسابات (${accounts.length})` : `Accounts (${accounts.length})`}</h2>
+        </div>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>{ar ? "الاسم" : "Name"}</th>
+              <th>Email</th>
+              <th>{ar ? "النوع" : "Kind"}</th>
+              <th>{ar ? "الحالة" : "Status"}</th>
+              <th>{ar ? "تحديث سريع" : "Quick update"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {accounts.map((account) => (
+              <tr key={account.id}>
+                <td>
+                  <strong>{account.name || "—"}</strong>
+                  {account.dealer_slug ? (
+                    <div>
+                      <Link href={`/admin/dealers/${account.dealer_slug}`}>{account.dealer_slug}</Link>
+                    </div>
+                  ) : null}
+                </td>
+                <td style={{ direction: "ltr" }}>{account.email}</td>
+                <td>{account.kind}</td>
+                <td>
+                  <span className={`admin-badge admin-badge--${account.status === "active" ? "ready" : "warn"}`}>
+                    {account.status}
+                  </span>
+                </td>
+                <td>
+                  <AdminActionForm
+                    action="/api/admin/users"
+                    method="PUT"
+                    submitLabel={ar ? "حفظ" : "Save"}
+                    fields={[
+                      { name: "email", type: "hidden", label: "", defaultValue: account.email },
+                      { name: "name", type: "hidden", label: "", defaultValue: account.name },
+                      { name: "kind", type: "hidden", label: "", defaultValue: account.kind },
+                      {
+                        name: "status",
+                        label: ar ? "الحالة" : "Status",
+                        type: "select",
+                        defaultValue: account.status,
+                        options: [
+                          { value: "active", label: "active" },
+                          { value: "suspended", label: "suspended" },
+                        ],
+                      },
+                      {
+                        name: "dealerSlug",
+                        type: "hidden",
+                        label: "",
+                        defaultValue: account.dealer_slug || "",
+                      },
+                      {
+                        name: "identitySub",
+                        type: "hidden",
+                        label: "",
+                        defaultValue: account.identity_sub || "",
+                      },
+                    ]}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

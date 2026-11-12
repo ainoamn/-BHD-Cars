@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { DemoNote, PageHeader, Photo } from "@/components/ui";
-import { auctions } from "@/lib/data";
+import { auctions as catalogAuctions } from "@/lib/data";
 import { usePrefs } from "@/lib/prefs";
 import { useStore } from "@/lib/store";
 import type { Auction, Copy } from "@/lib/types";
@@ -63,7 +63,8 @@ function LotRow({ auction }: { auction: Auction }) {
   );
 }
 
-export function AuctionsBoard() {
+export function AuctionsBoard({ initialAuctions }: { initialAuctions?: Auction[] }) {
+  const auctions = initialAuctions?.length ? initialAuctions : catalogAuctions;
   return (
     <div>
       <PageHeader

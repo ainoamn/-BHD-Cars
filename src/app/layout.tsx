@@ -3,6 +3,7 @@ import Script from "next/script";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { BhdAccountIsolation } from "@/components/bhd/BhdAccountIsolation";
+import { SiteRuntime } from "@/components/site-runtime";
 import { PrefsProvider } from "@/lib/prefs";
 import { StoreProvider } from "@/lib/store";
 import "./globals.css";
@@ -43,7 +44,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <BhdAccountIsolation />
         <PrefsProvider>
           <StoreProvider>
-            <AppShell>{children}</AppShell>
+            <SiteRuntime>
+              <AppShell>{children}</AppShell>
+            </SiteRuntime>
           </StoreProvider>
         </PrefsProvider>
         <Script src="https://id.bhd-om.com/bhd-identity.js" strategy="afterInteractive" />

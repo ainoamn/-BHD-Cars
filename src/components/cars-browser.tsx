@@ -6,13 +6,13 @@ import { BrandLogo } from "@/components/brand-logo";
 import { CarCard } from "@/components/car-card";
 import { ModelThumb } from "@/components/model-thumb";
 import { PageHeader } from "@/components/ui";
-import { cars } from "@/lib/data";
+import { cars as catalogCars } from "@/lib/data";
 import { makeIdFromLabel, makeLabelFromId, popularMakeIds } from "@/lib/make-map";
 import { allMakes } from "@/lib/makes-full";
 import { omanRegions, regionForCity } from "@/lib/oman-regions";
 import { usePrefs } from "@/lib/prefs";
 import { bodyTypes, exteriorColors, interiorColors, years } from "@/lib/sell-catalog";
-import type { Copy } from "@/lib/types";
+import type { Car, Copy } from "@/lib/types";
 
 const L = (ar: string, en: string): Copy => ({ ar, en });
 
@@ -36,6 +36,10 @@ const DRIVES = [
   { id: "rwd", label: L("دفع خلفي", "Rear-wheel"), match: ["خلفي", "rwd"] },
   { id: "awd", label: L("4x4", "4x4"), match: ["رباعي", "4wd", "awd", "4x4"] },
 ] as const;
+
+type CarsBrowserProps = {
+  initialCars?: Car[];
+};
 
 const ORIGINS = [
   { id: "", label: L("الكل", "All") },
@@ -134,7 +138,7 @@ function ColorSwatches({
   );
 }
 
-function carText(car: (typeof cars)[number]) {
+function carText(car: Car) {
   return [
     car.title.ar,
     car.title.en,
@@ -165,7 +169,8 @@ function parseList(value: string | null) {
   return [...new Set((value ?? "").split(",").map((item) => item.trim()).filter(Boolean))];
 }
 
-export function CarsBrowser() {
+export function CarsBrowser({ initialCars }: CarsBrowserProps) {
+  const cars = initialCars?.length ? initialCars : catalogCars;
   const params = useSearchParams();
   const { tx, locale } = usePrefs();
 

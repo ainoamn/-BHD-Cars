@@ -1,66 +1,72 @@
-import { AdminDeskPage } from "@/components/admin/admin-desk";
-import { sellers } from "@/lib/data";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { AdminPageHeader } from "@/components/admin/admin-page-header";
+import { billingPulse, listSubscriptions } from "@/lib/admin/store";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminBillingPage() {
-  const dealers = sellers.filter((seller) => seller.kind === "dealer").length;
+export default async function AdminBillingPage() {
+  const jar = await cookies();
+  const ar = jar.get("bhd_locale")?.value !== "en";
+  const pulse = await billingPulse();
+  const subs = await listSubscriptions();
 
   return (
-    <AdminDeskPage
-      leadAr="إحصائيات الاشتراك والإيراد التقديري للمنصة — ليست إعدادات الموقع."
-      leadEn="Subscription stats and estimated platform revenue — not site settings."
-      panels={[
-        {
-          titleAr: "معارض في الكتالوج",
-          titleEn: "Catalog dealers",
-          bodyAr: `${dealers} معرض في بيانات العرض الحالية.`,
-          bodyEn: `${dealers} dealers in the current demo catalog.`,
-          statusAr: "عرض فقط",
-          statusEn: "Demo only",
-        },
-        {
-          titleAr: "MRR تقديري",
-          titleEn: "Estimated MRR",
-          bodyAr: "يُحسب بعد ربط الباقات باشتراكات حقيقية.",
-          bodyEn: "Computed once plans bind to live subscriptions.",
-          statusAr: "غير مربوط",
-          statusEn: "Unwired",
-        },
-        {
-          titleAr: "التجديد",
-          titleEn: "Renewals",
-          bodyAr: "نسبة التجديد والتعثر الشهري.",
-          bodyEn: "Monthly renewal and delinquency rate.",
-          statusAr: "يحتاج فوترة",
-          statusEn: "Needs billing",
-        },
-      ]}
-      columns={[
-        { key: "metric", ar: "المؤشر", en: "Metric" },
-        { key: "value", ar: "القيمة", en: "Value" },
-        { key: "note", ar: "ملاحظة", en: "Note" },
-      ]}
-      rows={[
-        {
-          id: "mrr",
-          metric: "MRR",
-          value: "—",
-          note: "awaiting subscriptions",
-        },
-        {
-          id: "active",
-          metric: "Active plans",
-          value: "0",
-          note: "no live billing yet",
-        },
-        {
-          id: "past_due",
-          metric: "Past due",
-          value: "0",
-          note: "—",
-        },
-      ]}
-    />
+    <div>
+      <AdminPageHeader
+        actions={
+          <>
+            <Link href="/admin/plans">{ar ? "الباقات" : "Plans"}</Link>
+            <Link href="/admin/payments">{ar ? "المدفوعات" : "Payments"}</Link>
+            <Link href="/admin/accounting">{ar ? "الحسابات" : "Accounts"}</Link>
+          </>
+        }
+      />
+      <div className="admin-grid" style={{ marginBottom: "1rem" }}>
+        <div className="admin-card">
+          <p className="admin-card__label">MRR</p>
+          <p className="admin-card__value">{pulse.mrr.toLocaleString()} OMR</p>
+        </div>
+        <div className="admin-card">
+          <p className="admin-card__label">{ar ? "اشتراكات نشطة" : "Active subs"}</p>
+          <p className="admin-card__value">{pulse.activeSubs}</p>
+        </div>
+        <div className="admin-card">
+          <p className="admin-card__label">{ar ? "بوابات مفعّلة" : "Gateways on"}</p>
+          <p className="admin-card__value">{pulse.enabledGateways}</p>
+        </div>
+        <div className="admin-card">
+          <p className="admin-card__label">{ar ? "أرصدة مفتوحة" : "Open balances"}</p>
+          <p className="admin-card__value">{pulse.openBalance.toLocaleString()} OMR</p>
+        </div>
+      </div>
+      <div className="admin-panel">
+        <div className="admin-panel__head">
+          <h2>{ar ? "توزيع الاشتراكات" : "Subscription mix"}</h2>
+        </div>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>{ar ? "المعرض" : "Dealer"}</th>
+              <th>{ar ? "الباقة" : "Plan"}</th>
+              <th>{ar ? "الحالة" : "Status"}</th>
+              <th>{ar ? "التجديد" : "Renews"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {subs.map((sub) => (
+              <tr key={sub.id}>
+                <td>
+                  <Link href={`/admin/dealers/${sub.dealer_slug}`}>{sub.dealer_slug}</Link>
+                </td>
+                <td>{sub.plan_id}</td>
+                <td>{sub.status}</td>
+                <td>{sub.renews_at || "—"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
