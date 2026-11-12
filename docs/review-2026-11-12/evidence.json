@@ -1,0 +1,870 @@
+{
+  "reviewedOn": "2026-11-12",
+  "capturedAt": "2026-11-12T06:57:05.910Z",
+  "scope": "Local working tree, not only HEAD; public HTTP reads without browser interaction or private accounts.",
+  "gitHead": "f5273b8735d5eeca90dfcd88af950de6b006a3a0",
+  "versions": {
+    "next": "15.5.29",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "typescript": "5.9.3",
+    "eslint": "9.39.5"
+  },
+  "counts": {
+    "cars": 8,
+    "sellers": 4,
+    "auctions": 3,
+    "rentals": 4,
+    "parts": 6,
+    "yards": 3,
+    "plates": 4,
+    "insurers": 4,
+    "banks": 4,
+    "appraisers": 4,
+    "centers": 3,
+    "workshops": 3
+  },
+  "sourcePageCount": 25,
+  "routes": [
+    "about",
+    "auctions",
+    "auctions/[slug]",
+    "cars",
+    "cars/[slug]",
+    "compare",
+    "contact",
+    "dealers",
+    "dealers/[slug]",
+    "finance",
+    "import",
+    "inspection",
+    "insurance",
+    "",
+    "parts",
+    "plates",
+    "rental",
+    "reports",
+    "requests",
+    "scrap",
+    "sell/accident",
+    "sell",
+    "sell/ready",
+    "service",
+    "valuation"
+  ],
+  "diagnostics": {
+    "financeNoOffers": 0,
+    "negativeYearInsurance": [
+      4250,
+      4250,
+      4250,
+      4250
+    ],
+    "zeroPrincipalPayment": 0,
+    "zeroRatePayment": 200,
+    "note": "Diagnostics demonstrate current pure-function behavior; they do not certify UI or provider integrations."
+  },
+  "http": [
+    {
+      "url": "https://bhd-cars.vercel.app/about",
+      "finalUrl": "https://bhd-cars.vercel.app/about",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 20086,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/about/page-b8a4556cdbacf4d7.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/auctions",
+      "finalUrl": "https://bhd-cars.vercel.app/auctions",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 21552,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/auctions/page-d40683164ffcf762.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/auctions/land-cruiser-2023",
+      "finalUrl": "https://bhd-cars.vercel.app/auctions/land-cruiser-2023",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": "Next.js",
+      "bytes": 20175,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/auctions/%5Bslug%5D/page-63e99ec4ac8e3e7b.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/cars",
+      "finalUrl": "https://bhd-cars.vercel.app/cars",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 18225,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/448-ae47b7b84573fdb7.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/707-26cc0533db9766e2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/cars/page-9a28b361611db871.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/cars/mercedes-amg-gt-2020",
+      "finalUrl": "https://bhd-cars.vercel.app/cars/mercedes-amg-gt-2020",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": "Next.js",
+      "bytes": 29181,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/448-ae47b7b84573fdb7.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/cars/%5Bslug%5D/page-7fc93cc10c2d8a3a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/compare",
+      "finalUrl": "https://bhd-cars.vercel.app/compare",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 18849,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/compare/page-62e58fa9aee21125.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/contact",
+      "finalUrl": "https://bhd-cars.vercel.app/contact",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 19371,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/contact/page-ce002b5df0021461.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/dealers",
+      "finalUrl": "https://bhd-cars.vercel.app/dealers",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 19500,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/dealers/page-704ca87a41237c3c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/dealers/dar-al-layl",
+      "finalUrl": "https://bhd-cars.vercel.app/dealers/dar-al-layl",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": "Next.js",
+      "bytes": 23847,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/448-ae47b7b84573fdb7.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/dealers/%5Bslug%5D/page-62165b7cad38c092.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/finance",
+      "finalUrl": "https://bhd-cars.vercel.app/finance",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 17838,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/finance/page-afa7cd6753616954.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/import",
+      "finalUrl": "https://bhd-cars.vercel.app/import",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 20812,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/448-ae47b7b84573fdb7.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/import/page-0ef744ec652b6a54.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/inspection",
+      "finalUrl": "https://bhd-cars.vercel.app/inspection",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 18057,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/836-5607bd1ff4583fcc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/inspection/page-5e3ea22f8da63532.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/insurance",
+      "finalUrl": "https://bhd-cars.vercel.app/insurance",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 17850,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/insurance/page-30b9c4838903d073.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/",
+      "finalUrl": "https://bhd-cars.vercel.app/",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 44928,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/448-ae47b7b84573fdb7.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/page-3e17fc88434abd10.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/parts",
+      "finalUrl": "https://bhd-cars.vercel.app/parts",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 23394,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/985-ed6ad3078537d8e6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/parts/page-3204f9cb8c54af00.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/plates",
+      "finalUrl": "https://bhd-cars.vercel.app/plates",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 20115,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/985-ed6ad3078537d8e6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/plates/page-ab16573161aef7e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/rental",
+      "finalUrl": "https://bhd-cars.vercel.app/rental",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 22902,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/985-ed6ad3078537d8e6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/rental/page-b1224c38d9a46a26.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/reports",
+      "finalUrl": "https://bhd-cars.vercel.app/reports",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 19236,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/985-ed6ad3078537d8e6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/reports/page-2ad96d0073fdb8c8.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/requests",
+      "finalUrl": "https://bhd-cars.vercel.app/requests",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 18980,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/requests/page-d543bde1eac37bc5.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/scrap",
+      "finalUrl": "https://bhd-cars.vercel.app/scrap",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 20093,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/985-ed6ad3078537d8e6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/scrap/page-52013697dc194d56.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/sell/accident",
+      "finalUrl": "https://bhd-cars.vercel.app/sell/accident",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 110823,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/707-26cc0533db9766e2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/sell/accident/page-2b5f1c05baf83546.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/sell",
+      "finalUrl": "https://bhd-cars.vercel.app/sell",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 19686,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/sell/page-cbdace08efabbc04.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/sell/ready",
+      "finalUrl": "https://bhd-cars.vercel.app/sell/ready",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 127292,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/707-26cc0533db9766e2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/sell/ready/page-3a6a95eb1bcc7649.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/service",
+      "finalUrl": "https://bhd-cars.vercel.app/service",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 19933,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/985-ed6ad3078537d8e6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/service/page-a22fa888affbe727.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/valuation",
+      "finalUrl": "https://bhd-cars.vercel.app/valuation",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 18074,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/836-5607bd1ff4583fcc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/valuation/page-c3e4386d0b57ff44.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/cars/bhd-audit-does-not-exist",
+      "finalUrl": "https://bhd-cars.vercel.app/cars/bhd-audit-does-not-exist",
+      "status": 200,
+      "server": "Vercel",
+      "poweredBy": "Next.js",
+      "bytes": 17311,
+      "title": "BHD Cars",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/448-ae47b7b84573fdb7.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/cars/%5Bslug%5D/page-7fc93cc10c2d8a3a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/admin",
+      "finalUrl": "https://bhd-cars.vercel.app/admin",
+      "status": 404,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 18258,
+      "title": "404: This page could not be found.",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://bhd-cars.vercel.app/account",
+      "finalUrl": "https://bhd-cars.vercel.app/account",
+      "status": 404,
+      "server": "Vercel",
+      "poweredBy": null,
+      "bytes": 18258,
+      "title": "404: This page could not be found.",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/4bd1b696-c023c6e3521b1417.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/255-0f7d0fcbc4d6d136.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/main-app-f9b5d20365cb8be2.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/619-ba102abea3e3d0e4.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/776-48ca709d2b6c1edc.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/app/layout-b207a8f389b0b33c.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/polyfills-42372ed130431b0a.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3",
+        "/_next/static/chunks/webpack-aec7301005d96fd6.js?dpl=dpl_7KnRzo9GPJ6hhi1FMJJJgCZoEpX3"
+      ]
+    },
+    {
+      "url": "https://sooq-cars.com/om/ar",
+      "finalUrl": "https://sooq-cars.com/om/ar",
+      "status": 200,
+      "server": "cloudflare",
+      "poweredBy": "Next.js",
+      "bytes": 468301,
+      "title": "سوق كارز – بيع وشراء السيارات في عُمان",
+      "signals": {
+        "next": true,
+        "aspnet": false,
+        "jquery": false,
+        "bootstrap": false
+      },
+      "scripts": [
+        "/_next/static/chunks/1gvtffnnom63j.js",
+        "/_next/static/chunks/3rypxd0kq2962.js",
+        "/_next/static/chunks/371ge86_g7bpq.js",
+        "/_next/static/chunks/3-bz84rnw9_w9.js",
+        "/_next/static/chunks/33rcikebdy62o.js",
+        "/_next/static/chunks/turbopack-2h-u0he6dowwt.js",
+        "/_next/static/chunks/2boz9d-9-0llt.js",
+        "/_next/static/chunks/1qhzm0_cx3opd.js",
+        "/_next/static/chunks/08b9ytvvi62ty.js",
+        "/_next/static/chunks/09jej4_ovw9ml.js",
+        "/_next/static/chunks/19tlozbcor8zy.js",
+        "/_next/static/chunks/0lvjhz6n-3ruk.js"
+      ]
+    },
+    {
+      "url": "https://www.bima.om/",
+      "finalUrl": "https://www.bima.om/",
+      "status": 200,
+      "server": "Microsoft-IIS/10.0",
+      "poweredBy": "ASP.NET",
+      "bytes": 70038,
+      "title": "Bima Insurance بيمة للتأمين - بيمة للتأمين",
+      "signals": {
+        "next": false,
+        "aspnet": true,
+        "jquery": true,
+        "bootstrap": true
+      },
+      "scripts": [
+        "https://www.googletagmanager.com/gtag/js?id=G-HLGTMR45EE",
+        "https://www.googletagmanager.com/gtag/js?id=AW-968467525",
+        "https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js",
+        "https://oss.maxcdn.com/respond/1.4.2/respond.min.js",
+        "/assets/js/jquery-3.6.4.min.js",
+        "/assets/js/jquery-migrate-3.0.0.js",
+        "/assets/js/popper.min.js",
+        "/assets/js/bootstrap.min.js",
+        "/assets/js/bootstrap-select.min.js",
+        "/scripts/Notify/bootstrap-notify.min.js",
+        "/lib/Microsoft.jQuery.Unobtrusive.Ajax/jquery.unobtrusive-ajax.min.js",
+        "/assets/js/lordicon.js"
+      ]
+    }
+  ]
+}

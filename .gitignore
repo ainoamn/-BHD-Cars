@@ -8,6 +8,11 @@ out
 *.tsbuildinfo
 .vercel
 
+coverage
+playwright-report
+test-results
+blob-report
+
 scripts/wiki-thumb-cache.json
 scripts/models-manifest-partial.json
 

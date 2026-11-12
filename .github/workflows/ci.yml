@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "chore/**", "feat/**", "fix/**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: lint · typecheck · unit · build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint (non-interactive)
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests (business rules harness)
+        run: npm run test:unit
+
+      - name: Build
+        run: npm run build
+        env:
+          AUTH_SECRET: ci-only-dummy-secret-do-not-use-elsewhere
+
+  # Known-gap regressions stay isolated so main is not red for documented deficits.
+  regression:
+    name: regression (informative)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - run: npm ci
+      - run: npm run test:regression
+
+  # E2E is optional until staging URL / auth fixtures exist.
+  e2e:
+    name: e2e smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Playwright smoke
+        run: npm run test:e2e
+        env:
+          AUTH_SECRET: ci-only-dummy-secret-do-not-use-elsewhere
