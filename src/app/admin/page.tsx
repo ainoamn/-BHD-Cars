@@ -62,6 +62,21 @@ export default async function AdminOverviewPage() {
 
       <div className="admin-panel" style={{ marginTop: "1rem" }}>
         <div className="admin-panel__head">
+          <h2>{ar ? "أقسام المنصة" : "Platform desks"}</h2>
+          <Link href="/admin/settings">{ar ? "إعدادات الموقع فقط" : "Site settings only"}</Link>
+        </div>
+        <div className="admin-actions" style={{ padding: "1rem" }}>
+          <Link href="/admin/delegates">{ar ? "الصلاحيات" : "Permissions"}</Link>
+          <Link href="/admin/users">{ar ? "الأعضاء والحسابات" : "Members"}</Link>
+          <Link href="/admin/plans">{ar ? "الاشتراكات" : "Subscriptions"}</Link>
+          <Link href="/admin/billing">{ar ? "الإحصائيات" : "Stats"}</Link>
+          <Link href="/admin/accounting">{ar ? "حسابات العملاء" : "Accounts"}</Link>
+          <Link href="/admin/payments">{ar ? "المدفوعات" : "Payments"}</Link>
+        </div>
+      </div>
+
+      <div className="admin-panel" style={{ marginTop: "1rem" }}>
+        <div className="admin-panel__head">
           <h2>{ar ? "أحدث الإعلانات في الكتالوج" : "Latest catalog listings"}</h2>
           <Link href="/admin/listings">{ar ? "الكل" : "View all"}</Link>
         </div>

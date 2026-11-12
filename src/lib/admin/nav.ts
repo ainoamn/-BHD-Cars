@@ -1,11 +1,18 @@
-export type AdminNavGroup = "home" | "marketplace" | "operations" | "partners" | "system";
+export type AdminNavGroup =
+  | "home"
+  | "marketplace"
+  | "operations"
+  | "partners"
+  | "platform"
+  | "system";
 
 export const ADMIN_NAV_GROUPS: Record<AdminNavGroup, { ar: string; en: string; order: number }> = {
   home: { ar: "الرئيسية", en: "Home", order: 0 },
   marketplace: { ar: "السوق", en: "Marketplace", order: 1 },
   operations: { ar: "التشغيل", en: "Operations", order: 2 },
   partners: { ar: "الشركاء", en: "Partners", order: 3 },
-  system: { ar: "النظام", en: "System", order: 4 },
+  platform: { ar: "المنصة", en: "Platform", order: 4 },
+  system: { ar: "الموقع", en: "Site", order: 5 },
 };
 
 export type AdminSection = {
@@ -101,6 +108,60 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     hintEn: "Insurance, finance, valuation, inspection",
   },
   {
+    id: "users",
+    href: "/admin/users",
+    group: "platform",
+    ar: "الأعضاء والحسابات",
+    en: "Members & accounts",
+    hintAr: "حسابات المنصة، الإيقاف، والتفعيل",
+    hintEn: "Platform accounts, suspend, and restore",
+  },
+  {
+    id: "plans",
+    href: "/admin/plans",
+    group: "platform",
+    ar: "الاشتراكات والباقات",
+    en: "Subscriptions",
+    hintAr: "باقات المعارض والحدود والأسعار",
+    hintEn: "Dealer plans, limits, and pricing",
+  },
+  {
+    id: "billing",
+    href: "/admin/billing",
+    group: "platform",
+    ar: "إحصائيات الاشتراك",
+    en: "Billing stats",
+    hintAr: "إيراد تقديري ومعدلات التجديد",
+    hintEn: "Estimated revenue and renewal rates",
+  },
+  {
+    id: "accounting",
+    href: "/admin/accounting",
+    group: "platform",
+    ar: "حسابات العملاء",
+    en: "Client accounts",
+    hintAr: "أرصدة المعارض والشركاء والفواتير",
+    hintEn: "Dealer and partner balances and invoices",
+  },
+  {
+    id: "payments",
+    href: "/admin/payments",
+    group: "platform",
+    ar: "المدفوعات والبوابات",
+    en: "Payments",
+    hintAr: "بوابات الدفع والمفاتيح وطرق التحصيل",
+    hintEn: "Payment gateways, keys, and methods",
+  },
+  {
+    id: "delegates",
+    href: "/admin/delegates",
+    group: "platform",
+    ar: "الصلاحيات والتفويض",
+    en: "Permissions",
+    hintAr: "تفويض مديري الموقع وصلاحيات الأقسام",
+    hintEn: "Delegate site admins and section scopes",
+  },
+  {
     id: "catalog",
     href: "/admin/catalog",
     group: "system",
@@ -119,13 +180,13 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     hintEn: "Countries, services, and flags",
   },
   {
-    id: "staff",
-    href: "/admin/staff",
+    id: "settings",
+    href: "/admin/settings",
     group: "system",
-    ar: "الموظفون والصلاحيات",
-    en: "Staff",
-    hintAr: "تفويض مديري الموقع",
-    hintEn: "Site admin delegates",
+    ar: "إعدادات الموقع",
+    en: "Site settings",
+    hintAr: "صيانة، تنبيهات، وصفحات عامة فقط",
+    hintEn: "Maintenance, notices, and public pages only",
   },
   {
     id: "diagnostics",
@@ -135,15 +196,6 @@ export const ADMIN_SECTIONS: AdminSection[] = [
     en: "Diagnostics",
     hintAr: "هوية، بيئة، وصحة البناء",
     hintEn: "Identity, env, and build health",
-  },
-  {
-    id: "settings",
-    href: "/admin/settings",
-    group: "system",
-    ar: "إعدادات الموقع",
-    en: "Settings",
-    hintAr: "صيانة وتنبيهات وصفحات عامة",
-    hintEn: "Maintenance, notices, public pages",
   },
 ];
 
@@ -161,6 +213,9 @@ export function adminNavGrouped() {
 export function adminSectionFromPath(pathname: string) {
   const clean = pathname.split("?")[0].replace(/\/$/, "") || "/admin";
   if (clean === "/admin") return ADMIN_SECTIONS[0];
+  if (clean === "/admin/staff" || clean.startsWith("/admin/staff/")) {
+    return ADMIN_SECTIONS.find((section) => section.id === "delegates") || null;
+  }
   return (
     ADMIN_SECTIONS.find((section) => section.href !== "/admin" && clean.startsWith(section.href)) ||
     ADMIN_SECTIONS.find((section) => section.href === clean) ||

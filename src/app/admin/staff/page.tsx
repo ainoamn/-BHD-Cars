@@ -1,12 +1,8 @@
-import { AdminPendingPage } from "@/components/admin/admin-pending";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminStaffPage() {
-  return (
-    <AdminPendingPage
-      needAr="تفويض مديري الموقع وصلاحيات الأقسام بدل قائمة البريد فقط."
-      needEn="Delegate site admins and section permissions beyond the email allowlist."
-    />
-  );
+/** Legacy path — permissions live under /admin/delegates. */
+export default function AdminStaffRedirectPage() {
+  redirect("/admin/delegates");
 }
