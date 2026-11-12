@@ -3,11 +3,11 @@
 | الحقل | القيمة |
 |---|---|
 | التاريخ | 2026-11-12 |
-| Git SHA | `9b09bb0d5bd5d85224a55adffdb064973f2236d5` |
+| Git SHA | `2b39808ba3835f0059d466772fa58e0942dedeb9` |
 | الفرع | `main` (+ `chore/bhd-001-quality-baseline`) |
 | المستودع | https://github.com/ainoamn/-BHD-Cars |
 | الإنتاج | https://bhd-cars.vercel.app |
-| Inspect | https://vercel.com/bhdom89-8158s-projects/bhd-cars/2ACPfWaEzqYKnYX3b8qrhqtQLjo9 |
+| Inspect | https://vercel.com/bhdom89-8158s-projects/bhd-cars/Hs5iG8E3AzC4XAq2AQfbUaaKhYNR |
 
 ## ماذا دخل الإنتاج
 
