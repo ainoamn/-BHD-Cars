@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { BrandLogo, ModelName } from "@/components/brand-logo";
+import { BrandLogo } from "@/components/brand-logo";
 import { CarCard } from "@/components/car-card";
 import { ModelThumb } from "@/components/model-thumb";
 import { PageHeader } from "@/components/ui";
@@ -45,15 +45,24 @@ function FilterSection({
   );
 }
 
+function parseList(value: string | null) {
+  return [...new Set((value ?? "").split(",").map((item) => item.trim()).filter(Boolean))];
+}
+
 export function CarsBrowser() {
   const params = useSearchParams();
   const { tx, locale } = usePrefs();
 
   const initialMakeLabel = params.get("make") ?? "";
-  const initialMakeId = initialMakeLabel ? makeIdFromLabel(initialMakeLabel) : params.get("makeId");
+  const initialMakeFromLabel = initialMakeLabel ? makeIdFromLabel(initialMakeLabel) : null;
+  const initialMakes = [
+    ...parseList(params.get("makes") ?? params.get("makeId")),
+    ...(initialMakeFromLabel ? [initialMakeFromLabel] : []),
+  ];
+  const initialModels = parseList(params.get("models") ?? params.get("model"));
 
-  const [makeId, setMakeId] = useState(initialMakeId ?? "");
-  const [modelId, setModelId] = useState(params.get("model") ?? "");
+  const [makeIds, setMakeIds] = useState<string[]>([...new Set(initialMakes)]);
+  const [modelIds, setModelIds] = useState<string[]>([...new Set(initialModels)]);
   const [yearFrom, setYearFrom] = useState(params.get("yearFrom") ?? "");
   const [yearTo, setYearTo] = useState(params.get("yearTo") ?? "");
   const [body, setBody] = useState(params.get("body") ?? "");
@@ -62,7 +71,8 @@ export function CarsBrowser() {
   const [query, setQuery] = useState(params.get("q") ?? "");
   const [sort, setSort] = useState("newest");
   const [showAllMakes, setShowAllMakes] = useState(false);
-  const [showAllModels, setShowAllModels] = useState(false);
+  const [modelsExpanded, setModelsExpanded] = useState<Record<string, boolean>>({});
+  const [modelsShowAll, setModelsShowAll] = useState<Record<string, boolean>>({});
   const [open, setOpen] = useState({
     make: true,
     model: true,
@@ -71,8 +81,13 @@ export function CarsBrowser() {
     fuel: true,
   });
 
-  const selectedMake = allMakes.find((item) => item.id === makeId);
-  const makeLabel = selectedMake ? selectedMake.name.en : makeId ? makeLabelFromId(makeId) : "";
+  const selectedMakes = useMemo(
+    () =>
+      makeIds
+        .map((id) => allMakes.find((item) => item.id === id))
+        .filter(Boolean) as typeof allMakes,
+    [makeIds],
+  );
 
   const brandOptions = useMemo(() => {
     const popular = popularMakeIds
@@ -85,22 +100,37 @@ export function CarsBrowser() {
     return popular;
   }, [showAllMakes]);
 
-  const modelOptions = selectedMake?.models ?? [];
-  const visibleModels = showAllModels ? modelOptions : modelOptions.slice(0, 8);
+  const modelGroups = useMemo(
+    () =>
+      selectedMakes.map((make) => ({
+        make,
+        models: make.models.map((model) => ({
+          ...model,
+          makeId: make.id,
+        })),
+      })),
+    [selectedMakes],
+  );
+
+  const modelOptions = useMemo(() => modelGroups.flatMap((group) => group.models), [modelGroups]);
 
   const list = useMemo(() => {
     const filtered = cars.filter((car) => {
-      if (makeLabel && car.make !== makeLabel) {
-        // also allow arabic/alternate matching via catalog
+      if (makeIds.length > 0) {
         const carMakeId = makeIdFromLabel(car.make);
-        if (!carMakeId || carMakeId !== makeId) return false;
+        const matchesMake = makeIds.some((id) => {
+          if (carMakeId && carMakeId === id) return true;
+          const label = makeLabelFromId(id).toLowerCase();
+          return car.make.toLowerCase() === label || car.make.toLowerCase().includes(label);
+        });
+        if (!matchesMake) return false;
       }
-      if (modelId && selectedMake) {
-        const model = selectedMake.models.find((item) => item.id === modelId);
-        if (model) {
-          const hay = `${car.model} ${car.title.en} ${car.title.ar}`.toLowerCase();
-          if (!hay.includes(model.name.en.toLowerCase()) && !hay.includes(model.name.ar)) return false;
-        }
+      if (modelIds.length > 0) {
+        const modelHay = `${car.model} ${car.title.en} ${car.title.ar}`.toLowerCase();
+        const matchesModel = modelOptions
+          .filter((item) => modelIds.includes(item.id) || modelIds.includes(`${item.makeId}:${item.id}`))
+          .some((model) => modelHay.includes(model.name.en.toLowerCase()) || modelHay.includes(model.name.ar));
+        if (!matchesModel) return false;
       }
       if (yearFrom && car.year < Number(yearFrom)) return false;
       if (yearTo && car.year > Number(yearTo)) return false;
@@ -132,34 +162,55 @@ export function CarsBrowser() {
       if (sort === "mileage") return a.mileage - b.mileage;
       return b.year - a.year;
     });
-  }, [makeId, makeLabel, modelId, selectedMake, yearFrom, yearTo, body, fuel, condition, query, sort]);
+  }, [makeIds, modelIds, modelOptions, yearFrom, yearTo, body, fuel, condition, query, sort]);
 
   function clearFilters() {
-    setMakeId("");
-    setModelId("");
+    setMakeIds([]);
+    setModelIds([]);
     setYearFrom("");
     setYearTo("");
     setBody("");
     setFuel("");
     setCondition("");
     setQuery("");
-    setShowAllModels(false);
+    setModelsExpanded({});
+    setModelsShowAll({});
   }
 
   function pickMake(id: string) {
-    if (makeId === id) {
-      setMakeId("");
-      setModelId("");
-      return;
+    const already = makeIds.includes(id);
+    if (already) {
+      const bareIds = new Set((allMakes.find((item) => item.id === id)?.models ?? []).map((model) => model.id));
+      setMakeIds((current) => current.filter((item) => item !== id));
+      setModelIds((models) => models.filter((key) => !key.startsWith(`${id}:`) && !bareIds.has(key)));
+      setModelsExpanded((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      setModelsShowAll((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    } else {
+      setMakeIds((current) => [...current, id]);
+      setModelsExpanded((prev) => ({ ...prev, [id]: true }));
+      setOpen((prev) => ({ ...prev, model: true, year: true }));
     }
-    setMakeId(id);
-    setModelId("");
-    setShowAllModels(false);
-    setOpen((prev) => ({ ...prev, model: true, year: true }));
   }
 
-  function pickModel(id: string) {
-    setModelId((current) => (current === id ? "" : id));
+  function pickModel(makeId: string, id: string) {
+    const key = `${makeId}:${id}`;
+    setModelIds((current) => {
+      if (current.includes(key)) return current.filter((item) => item !== key);
+      // drop legacy bare ids for this model when toggling on
+      return [...current.filter((item) => item !== id), key];
+    });
+  }
+
+  function isMakeModelsOpen(makeId: string) {
+    return modelsExpanded[makeId] !== false;
   }
 
   return (
@@ -168,8 +219,8 @@ export function CarsBrowser() {
         kicker={L("السوق", "The market")}
         title={L("سيارات جاهزة، واضحة، وقابلة للمقارنة.", "Ready cars, clear and comparable.")}
         lead={L(
-          "اختر الوكالة بالشعار الحقيقي، ثم الفئة بالصورة، ثم السنة والهيكل والوقود — بنفس ترتيب كارس.",
-          "Pick a real brand logo, then the model photo, then year, body, and fuel — Cars-style order.",
+          "اختر شركة أو أكثر، ثم الموديلات لكل شركة، ثم السنة والهيكل والوقود.",
+          "Pick one or more makes, then models per make, then year, body, and fuel.",
         )}
         actions={<a href="/sell" className="btn-primary">{tx(L("أضف إعلانك", "Add your listing"))}</a>}
       />
@@ -212,27 +263,30 @@ export function CarsBrowser() {
               />
             </label>
 
-            {/* 1) الشركة — شعارات حقيقية */}
             <FilterSection
               title={tx(L("التصنيع", "Make"))}
               open={open.make}
               onToggle={() => setOpen((prev) => ({ ...prev, make: !prev.make }))}
             >
+              <p className="mb-2 text-[11px] text-muted">{tx(L("يمكنك اختيار أكثر من شركة.", "You can select more than one make."))}</p>
               <div className="grid grid-cols-4 gap-2">
                 {brandOptions.map((item) => {
-                  const active = makeId === item.id;
+                  const active = makeIds.includes(item.id);
                   return (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => pickMake(item.id)}
-                      className={`flex flex-col items-center rounded-xl border bg-white p-1.5 transition ${
+                      className={`relative flex flex-col items-center rounded-xl border bg-white p-1.5 transition ${
                         active ? "border-brass ring-2 ring-brass/30" : "border-line hover:border-brass/40"
                       }`}
                       title={tx(item.name)}
                     >
+                      {active && <span className="absolute end-1 top-1 rounded-full bg-navy px-1 text-[9px] text-ivory">✓</span>}
                       <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="h-10 w-10" />
-                      <span className="mt-1 line-clamp-1 w-full text-center text-[10px] text-muted">{locale === "ar" ? item.name.ar : item.name.en}</span>
+                      <span className="mt-1 line-clamp-1 w-full text-center text-[10px] text-muted">
+                        {locale === "ar" ? item.name.ar : item.name.en}
+                      </span>
                     </button>
                   );
                 })}
@@ -246,63 +300,103 @@ export function CarsBrowser() {
               </button>
             </FilterSection>
 
-            {/* 2) الفئة / الموديل — صور الطراز وليس الأسماء فقط */}
             <FilterSection
-              title={tx(L("الفئة / الموديل", "Category / model"))}
+              title={tx(L("الموديل الفرعي", "Sub-model"))}
               open={open.model}
               onToggle={() => setOpen((prev) => ({ ...prev, model: !prev.model }))}
             >
-              {!selectedMake ? (
+              {selectedMakes.length === 0 ? (
                 <p className="rounded-xl bg-soft/50 px-3 py-4 text-center text-xs text-muted">
-                  {tx(L("اختر شعار الوكالة أولاً لعرض ملصقات الفئات.", "Pick a brand logo first to see category stickers."))}
+                  {tx(L("اختر شركة واحدة أو أكثر أولاً.", "Pick one or more makes first."))}
                 </p>
               ) : (
-                <>
-                  <div className="mb-2 flex items-center gap-2 rounded-xl border border-line bg-soft/40 px-2 py-1.5">
-                    <BrandLogo id={selectedMake.id} mark={selectedMake.mark} name={tx(selectedMake.name)} className="h-8 w-8" />
-                    <ModelName name={selectedMake.name} locale={locale} className="text-xs" />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {visibleModels.map((item) => {
-                      const active = modelId === item.id;
-                      return (
+                <div className="space-y-2">
+                  <p className="text-[11px] text-muted">
+                    {tx(L("موديلات كل شركة منفصلة — يمكنك طي أو توسيع أي قسم.", "Models are grouped by make — expand or collapse each section."))}
+                  </p>
+                  {modelGroups.map(({ make, models }) => {
+                    const groupOpen = isMakeModelsOpen(make.id);
+                    const showAll = Boolean(modelsShowAll[make.id]);
+                    const visible = showAll ? models : models.slice(0, 9);
+                    const selectedCount = models.filter((item) => modelIds.includes(`${make.id}:${item.id}`)).length;
+                    return (
+                      <div key={make.id} className="overflow-hidden rounded-xl border border-line bg-white">
                         <button
-                          key={item.id}
                           type="button"
-                          onClick={() => pickModel(item.id)}
-                          className={`overflow-hidden rounded-xl border bg-white text-center transition ${
-                            active ? "border-brass ring-2 ring-brass/30" : "border-line hover:border-brass/40"
-                          }`}
+                          onClick={() =>
+                            setModelsExpanded((prev) => ({
+                              ...prev,
+                              [make.id]: !(prev[make.id] !== false),
+                            }))
+                          }
+                          className="flex w-full items-center justify-between gap-2 bg-soft/40 px-2.5 py-2 text-start transition hover:bg-soft/70"
                         >
-                          <ModelThumb
-                            src={item.image}
-                            alt={`${item.name.ar} / ${item.name.en}`}
-                            body={item.body}
-                            makeId={selectedMake.id}
-                            modelId={item.id}
-                            className="aspect-[5/4] w-full object-contain p-1"
-                          />
-                          <span className="block truncate border-t border-line/70 px-1 py-1.5 text-[10px] font-medium text-muted">
-                            {locale === "ar" ? item.name.ar : item.name.en}
+                          <span className="inline-flex min-w-0 items-center gap-2">
+                            <BrandLogo id={make.id} mark={make.mark} name={tx(make.name)} className="h-7 w-7 shrink-0" />
+                            <span className="truncate text-xs font-semibold text-night">{tx(make.name)}</span>
+                            <span className="shrink-0 rounded-full bg-paper px-1.5 py-0.5 text-[10px] text-muted">
+                              {selectedCount > 0
+                                ? locale === "ar"
+                                  ? `${selectedCount} مختار`
+                                  : `${selectedCount} selected`
+                                : locale === "ar"
+                                  ? `${models.length} موديل`
+                                  : `${models.length} models`}
+                            </span>
                           </span>
+                          <span className="text-muted">{groupOpen ? "▴" : "▾"}</span>
                         </button>
-                      );
-                    })}
-                  </div>
-                  {modelOptions.length > 8 && (
-                    <button
-                      type="button"
-                      onClick={() => setShowAllModels((value) => !value)}
-                      className="mt-2 w-full rounded-xl border border-line bg-soft/60 py-2 text-xs font-medium text-night hover:bg-soft"
-                    >
-                      {showAllModels ? tx(L("عرض أقل", "Show less")) : tx(L("عرض المزيد", "Show more"))}
-                    </button>
-                  )}
-                </>
+                        {groupOpen && (
+                          <div className="border-t border-line/70 p-2">
+                            <div className="grid grid-cols-3 gap-2">
+                              {visible.map((item) => {
+                                const key = `${item.makeId}:${item.id}`;
+                                const active = modelIds.includes(key);
+                                return (
+                                  <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => pickModel(item.makeId, item.id)}
+                                    className={`relative overflow-hidden rounded-xl border bg-white text-center transition ${
+                                      active ? "border-brass ring-2 ring-brass/30" : "border-line hover:border-brass/40"
+                                    }`}
+                                  >
+                                    {active && (
+                                      <span className="absolute end-1 top-1 z-10 rounded-full bg-navy px-1 text-[9px] text-ivory">✓</span>
+                                    )}
+                                    <ModelThumb
+                                      src={item.image}
+                                      alt={`${item.name.ar} / ${item.name.en}`}
+                                      body={item.body}
+                                      makeId={item.makeId}
+                                      modelId={item.id}
+                                      className="aspect-[5/4] w-full object-contain p-1"
+                                    />
+                                    <span className="block truncate border-t border-line/70 px-1 py-1.5 text-[10px] font-medium text-muted">
+                                      {locale === "ar" ? item.name.ar : item.name.en}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {models.length > 9 && (
+                              <button
+                                type="button"
+                                onClick={() => setModelsShowAll((prev) => ({ ...prev, [make.id]: !prev[make.id] }))}
+                                className="mt-2 w-full rounded-xl border border-line bg-soft/60 py-2 text-xs font-medium text-night hover:bg-soft"
+                              >
+                                {showAll ? tx(L("عرض أقل", "Show less")) : tx(L("عرض المزيد", "Show more"))}
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </FilterSection>
 
-            {/* 3) سنة الصنع */}
             <FilterSection
               title={tx(L("سنة الصنع", "Year"))}
               open={open.year}
@@ -334,7 +428,6 @@ export function CarsBrowser() {
               </div>
             </FilterSection>
 
-            {/* 4) نوع الهيكل */}
             <FilterSection
               title={tx(L("نوع الهيكل", "Body type"))}
               open={open.body}
@@ -348,7 +441,7 @@ export function CarsBrowser() {
                       key={item.id}
                       type="button"
                       onClick={() => setBody((current) => (current === item.id ? "" : item.id))}
-                      className={`overflow-hidden rounded-xl border text-center ${active ? "border-[#1d4ed8] ring-1 ring-[#1d4ed8]/30" : "border-line"}`}
+                      className={`overflow-hidden rounded-xl border text-center ${active ? "border-brass ring-1 ring-brass/30" : "border-line"}`}
                     >
                       <img src={item.image} alt={tx(item.name)} className="aspect-[4/3] w-full object-cover" />
                       <span className="block px-1 py-1.5 text-[11px] font-medium">{tx(item.name)}</span>
@@ -358,7 +451,6 @@ export function CarsBrowser() {
               </div>
             </FilterSection>
 
-            {/* 5) نوع الوقود */}
             <FilterSection
               title={tx(L("نوع الوقود", "Fuel type"))}
               open={open.fuel}
@@ -382,10 +474,15 @@ export function CarsBrowser() {
           <div>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 py-3">
               <div className="flex min-w-0 flex-wrap items-center gap-2">
-                {selectedMake && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-soft px-2 py-1 text-xs">
-                    <BrandLogo id={selectedMake.id} mark={selectedMake.mark} name={tx(selectedMake.name)} className="h-5 w-5" />
-                    {tx(selectedMake.name)}
+                {selectedMakes.map((make) => (
+                  <span key={make.id} className="inline-flex items-center gap-1.5 rounded-full border border-line bg-soft px-2 py-1 text-xs">
+                    <BrandLogo id={make.id} mark={make.mark} name={tx(make.name)} className="h-5 w-5" />
+                    {tx(make.name)}
+                  </span>
+                ))}
+                {modelIds.length > 0 && (
+                  <span className="rounded-full border border-line bg-soft px-2 py-1 text-xs text-muted">
+                    {locale === "ar" ? `${modelIds.length} موديل` : `${modelIds.length} models`}
                   </span>
                 )}
                 <p className="text-sm text-muted">{locale === "ar" ? `${list.length} إعلان` : `${list.length} listings`}</p>
