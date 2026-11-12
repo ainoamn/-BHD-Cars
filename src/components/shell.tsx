@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import BhdProgramsStrip from "@/components/bhd/BhdProgramsStrip";
 import { markets } from "@/lib/data";
 import { usePrefs } from "@/lib/prefs";
 import { useStore } from "@/lib/store";
@@ -57,7 +58,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen">
       <div className="border-b border-line/70 bg-night text-ivory">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-5 py-2 text-xs">
+        <div className="page-wrap flex items-center justify-between gap-3 py-2 text-xs">
           <p className="truncate text-ivory/75">
             {tx(L("منظومة بن حمود · ابنِ أحلامًا أكبر", "Bin Hamood · Build Higher Dreams"))}
           </p>
@@ -89,8 +90,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
+      <BhdProgramsStrip variant="header" />
+
       <header className="sticky top-0 z-40 border-b border-line/80 bg-ivory/90 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-5 py-3">
+        <div className="page-wrap py-3">
           <div className="flex items-center gap-3">
             <Link href="/" className="flex shrink-0 items-center gap-3" onClick={() => setOpen(false)}>
               <img src="/brand/bhd-mark.svg" alt="BHD" className="bhd-mark" />
@@ -158,7 +161,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </div>
 
         {open && (
-          <div className="max-h-[70vh] overflow-y-auto border-t border-line px-5 py-4 lg:hidden">
+          <div className="page-wrap max-h-[70vh] overflow-y-auto border-t border-line py-4 lg:hidden">
             <form onSubmit={search} className="mb-4 flex gap-2">
               <input
                 value={query}
@@ -188,7 +191,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       )}
 
       <footer className="mt-20 bg-night text-ivory">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-4">
+        <div className="page-wrap grid gap-10 py-14 md:grid-cols-5">
           <div>
             <span className="inline-flex rounded-xl bg-paper px-3 py-2">
               <img src="/brand/bhd-mark.svg" alt="BHD" className="bhd-mark" />
@@ -205,8 +208,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <FooterCol title={tx(L("السوق", "Market"))} links={[["/cars", L("السيارات", "Cars")], ["/auctions", L("المزادات", "Auctions")], ["/rental", L("التأجير", "Rental")], ["/plates", L("اللوحات", "Plates")], ["/dealers", L("المعارض", "Houses")]]} />
           <FooterCol title={tx(L("الخدمات", "Services"))} links={[["/valuation", L("التثمين", "Valuation")], ["/finance", L("التمويل", "Finance")], ["/insurance", L("التأمين", "Insurance")], ["/inspection", L("الفحص", "Inspection")], ["/import", L("الاستيراد", "Import")], ["/parts", L("القطع", "Parts")], ["/scrap", L("السكراب", "Scrap")]]} />
           <FooterCol title={tx(L("الشركة", "House"))} links={[["/about", L("عن المنصة", "About")], ["/contact", L("تواصل", "Contact")], ["/requests", L("متابعة الطلب", "Track a request")], ["/reports", L("سجل السيارة", "History")], ["/service", L("الصيانة", "Service")]]} />
+          <BhdProgramsStrip variant="footer" />
         </div>
-        <div className="border-t border-white/10 px-5 py-4 text-center text-xs text-ivory/50">
+        <div className="page-wrap border-t border-white/10 py-4 text-center text-xs text-ivory/50">
           BHD Cars · Bin Hamood Development · {new Date().getFullYear()}
         </div>
       </footer>

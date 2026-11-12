@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
+import { BhdAccountIsolation } from "@/components/bhd/BhdAccountIsolation";
 import { Shell } from "@/components/shell";
 import { PrefsProvider } from "@/lib/prefs";
 import { StoreProvider } from "@/lib/store";
@@ -25,15 +27,23 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover" as const,
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={plex.variable}>
-      <body>
+    <html lang="ar" dir="rtl" className={`${plex.variable} h-full`}>
+      <body className="min-h-full">
+        <BhdAccountIsolation />
         <PrefsProvider>
           <StoreProvider>
             <Shell>{children}</Shell>
           </StoreProvider>
         </PrefsProvider>
+        <Script src="https://id.bhd-om.com/bhd-identity.js" strategy="afterInteractive" />
       </body>
     </html>
   );

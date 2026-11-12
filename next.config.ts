@@ -1,11 +1,30 @@
 import type { NextConfig } from "next";
 
+const IDENTITY_CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://id.bhd-om.com",
+  "connect-src 'self' https://id.bhd-om.com https://*.bhd-om.com https:",
+  "img-src 'self' data: blob: https://id.bhd-om.com https:",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data: https:",
+  "frame-src https://id.bhd-om.com",
+].join("; ");
+
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "id.bhd-om.com" },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [{ key: "Content-Security-Policy", value: IDENTITY_CSP }],
+      },
+    ];
   },
 };
 
