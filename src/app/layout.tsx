@@ -36,6 +36,9 @@ export const viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ar" dir="rtl" className={`${plex.variable} h-full`}>
+      <head>
+        <link rel="stylesheet" href="https://id.bhd-om.com/bhd-launcher.css" />
+      </head>
       <body className="min-h-full">
         <BhdAccountIsolation />
         <PrefsProvider>
@@ -44,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </StoreProvider>
         </PrefsProvider>
         <Script src="https://id.bhd-om.com/bhd-identity.js" strategy="afterInteractive" />
+        <Script src="https://id.bhd-om.com/bhd-launcher.js" strategy="afterInteractive" />
       </body>
     </html>
   );
