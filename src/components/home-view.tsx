@@ -89,7 +89,7 @@ export function HomeView() {
         <div className="absolute inset-0 bg-gradient-to-t from-night/90 via-night/55 to-night/25" />
         <div className="absolute inset-0 bg-gradient-to-l from-night/70 via-transparent to-transparent md:from-night/75" />
 
-        <div className="relative mx-auto flex min-h-[78vh] max-w-6xl flex-col justify-end px-5 pb-10 pt-24 md:justify-center md:pb-16 md:pt-20">
+        <div className="relative page-wrap flex min-h-[78vh] flex-col justify-end pb-10 pt-24 md:justify-center md:pb-16 md:pt-20">
           <div className="max-w-2xl text-ivory">
             <p className="text-xs font-semibold tracking-[0.18em] text-brass">
               {tx(L("BHD CARS · عُمان والخليج", "BHD CARS · Oman & the Gulf"))}
@@ -139,7 +139,7 @@ export function HomeView() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-12">
+      <section className="page-wrap py-12">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="eyebrow">{tx(L("تصفّح سريع", "Quick browse"))}</p>
@@ -167,7 +167,7 @@ export function HomeView() {
       </section>
 
       <section className="border-y border-line bg-paper/70">
-        <div className="mx-auto grid max-w-6xl gap-4 px-5 py-10 md:grid-cols-4">
+        <div className="page-wrap grid gap-4 py-10 md:grid-cols-4">
           {services.map((service) => (
             <Link key={service.href} href={service.href} className="rounded-2xl border border-line bg-ivory px-4 py-5 transition hover:border-brass/40 hover:bg-soft">
               <h3 className="text-base font-semibold text-night">{tx(service.title)}</h3>
@@ -177,7 +177,7 @@ export function HomeView() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 py-12">
+      <section className="page-wrap py-12">
         <div className="mb-6 flex items-end justify-between gap-4">
           <div>
             <p className="eyebrow">{tx(L("مختارة الآن", "Selected now"))}</p>
@@ -190,7 +190,7 @@ export function HomeView() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 pb-14">
+      <section className="page-wrap pb-14">
         <Link href={`/auctions/${live.slug}`} className="surface-card surface-card-hover grid overflow-hidden md:grid-cols-[1.2fr_0.8fr]">
           <div className="relative min-h-[240px]">
             <Photo src={live.image} alt={tx(live.title)} className="absolute inset-0 h-full w-full" />

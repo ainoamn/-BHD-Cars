@@ -14,7 +14,7 @@ export default function Page() {
   return (
     <div>
       <PageHeader kicker={L("المعارض", "Houses")} title={L("معارض موثّقة، لا حسابات مجهولة.", "Verified houses, not anonymous accounts.")} lead={L("المعرض الموثّق يظهر باسمه وتاريخه. الإعلان الفردي يبقى فردياً.", "A verified house appears under its name and its history. A private listing stays private.")} />
-      <div className="mx-auto grid max-w-6xl gap-5 px-5 py-10 md:grid-cols-2">
+      <div className="page-wrap grid gap-5 px-5 py-10 md:grid-cols-2">
         {houses.map((house) => (
           <Link key={house.slug} href={`/dealers/${house.slug}`} className="surface-card surface-card-hover p-6">
             <p className="text-xs font-medium text-brass">{tx(L("موثّق", "Verified"))} · {house.since}</p>

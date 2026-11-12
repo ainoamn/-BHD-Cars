@@ -22,7 +22,7 @@ export function PageHeader({
   const { tx } = usePrefs();
   return (
     <header className="border-b border-line/80 bg-paper/70 backdrop-blur">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 md:flex-row md:items-end md:justify-between md:py-12">
+      <div className="page-wrap flex flex-col gap-6 py-10 md:flex-row md:items-end md:justify-between md:py-12">
         <div className="max-w-3xl">
           <p className="eyebrow">{tx(kicker)}</p>
           <h1 className="section-title mt-3">{tx(title)}</h1>

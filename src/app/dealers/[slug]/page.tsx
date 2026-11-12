@@ -18,7 +18,7 @@ export default function Page() {
   return (
     <div>
       <PageHeader kicker={L("معرض", "House")} title={{ ar: house.name, en: house.name }} lead={house.about} />
-      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12 sm:grid-cols-2">
+      <div className="page-wrap grid gap-8 py-12 sm:grid-cols-2">
         {list.map((car) => <CarCard key={car.slug} car={car} />)}
       </div>
     </div>

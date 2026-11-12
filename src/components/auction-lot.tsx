@@ -40,7 +40,7 @@ export function AuctionLot({ slug }: { slug: string }) {
   return (
     <div>
       <PageHeader kicker={L("لوت مفتوح", "Open lot")} title={auction.title} lead={auction.note} />
-      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-10 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="page-wrap grid gap-6 px-5 py-10 lg:grid-cols-[1.2fr_0.8fr]">
         <div>
           <div className="surface-card overflow-hidden">
             <Photo src={auction.image} alt={tx(auction.title)} className="aspect-[16/10] w-full" />

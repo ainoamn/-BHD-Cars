@@ -18,7 +18,7 @@ export default function Page() {
   return (
     <div>
       <PageHeader kicker={L("تواصل", "Contact")} title={L("مكتب واحد، لا رقم يضيع في الإعلان.", "One desk, not a number lost on a listing.")} lead={L("مسقط · رد خلال يوم عمل على طلبات الشراكة والمعارض.", "Muscat · partnership and showroom notes are answered within a working day.")} />
-      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-10 md:grid-cols-2">
+      <div className="page-wrap grid gap-6 px-5 py-10 md:grid-cols-2">
         <div className="surface-card p-6 text-sm leading-relaxed">
           <p className="eyebrow">{tx(L("المكتب", "The desk"))}</p>
           <p className="mt-4 text-lg font-semibold text-night">hello@bhdcars.example</p>

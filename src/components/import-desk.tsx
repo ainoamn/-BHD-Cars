@@ -39,7 +39,7 @@ export function ImportDesk() {
         title={L("اطلب سيارة، أو اشترِ حادثاً معلناً.", "Order a car, or buy a declared salvage.")}
         lead={L("مكتب واحد للمصدر والشحن والجمارك، وقسم منفصل لسيارات الحوادث حتى لا تختلط بالجاهز.", "One desk for source, freight, and duty, and a separate section for accident cars so they do not mix with ready stock.")}
       />
-      <div className="mx-auto max-w-6xl px-5 py-10">
+      <div className="page-wrap py-10">
         <div className="mb-8 flex flex-wrap gap-2">
           <button type="button" className={tab === "order" ? "chip chip-active" : "chip"} onClick={() => setTab("order")}>
             {tx(L("طلب استيراد", "Order an import"))}

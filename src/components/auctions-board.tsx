@@ -71,7 +71,7 @@ export function AuctionsBoard() {
         title={L("المزايدة علنية، والخطوة معلنة.", "The bidding is public, and the step is stated.")}
         lead={L("كل لوت يعرض أعلى مزايدة وعمولة المشتري 2.5٪ بعد المطرقة. الترسية يؤكدها مكتب المزاد.", "Each lot shows the high bid and a 2.5% buyer's premium after the hammer. The desk confirms the award.")}
       />
-      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-12">
+      <div className="page-wrap grid gap-8 px-5 py-12">
         {auctions.map((auction) => <LotRow key={auction.slug} auction={auction} />)}
         <DemoNote />
       </div>

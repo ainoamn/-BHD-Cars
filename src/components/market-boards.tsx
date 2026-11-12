@@ -17,7 +17,7 @@ export function RentalBoard() {
         title={L("السعر يشمل التأمين وسقف الكيلومترات.", "The price includes cover and a mileage cap.")}
         lead={L("يومي أو أسبوعي أو شهري، من شركات معلنة، مع توصيل حيث هو مكتوب.", "Daily, weekly, or monthly, from named companies, with delivery where it is written.")}
       />
-      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-10 md:grid-cols-2">
+      <div className="page-wrap grid gap-6 px-5 py-10 md:grid-cols-2">
         {rentals.map((car) => <RentalCard key={car.slug} car={car} />)}
       </div>
     </div>
@@ -95,7 +95,7 @@ export function PartsBoard() {
   return (
     <div>
       <PageHeader kicker={L("قطع الغيار", "Parts")} title={L("قطعة مطابقة للهيكل.", "A part matched to the VIN.")} lead={L("جديد ومستعمل، مع طلب حر إذا لم تجد القطعة في القائمة.", "New and used, with a free request if the part is not on the list.")} />
-      <div className="mx-auto max-w-6xl px-5 py-10">
+      <div className="page-wrap py-10">
         <div className="grid gap-5 md:grid-cols-3">
           {parts.map((part) => (
             <article key={part.slug} className="surface-card surface-card-hover overflow-hidden">
@@ -145,7 +145,7 @@ export function ScrapBoard() {
   return (
     <div>
       <PageHeader kicker={L("السكراب", "Scrap")} title={L("سيارة انتهت، بسعر وزن واضح.", "A car at the end of its life, at a stated weight price.")} lead={L("استلام من البيت حيث هو متاح، وشهادة إسقاط مع العملية.", "Home collection where it is offered, and a deregistration note with the job.")} />
-      <div className="mx-auto grid max-w-6xl gap-5 px-5 py-10 md:grid-cols-3">
+      <div className="page-wrap grid gap-5 px-5 py-10 md:grid-cols-3">
         {yards.map((yard) => (
           <article key={yard.slug} className="surface-card p-5">
             <h2 className="text-xl font-bold text-night">{tx(yard.name)}</h2>
@@ -177,7 +177,7 @@ export function PlatesBoard() {
   return (
     <div>
       <PageHeader kicker={L("اللوحات", "Plates")} title={L("رقم مميز، بمعاملة نقل واضحة.", "A distinctive number, with a clear transfer.")} />
-      <div className="mx-auto grid max-w-6xl gap-3 px-5 py-10">
+      <div className="page-wrap grid gap-3 px-5 py-10">
         {plates.map((plate) => (
           <article key={plate.slug} className="surface-card flex flex-wrap items-center justify-between gap-4 px-5 py-4">
             <div>

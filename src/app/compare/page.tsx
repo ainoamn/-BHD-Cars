@@ -18,7 +18,7 @@ export default function Page() {
   return (
     <div>
       <PageHeader kicker={L("المقارنة", "Compare")} title={L("ثلاث سيارات، صف واحد.", "Three cars, one row.")} lead={L("أضف من بطاقة السيارة. المقارنة تحفظ في هذا المتصفح.", "Add from a car card. The comparison stays in this browser.")} />
-      <div className="mx-auto max-w-6xl px-5 py-10">
+      <div className="page-wrap py-10">
         {selected.length === 0 ? (
           <div className="surface-card px-6 py-16 text-center">
             <p className="text-lg font-semibold text-night">{tx(L("لم تضف سيارات بعد.", "No cars added yet."))}</p>

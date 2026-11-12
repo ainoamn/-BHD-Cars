@@ -174,7 +174,7 @@ export function CarsBrowser() {
         actions={<a href="/sell" className="btn-primary">{tx(L("أضف إعلانك", "Add your listing"))}</a>}
       />
 
-      <div className="mx-auto max-w-6xl px-5 py-8">
+      <div className="market-shell">
         <div className="mb-5 flex flex-wrap gap-2">
           {[
             { id: "", label: tx(L("الكل", "All")) },
@@ -193,7 +193,7 @@ export function CarsBrowser() {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+        <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)] lg:grid-cols-[280px_minmax(0,1fr)]">
           <aside className="surface-card h-fit space-y-1 p-4 lg:sticky lg:top-28">
             <div className="mb-2 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-night">{tx(L("تصفية النتائج", "Filter results"))}</h2>
@@ -410,7 +410,7 @@ export function CarsBrowser() {
                 </button>
               </div>
             ) : (
-              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="cars-grid">
                 {list.map((car) => (
                   <CarCard key={car.slug} car={car} />
                 ))}

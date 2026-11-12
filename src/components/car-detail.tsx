@@ -28,7 +28,7 @@ export function CarDetail({ slug }: { slug: string }) {
   const [tab, setTab] = useState<"overview" | "services">("overview");
 
   if (!car) {
-    return <p className="mx-auto max-w-6xl px-5 py-20 text-muted">{tx(L("هذا الإعلان غير موجود.", "This listing is not here."))}</p>;
+    return <p className="page-wrap py-20 text-muted">{tx(L("هذا الإعلان غير موجود.", "This listing is not here."))}</p>;
   }
 
   const seller = sellerBySlug(car.seller);
@@ -46,7 +46,7 @@ export function CarDetail({ slug }: { slug: string }) {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-5 py-8">
+    <div className="page-wrap py-8">
       <p className="text-xs text-muted">
         <Link href="/cars" className="hover:text-brass">{tx(L("السيارات", "Cars"))}</Link>
         <span className="px-2">/</span>
