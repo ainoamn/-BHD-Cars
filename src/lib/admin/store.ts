@@ -74,9 +74,13 @@ export async function saveSiteSetting(key: string, value: unknown, updatedBy: st
 
 export async function listListingControls() {
   if (!databaseConfigured()) return [] as Array<{ slug: string; status: string; notes: string }>;
-  return query<{ slug: string; status: string; notes: string }>`
-    SELECT slug, status, notes FROM listing_controls ORDER BY slug
-  `;
+  try {
+    return await query<{ slug: string; status: string; notes: string }>`
+      SELECT slug, status, notes FROM listing_controls ORDER BY slug
+    `;
+  } catch {
+    return [];
+  }
 }
 
 export async function upsertListingControl(input: {

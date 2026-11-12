@@ -7,7 +7,9 @@ export function databaseConfigured() {
 }
 
 export function getSql() {
-  const url = process.env.DATABASE_URL?.trim();
+  let url = process.env.DATABASE_URL?.trim().replace(/^["']|["']$/g, "") || "";
+  // Guard against accidental KEY=value pastes into the env value itself.
+  if (url.startsWith("DATABASE_URL=")) url = url.slice("DATABASE_URL=".length).trim();
   if (!url) throw new Error("DATABASE_URL is not configured");
   if (!sql) sql = neon(url);
   return sql;

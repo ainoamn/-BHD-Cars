@@ -8,6 +8,7 @@ export type AdminAccess = {
 
 function parseList(raw: string | undefined) {
   return (raw ?? "")
+    .replace(/\r/g, "")
     .split(/[,;\s]+/)
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
