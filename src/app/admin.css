@@ -1,0 +1,427 @@
+/* BHD Cars site-admin console — patterned after BHD R /admin chrome */
+
+body:has(.site-admin-shell) {
+  overflow: hidden;
+}
+
+.site-admin-shell {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 65% 50% at 100% -10%, rgb(8 163 159 / 0.14), transparent 55%),
+    linear-gradient(160deg, #edf3f2 0%, #e4eceb 55%, #dfe8e7 100%);
+  color: #092d24;
+  font-family: var(--font-sans);
+}
+
+.site-admin-frame {
+  display: grid;
+  grid-template-columns: minmax(15rem, 17.5rem) minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+}
+
+.site-admin-nav {
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  height: 100%;
+  max-height: 100dvh;
+  padding: 1.25rem 0.85rem 1.35rem;
+  color: #e8f2f1;
+  background:
+    radial-gradient(ellipse 90% 55% at 0% 0%, rgb(8 163 159 / 0.28), transparent 55%),
+    linear-gradient(185deg, #0f3a52 0%, #12324a 48%, #0c283a 100%);
+  overflow-y: auto;
+}
+
+.site-admin-nav__brand {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "mark copy"
+    "role role";
+  gap: 0.4rem 0.7rem;
+  align-items: center;
+  padding: 0.45rem 0.5rem 0.85rem;
+  border-bottom: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.site-admin-nav__mark {
+  grid-area: mark;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.6rem;
+  background: linear-gradient(145deg, #2dd4bf, #08a39f 45%, #174b70);
+  box-shadow: 0 0 0 3px rgb(45 212 191 / 0.18);
+}
+
+.site-admin-nav__brand-copy {
+  grid-area: copy;
+  min-width: 0;
+}
+
+.site-admin-nav__product {
+  margin: 0;
+  color: #7dd3c7;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.site-admin-nav__title {
+  margin: 0.1rem 0 0;
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.site-admin-nav__role {
+  grid-area: role;
+  justify-self: start;
+  margin-top: 0.25rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  color: #06251f;
+  background: linear-gradient(135deg, #5eead4, #2dd4bf);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.site-admin-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 1;
+}
+
+.site-admin-nav__group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.site-admin-nav__group-label {
+  margin: 0 0 0.25rem;
+  padding: 0 0.65rem;
+  color: rgb(255 255 255 / 0.45);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.site-admin-nav__list a {
+  display: block;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.7rem;
+  color: rgb(255 255 255 / 0.82);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.site-admin-nav__list a:hover {
+  background: rgb(255 255 255 / 0.08);
+  color: #fff;
+}
+
+.site-admin-nav__list a.is-current {
+  background: rgb(8 163 159 / 0.22);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgb(94 234 212 / 0.28);
+}
+
+.site-admin-nav__account {
+  margin-top: auto;
+  padding: 0.85rem 0.7rem 0.2rem;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+}
+
+.site-admin-nav__account-name {
+  margin: 0;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.site-admin-nav__account-email {
+  margin: 0.2rem 0 0;
+  color: rgb(255 255 255 / 0.55);
+  font-size: 0.72rem;
+  direction: ltr;
+  text-align: start;
+}
+
+.site-admin-nav__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.7rem;
+}
+
+.site-admin-nav__links a {
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  color: rgb(255 255 255 / 0.8);
+  font-size: 0.7rem;
+  text-decoration: none;
+}
+
+.site-admin-main {
+  min-width: 0;
+  height: 100%;
+  overflow: auto;
+  padding: 1.25rem 1.35rem 2rem;
+}
+
+.admin-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-page-head h1 {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.admin-page-head p {
+  margin: 0;
+  color: #5f736c;
+  font-size: 0.9rem;
+}
+
+.admin-eyebrow {
+  margin: 0;
+  color: #08a39f;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.admin-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+}
+
+.admin-card {
+  background: #fff;
+  border: 1px solid #dde8e3;
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 10px 30px rgb(9 45 36 / 0.05);
+}
+
+.admin-card__label {
+  margin: 0;
+  color: #5f736c;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.admin-card__value {
+  margin: 0.35rem 0 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.admin-card__hint {
+  margin: 0.35rem 0 0;
+  color: #5f736c;
+  font-size: 0.75rem;
+}
+
+.admin-panel {
+  background: #fff;
+  border: 1px solid #dde8e3;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgb(9 45 36 / 0.05);
+}
+
+.admin-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid #dde8e3;
+  background: #f7faf9;
+}
+
+.admin-panel__head h2 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #e8efec;
+  text-align: start;
+  vertical-align: top;
+}
+
+.admin-table th {
+  color: #5f736c;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: #fbfaf7;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.admin-badge--ready {
+  background: #dff5ef;
+  color: #0f5c4c;
+}
+
+.admin-badge--warn {
+  background: #fff4df;
+  color: #8a5a00;
+}
+
+.admin-badge--muted {
+  background: #eef2f1;
+  color: #5f736c;
+}
+
+.admin-badge--danger {
+  background: #fde8e8;
+  color: #8a2f2f;
+}
+
+.admin-banner {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.9rem;
+  border: 1px solid #f0d9a8;
+  background: #fff8ea;
+  color: #6b4e12;
+  font-size: 0.85rem;
+}
+
+.admin-banner--info {
+  border-color: #b7d7e8;
+  background: #eef7fb;
+  color: #174b70;
+}
+
+.admin-empty {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: #5f736c;
+  font-size: 0.9rem;
+}
+
+.admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.admin-actions a,
+.admin-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.7rem;
+  border: 1px solid #dde8e3;
+  background: #fff;
+  color: #092d24;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.admin-actions a.primary,
+.admin-actions button.primary {
+  border-color: #092d24;
+  background: #092d24;
+  color: #fbfaf7;
+}
+
+.admin-gate {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  background:
+    radial-gradient(ellipse 65% 50% at 100% -10%, rgb(8 163 159 / 0.14), transparent 55%),
+    linear-gradient(160deg, #edf3f2 0%, #e4eceb 55%, #dfe8e7 100%);
+}
+
+.admin-gate__card {
+  width: min(420px, 100%);
+  padding: 1.5rem;
+  border-radius: 1.1rem;
+  border: 1px solid #dde8e3;
+  background: #fff;
+  box-shadow: 0 18px 40px rgb(9 45 36 / 0.08);
+  text-align: center;
+}
+
+.admin-gate__card h1 {
+  margin: 0.5rem 0 0;
+  font-size: 1.35rem;
+}
+
+.admin-gate__card p {
+  margin: 0.65rem 0 0;
+  color: #5f736c;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 920px) {
+  .site-admin-frame {
+    grid-template-columns: 1fr;
+  }
+
+  .site-admin-nav {
+    max-height: none;
+    height: auto;
+    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  }
+
+  .site-admin-shell {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+
+  body:has(.site-admin-shell) {
+    overflow: auto;
+  }
+}
