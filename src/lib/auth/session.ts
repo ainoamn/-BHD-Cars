@@ -61,9 +61,14 @@ export async function readSessionToken(token: string): Promise<ProductSession | 
   }
 }
 
-/** TODO: upsert user in your database and return ProductSession. */
+/** Upsert identity into platform accounts and accept pending org invites. */
 export async function upsertUserFromIdentity(profile: ProductSession): Promise<ProductSession> {
-  void profile;
-  // Replace with Prisma/Drizzle upsert keyed by profile.sub
+  try {
+    const { acceptInvitationsForUser, syncPlatformAccount } = await import("@/lib/portal/store");
+    await syncPlatformAccount(profile);
+    await acceptInvitationsForUser(profile);
+  } catch {
+    // DB may be unavailable during early bootstrap — session still issues.
+  }
   return profile;
 }

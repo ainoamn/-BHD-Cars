@@ -119,6 +119,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
             <div className="ms-auto flex items-center gap-2 md:ms-0">
               <div data-bhd-launcher data-locale={locale === "ar" ? "ar" : "en"} />
+              <Link href="/portal" className="btn-secondary hidden px-3 py-2 text-xs sm:inline-flex">
+                {tx(L("حسابي", "My account"))}
+              </Link>
               <Link href="/requests" className="btn-secondary hidden px-3 py-2 text-xs sm:inline-flex">
                 {tx(L("طلباتي", "Requests"))}
                 {requests.length > 0 ? ` (${requests.length})` : ""}
