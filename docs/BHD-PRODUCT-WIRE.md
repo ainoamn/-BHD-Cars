@@ -15,6 +15,8 @@
 | كتالوج | `src/lib/bhd/catalog.ts` ← `GET /api/bhd/catalog` |
 | OAuth start / callback / logout / rebind | `src/app/api/auth/bhd/*` |
 | جلسة المنتج | `src/lib/auth/session.ts` + `src/app/api/auth/me` |
+| تحكم الموقع | `/admin` · `src/lib/admin/*` · Neon |
+| لوحة المستخدم / المعرض | `/portal` · `/account` · `/workspace` · `src/lib/portal/*` |
 | CSP | `next.config.ts` يسمح بـ `id.bhd-om.com` |
 
 ## هوية العميل
