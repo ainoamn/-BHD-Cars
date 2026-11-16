@@ -59,13 +59,17 @@ node scripts/enrich-model-images-pass2.js
 
 بيانات الأسماء: `scripts/model-catalog-data.js`.
 
-## مسارات البيع
+## مسارات العرض (BHD-003)
 
 | المسار | الوصف |
 |--------|--------|
-| `/sell` | مركز البيع |
-| `/sell/ready` | معالج إعلان سيارة جاهزة |
-| `/sell/accident` | معالج إعلان سيارة متضررة مع بوابة شفافية الضرر |
+| `/sell` | اختيار المسار + مساعد اقتراح بالجملة |
+| `/sell/cars-sale` | فرع سيارات: جاهزة أو حادث معلن |
+| `/sell/ready` | معالج سيارة جاهزة (حقول كاملة) |
+| `/sell/accident` | معالج حادث معلن مع شفافية الضرر |
+| `/sell/[section]` | مسارات التأجير، التفكيك، الدراجات، المعدات، الشاحنات، القوارب، اللوحات، الإطارات، القطع، الزيوت، الإضافات |
+
+التوثيق: [`docs/implementation/BHD-003.md`](docs/implementation/BHD-003.md) · الإصدار: [`docs/implementation/RELEASE-BHD-003.md`](docs/implementation/RELEASE-BHD-003.md)
 
 ## النشر
 
