@@ -74,7 +74,7 @@ export function estimateMarketOmr(input: {
   year: number;
   mileage: number;
   body: string;
-  origin: "gcc" | "import";
+  origin: string;
 }) {
   const baseByMake: Record<string, number> = {
     toyota: 9000,
@@ -94,7 +94,8 @@ export function estimateMarketOmr(input: {
   const age = Math.max(0, 2026 - input.year);
   const ageHit = age * 480;
   const mileHit = Math.floor(input.mileage / 10000) * 280;
-  const originHit = input.origin === "import" ? -700 : 400;
+  const gccLike = input.origin === "gcc" || input.origin === "agency";
+  const originHit = gccLike ? 400 : -700;
   const raw = (baseByMake[input.makeId] ?? 8000) + (bodyBoost[input.body] ?? 0) - ageHit - mileHit + originHit;
   return Math.max(1200, Math.round(raw / 50) * 50);
 }
@@ -140,7 +141,7 @@ export function estimateAccidentOmr(input: {
   year: number;
   mileage: number;
   body: string;
-  origin: "gcc" | "import";
+  origin: string;
   severity: string;
   zones: string[];
   repair: string;
