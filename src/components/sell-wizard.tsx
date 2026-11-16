@@ -38,6 +38,7 @@ const STEPS = [
   L("اللون الخارجي", "Exterior"),
   L("اللون الداخلي", "Interior"),
   L("المفاتيح", "Keys"),
+  L("رقم الشاصي", "VIN"),
   L("الصور", "Photos"),
   L("السعر والنشر", "Price & publish"),
 ] as const;
@@ -203,8 +204,9 @@ export function SellWizard() {
     if (step === 11) return Boolean(draft.exterior);
     if (step === 12) return Boolean(draft.interior);
     if (step === 13) return Boolean(draft.keys);
-    if (step === 14) return draft.photos.length > 0;
-    if (step === 15) return Boolean(draft.price && draft.city);
+    if (step === 14) return true; // VIN optional — can skip
+    if (step === 15) return draft.photos.length > 0;
+    if (step === 16) return Boolean(draft.price && draft.city);
     return false;
   }
 
@@ -240,7 +242,7 @@ export function SellWizard() {
     const nextPhotos = [...draft.photos, ...urls].slice(0, 12);
     patch({ photos: nextPhotos });
     if (draft.photos.length === 0 && nextPhotos.length > 0) {
-      window.setTimeout(() => go(15), 180);
+      window.setTimeout(() => go(16), 180);
     }
   }
 
@@ -408,30 +410,6 @@ export function SellWizard() {
                     {year}
                   </Chip>
                 ))}
-              </div>
-              <div className="rounded-2xl border border-dashed border-line bg-soft/40 p-4">
-                <label className="flex items-center gap-2 text-sm">
-                  <input
-                    type="checkbox"
-                    checked={draft.showVin}
-                    onChange={(event) => patch({ showVin: event.target.checked })}
-                    className="accent-[var(--color-brass)]"
-                  />
-                  {tx(L("إضافة رقم الشاصي (اختياري)", "Add VIN (optional)"))}
-                </label>
-                {draft.showVin && (
-                  <div className="mt-3 flex gap-2">
-                    <input
-                      className="field"
-                      value={draft.vin}
-                      onChange={(event) => patch({ vin: event.target.value.toUpperCase() })}
-                      placeholder="WDB..."
-                    />
-                    <button type="button" className="btn-secondary shrink-0" onClick={decodeVin}>
-                      {tx(L("فك الرمز", "Decode"))}
-                    </button>
-                  </div>
-                )}
               </div>
             </Question>
           )}
@@ -604,6 +582,42 @@ export function SellWizard() {
 
           {step === 14 && (
             <Question
+              title={tx(L("رقم الشاصي", "Chassis / VIN"))}
+              lead={tx(L("اختياري — يسرّع المراجعة. يمكنك التخطي والمتابعة.", "Optional — speeds review. You can skip and continue."))}
+            >
+              <label className="block space-y-2">
+                <span className="block text-sm font-medium text-night">{tx(L("رقم الشاصي", "VIN"))}</span>
+                <input
+                  className="field"
+                  value={draft.vin}
+                  onChange={(event) => patch({ vin: event.target.value.toUpperCase(), showVin: true })}
+                  placeholder="WDB..."
+                  autoComplete="off"
+                />
+              </label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={!draft.vin.trim()}
+                  onClick={() => {
+                    decodeVin();
+                    window.setTimeout(() => go(15), 120);
+                  }}
+                >
+                  {tx(L("فك الرمز والمتابعة", "Decode & continue"))}
+                </button>
+                <button type="button" className="btn-primary" onClick={() => go(15)}>
+                  {draft.vin.trim()
+                    ? tx(L("حفظ والمتابعة", "Save & continue"))
+                    : tx(L("تخطي", "Skip"))}
+                </button>
+              </div>
+            </Question>
+          )}
+
+          {step === 15 && (
+            <Question
               title={`${tx(L("إضافة صور", "Add photos"))} (${draft.photos.length}/12)`}
               lead={tx(L("أول صورة تصبح الغلاف. بعد إضافة صورة تنتقل للسعر تلقائيًا.", "The first photo becomes the cover. After adding one, you move to pricing."))}
             >
@@ -641,7 +655,7 @@ export function SellWizard() {
             </Question>
           )}
 
-          {step === 15 && (
+          {step === 16 && (
             <Question
               title={tx(L("السعر والمنطقة والنشر", "Price, area, and publish"))}
               lead={tx(L("آخر خطوة — راجع المعاينة ثم أنشئ الإعلان.", "Last step — check the preview, then create the listing."))}
