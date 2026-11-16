@@ -19,73 +19,63 @@ export default async function PortalChooserPage() {
   const orgs = memberships.filter((row) => row.status === "active");
 
   return (
-    <div className="admin-gate">
-      <div className="admin-gate__card" style={{ width: "min(560px, 100%)", textAlign: "start" }}>
-        <p className="admin-eyebrow" style={{ textAlign: "center" }}>
-          Bin Hamood · Portal
-        </p>
-        <h1 style={{ textAlign: "center" }}>{ar ? "اختر مساحة التحكم" : "Choose your control space"}</h1>
-        <p style={{ textAlign: "center" }}>
+    <div className="portal-entrance portal-entrance--chooser">
+      <div className="portal-entrance__stage">
+        <img className="portal-entrance__mark" src="/brand/bhd-mark.svg" alt="BHD" />
+        <p className="portal-entrance__house">Bin Hamood</p>
+        <p className="portal-entrance__product">BHD Cars</p>
+        <span className="portal-entrance__rule" aria-hidden />
+        <h1>{ar ? "اختر مساحة التحكم" : "Choose your control space"}</h1>
+        <p className="portal-entrance__lead">
           {ar ? `مرحبًا ${session.name}` : `Welcome ${session.name}`}
         </p>
 
-        <div className="admin-panel" style={{ marginTop: "1.25rem" }}>
-          <div className="admin-panel__head">
+        <div className="portal-rooms">
+          <section className="portal-room">
+            <p className="portal-room__kicker">{ar ? "شخصي" : "Personal"}</p>
             <h2>{ar ? "حساب المستخدم" : "Personal account"}</h2>
-          </div>
-          <div style={{ padding: "1rem" }}>
-            <p className="admin-card__hint">
+            <p className="portal-room__lead">
               {ar
                 ? "مركباتك الشخصية وطلباتك فقط — معزولة عن بيانات المعارض."
                 : "Your personal vehicles and requests only — isolated from dealer data."}
             </p>
-            <div className="admin-actions" style={{ marginTop: "0.85rem" }}>
-              <Link className="primary" href="/account">
+            <div className="portal-room__foot">
+              <Link className="portal-room__link" href="/account">
                 {ar ? "فتح لوحة المستخدم" : "Open user desk"}
               </Link>
             </div>
-          </div>
-        </div>
+          </section>
 
-        <div className="admin-panel" style={{ marginTop: "1rem" }}>
-          <div className="admin-panel__head">
+          <section className="portal-room">
+            <p className="portal-room__kicker">{ar ? "معرض" : "House"}</p>
             <h2>{ar ? "المعارض والشركات" : "Dealers & companies"}</h2>
-          </div>
-          {orgs.length === 0 ? (
-            <div className="admin-empty">
-              {ar
-                ? "لست عضوًا في أي معرض بعد. اطلب دعوة من المالك."
-                : "You are not a member of any dealership yet. Ask an owner for an invite."}
-            </div>
-          ) : (
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>{ar ? "المنشأة" : "Organization"}</th>
-                  <th>{ar ? "الدور" : "Role"}</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
+            {orgs.length === 0 ? (
+              <p className="portal-room__empty">
+                {ar
+                  ? "لست عضوًا في أي معرض بعد. اطلب دعوة من المالك."
+                  : "You are not a member of any dealership yet. Ask an owner for an invite."}
+              </p>
+            ) : (
+              <div className="portal-orgs">
                 {orgs.map((org) => (
-                  <tr key={org.org_id}>
-                    <td>
+                  <div className="portal-org" key={org.org_id}>
+                    <div>
                       <strong>{ar ? org.org_name_ar : org.org_name_en}</strong>
-                      <div style={{ color: "#5f736c", fontSize: "0.72rem" }}>{org.org_kind}</div>
-                    </td>
-                    <td>{org.role}</td>
-                    <td>
-                      <SwitchOrgButton
-                        orgId={org.org_id}
-                        label={ar ? "دخول" : "Enter"}
-                        next="/workspace"
-                      />
-                    </td>
-                  </tr>
+                      <span>
+                        {org.org_kind} · {org.role}
+                      </span>
+                    </div>
+                    <SwitchOrgButton
+                      night
+                      orgId={org.org_id}
+                      label={ar ? "دخول" : "Enter"}
+                      next="/workspace"
+                    />
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          )}
+              </div>
+            )}
+          </section>
         </div>
       </div>
     </div>

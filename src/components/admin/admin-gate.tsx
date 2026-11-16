@@ -38,21 +38,27 @@ export function AdminGate({
     },
   }[reason];
 
+  const market = ar ? "العودة للسوق" : "Back to market";
+
   return (
-    <div className="admin-gate">
-      <div className="admin-gate__card">
-        <p className="admin-eyebrow">Bin Hamood · Site Control</p>
+    <div className="portal-entrance">
+      <div className="portal-entrance__stage">
+        <img className="portal-entrance__mark" src="/brand/bhd-mark.svg" alt="BHD" />
+        <p className="portal-entrance__house">Bin Hamood</p>
+        <p className="portal-entrance__product">Site Control</p>
+        <span className="portal-entrance__rule" aria-hidden />
         <h1>{copy.title}</h1>
-        <p>{copy.body}</p>
-        {accountHint ? (
-          <p style={{ marginTop: "0.75rem", direction: "ltr", fontSize: "0.78rem", color: "#5f736c" }}>
-            {accountHint}
-          </p>
-        ) : null}
-        <div className="admin-actions" style={{ justifyContent: "center", marginTop: "1.25rem" }}>
-          <Link className="primary" href={copy.href}>
+        <p className="portal-entrance__lead">{copy.body}</p>
+        {accountHint ? <p className="portal-entrance__hint">{accountHint}</p> : null}
+        <div className="portal-entrance__actions">
+          <Link className="portal-entrance__cta" href={copy.href}>
             {copy.cta}
           </Link>
+          {copy.href !== "/" ? (
+            <Link className="portal-entrance__quiet" href="/">
+              {market}
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>

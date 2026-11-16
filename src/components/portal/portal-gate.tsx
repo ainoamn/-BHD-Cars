@@ -21,7 +21,7 @@ export function PortalGate({
     "auth-config": {
       title: ar ? "المصادقة غير جاهزة" : "Auth is not ready",
       body: ar ? "يلزم إعداد AUTH_SECRET وعميل BHD." : "AUTH_SECRET and BHD OAuth are required.",
-      cta: ar ? "العودة" : "Back",
+      cta: ar ? "العودة للسوق" : "Back to market",
       href: "/",
     },
     "no-org": {
@@ -42,16 +42,26 @@ export function PortalGate({
     },
   }[reason];
 
+  const market = ar ? "العودة للسوق" : "Back to market";
+
   return (
-    <div className="admin-gate">
-      <div className="admin-gate__card">
-        <p className="admin-eyebrow">Bin Hamood · Portal</p>
+    <div className="portal-entrance">
+      <div className="portal-entrance__stage">
+        <img className="portal-entrance__mark" src="/brand/bhd-mark.svg" alt="BHD" />
+        <p className="portal-entrance__house">Bin Hamood</p>
+        <p className="portal-entrance__product">BHD Cars</p>
+        <span className="portal-entrance__rule" aria-hidden />
         <h1>{copy.title}</h1>
-        <p>{copy.body}</p>
-        <div className="admin-actions" style={{ justifyContent: "center", marginTop: "1.25rem" }}>
-          <Link className="primary" href={copy.href}>
+        <p className="portal-entrance__lead">{copy.body}</p>
+        <div className="portal-entrance__actions">
+          <Link className="portal-entrance__cta" href={copy.href}>
             {copy.cta}
           </Link>
+          {copy.href !== "/" ? (
+            <Link className="portal-entrance__quiet" href="/">
+              {market}
+            </Link>
+          ) : null}
         </div>
       </div>
     </div>
