@@ -68,7 +68,7 @@ function entityWord(sectionId: string | undefined, locale: "ar" | "en") {
     if (id === "parts" || id === "consumables" || id === "accessories" || id === "tires") return "القطعة";
     if (id === "plates") return "اللوحة";
     if (id === "cars-rent") return "المركبة";
-    if (id === "scrap") return "المركبة";
+    if (id === "scrap") return "مركبة التفكيك";
     return "السيارة";
   }
   if (id === "boats") return "vessel";
@@ -77,7 +77,12 @@ function entityWord(sectionId: string | undefined, locale: "ar" | "en") {
   if (id === "trucks") return "truck";
   if (id === "parts" || id === "consumables" || id === "accessories" || id === "tires") return "item";
   if (id === "plates") return "plate";
+  if (id === "scrap") return "dismantling vehicle";
   return "vehicle";
+}
+
+function isSeriousSection(sectionId?: string) {
+  return sectionId === "scrap" || sectionId === "heavy";
 }
 
 const FACT_LABELS: Record<string, { ar: string; en: string }> = {
@@ -108,6 +113,12 @@ const FACT_LABELS: Record<string, { ar: string; en: string }> = {
   plateDigits: { ar: "الرقم", en: "Digits" },
   equipType: { ar: "نوع المعدة", en: "Equipment type" },
   rentPeriod: { ar: "مدة التأجير", en: "Hire period" },
+  scrapType: { ar: "شكل العرض", en: "Offer form" },
+  damageLevel: { ar: "شدة الضرر", en: "Damage severity" },
+  titleStatus: { ar: "وثائق الملكية", en: "Ownership papers" },
+  exportable: { ar: "إمكانية الشحن خارج السلطنة", en: "Export readiness" },
+  cylinders: { ar: "الإسطوانات", en: "Cylinders" },
+  engine: { ar: "المحرك", en: "Engine" },
 };
 
 const SKIP_FACT_KEYS = new Set([
@@ -128,6 +139,9 @@ function templateTitle(facts: ListingAssistInput["facts"], locale: "ar" | "en", 
     .filter(Boolean)
     .map(String);
   const base = bits.join(" ") || (locale === "ar" ? "عرض على BHD Cars" : "Listing on BHD Cars");
+  if (sectionId === "scrap") {
+    return locale === "ar" ? `${base} — للتفكيك ببيانات معلنة` : `${base} — for dismantling, details declared`;
+  }
   if (style === "warm") {
     if (sectionId === "boats") {
       return locale === "ar" ? `${base} — جاهز يفرّح البحر!` : `${base} — ready for bright days on the water!`;
@@ -142,31 +156,40 @@ function templateDescription(input: ListingAssistInput) {
   const ar = input.locale !== "en";
   const style = input.style ?? "clear";
   const entity = entityWord(input.sectionId, ar ? "ar" : "en");
+  const serious = isSeriousSection(input.sectionId);
   const lines = Object.entries(f)
     .filter(([k, v]) => !SKIP_FACT_KEYS.has(k) && v !== null && v !== undefined && String(v).trim() !== "")
     .slice(0, 10)
     .map(([k, v]) => {
       const label = FACT_LABELS[k]?.[ar ? "ar" : "en"] ?? (ar ? k : k.replace(/([A-Z])/g, " $1").trim());
       const value = Array.isArray(v) ? v.join(ar ? "، " : ", ") : String(v);
-      return ar ? `• ${label}: ${value}` : `• ${label}: ${value}`;
+      return `• ${label}: ${value}`;
     });
 
   if (ar) {
-    const opener =
-      style === "warm"
+    const opener = serious
+      ? `عرض ${entity} عبر BHD Cars — البيانات معلنة بوضوح:`
+      : style === "warm"
         ? `مرحبا! ${entity} جاهزة تفرّح يومك عبر BHD Cars.`
         : style === "calm"
           ? `تفاصيل ${entity} كما أدخلها البائع:`
           : `ملخص العرض:`;
-    return [opener, ...lines, "المعاينة والفحص متاحان حسب الاتفاق."].join("\n");
+    const closer = serious
+      ? "المعاينة والفحص حسب الاتفاق قبل إتمام الصفقة."
+      : "المعاينة والفحص متاحان حسب الاتفاق.";
+    return [opener, ...lines, closer].join("\n");
   }
-  const opener =
-    style === "warm"
+  const opener = serious
+    ? `A ${entity} listing on BHD Cars — facts declared clearly:`
+    : style === "warm"
       ? `Hello! This ${entity} is ready to brighten your day on BHD Cars.`
       : style === "calm"
         ? `Listing facts for this ${entity}:`
         : "Listing summary:";
-  return [opener, ...lines, "Viewing and inspection by arrangement."].join("\n");
+  const closer = serious
+    ? "Viewing and inspection by arrangement before the deal."
+    : "Viewing and inspection by arrangement.";
+  return [opener, ...lines, closer].join("\n");
 }
 
 async function callModel(system: string, user: string) {
@@ -230,7 +253,8 @@ export async function runListingAssist(input: ListingAssistInput) {
   }
 
   if (input.action === "title") {
-    const cheerful = input.style === "warm";
+    const serious = isSeriousSection(input.sectionId);
+    const cheerful = input.style === "warm" && !serious;
     const fallback = templateTitle(input.facts, locale, input.style, input.sectionId);
     const langLock =
       locale === "ar"
@@ -238,12 +262,16 @@ export async function runListingAssist(input: ListingAssistInput) {
         : "Write in English only. No Arabic text and no bilingual dual lines.";
     const ai = await callModel(
       locale === "ar"
-        ? cheerful
-          ? `اكتب عنوان عرض قصير مرحًا وودّيًا بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. حيوي ومشجّع دون مبالغة كاذبة. ${langLock} أرجع النص فقط.`
-          : `اكتب عنوان عرض قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. بلا مبالغة. ${langLock} أرجع النص فقط.`
-        : cheerful
-          ? `Write a short cheerful, warm listing title under 80 chars from the given facts. Inviting but factual. ${langLock} Return text only.`
-          : `Write a short factual listing title under 80 chars from the given facts. No hype. ${langLock} Return text only.`,
+        ? serious
+          ? `اكتب عنوان عرض تفكيك/معدات قصيرًا وواضحًا بالعربية الفصحى السهلة (أقل من 80 حرفًا). صيغة واقعية معلنة — بلا احتفال أو «تفرّح العين». ${langLock} أرجع النص فقط.`
+          : cheerful
+            ? `اكتب عنوان عرض قصير مرحًا وودّيًا بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. حيوي ومشجّع دون مبالغة كاذبة. ${langLock} أرجع النص فقط.`
+            : `اكتب عنوان عرض قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. بلا مبالغة. ${langLock} أرجع النص فقط.`
+        : serious
+          ? `Write a short clear dismantling/equipment listing title under 80 chars. Honest and declared — no party/hype tone. ${langLock} Return text only.`
+          : cheerful
+            ? `Write a short cheerful, warm listing title under 80 chars from the given facts. Inviting but factual. ${langLock} Return text only.`
+            : `Write a short factual listing title under 80 chars from the given facts. No hype. ${langLock} Return text only.`,
       JSON.stringify({ facts: input.facts, sectionId: input.sectionId }),
     );
     return { ok: true as const, source: ai ? ("ai" as const) : ("template" as const), text: (ai || fallback).slice(0, 100) };
@@ -251,8 +279,12 @@ export async function runListingAssist(input: ListingAssistInput) {
 
   if (input.action === "description" || input.action === "polish") {
     const fallback = templateDescription({ ...input, locale });
-    const styleHint =
-      input.style === "warm"
+    const serious = isSeriousSection(input.sectionId);
+    const styleHint = serious
+      ? locale === "ar"
+        ? "بنبرة واضحة وواقعية ومعلنة — مناسبة للتفكيك أو المعدات، دون مرح احتفالي"
+        : "clear, factual, and declared — suitable for dismantling or equipment, not celebratory"
+      : input.style === "warm"
         ? locale === "ar"
           ? "بنبرة مرحة وودّية ومشرقة — قصيرة ومشجّعة دون مبالغة كاذبة"
           : "cheerful, warm, and upbeat — short and inviting, still factual"
@@ -270,7 +302,7 @@ export async function runListingAssist(input: ListingAssistInput) {
     const entity = entityWord(input.sectionId, locale);
     const ai = await callModel(
       locale === "ar"
-        ? `اكتب وصف عرض حقيقي ومفيد بالعربية الفصحى السهلة ${styleHint}. استخدم كلمة مناسبة مثل «${entity}» لا كلمة خاطئة. لا تعرض مفاتيح إنجليزية للحقول (مثل section أو vesselType)؛ اكتب تسميات عربية طبيعية. فقرة أو نقاط من البيانات فقط. ${langLock} أرجع النص فقط.`
+        ? `اكتب وصف عرض حقيقي ومفيد بالعربية الفصحى السهلة ${styleHint}. استخدم كلمة مناسبة مثل «${entity}» لا كلمة خاطئة. لا تعرض مفاتيح إنجليزية للحقول؛ اكتب تسميات عربية طبيعية. فقرة أو نقاط من البيانات فقط. ${langLock} أرجع النص فقط.`
         : `Write a real, useful listing description ${styleHint}. Refer to it as a “${entity}” (not the wrong category). Never dump raw field keys; use natural English labels. One short paragraph or bullets from facts only. ${langLock} Return text only.`,
       JSON.stringify({ facts: input.facts, sectionId: input.sectionId, prompt: input.prompt }),
     );

@@ -801,6 +801,28 @@ export function SectionWizard({ section }: { section: ListingSection }) {
             <div className="aspect-[16/10] bg-soft">
               {photos[0] ? (
                 <img src={photos[0]} alt="" className="h-full w-full object-cover" />
+              ) : selectedMake && values.modelId ? (
+                <ModelThumb
+                  src={selectedMake.models.find((item) => item.id === values.modelId)?.image}
+                  alt={values.model || previewTitle}
+                  body={selectedMake.models.find((item) => item.id === values.modelId)?.body}
+                  makeId={selectedMake.id}
+                  modelId={values.modelId}
+                  className="h-full w-full object-cover"
+                />
+              ) : selectedMake ? (
+                <div className="flex h-full flex-col items-center justify-center gap-3 p-4">
+                  <BrandLogo
+                    id={selectedMake.id}
+                    mark={selectedMake.mark}
+                    name={locale === "ar" ? selectedMake.name.ar : selectedMake.name.en}
+                    className="h-16 w-16"
+                  />
+                  <p className="text-center text-sm font-medium text-night">
+                    {locale === "ar" ? selectedMake.name.ar : selectedMake.name.en}
+                    {values.model ? ` · ${values.model}` : ""}
+                  </p>
+                </div>
               ) : (
                 <div className="flex h-full items-center justify-center text-4xl">{section.icon}</div>
               )}
