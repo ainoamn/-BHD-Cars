@@ -496,7 +496,7 @@ export function CarsBrowser({ initialCars }: CarsBrowserProps) {
           "فلاتر كاملة: الشركات، الموديلات، التجهيز، السنة، المواصفات، والألوان والمناطق.",
           "Full filters: makes, models, trims, year, specs, colors, and regions.",
         )}
-        actions={<Link href="/sell" className="btn-primary">{tx(L("أضف إعلانك", "Add your listing"))}</Link>}
+        actions={<Link href="/sell" className="btn-primary">{tx(L("أضف عرضًا", "Add an offer"))}</Link>}
       />
 
       <div className="market-shell">

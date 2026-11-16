@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ChoiceCard, DemoNote, Field, FormShell, PageHeader, Photo, Primary, Receipt, fieldClass } from "@/components/ui";
 import { parts, plates, rentals, workshops, yards } from "@/lib/data";
@@ -10,12 +11,18 @@ import type { Copy, Rental } from "@/lib/types";
 const L = (ar: string, en: string): Copy => ({ ar, en });
 
 export function RentalBoard() {
+  const { tx } = usePrefs();
   return (
     <div>
       <PageHeader
-        kicker={L("التأجير", "Rental")}
-        title={L("السعر يشمل التأمين وسقف الكيلومترات.", "The price includes cover and a mileage cap.")}
+        kicker={L("تأجير مركبات", "Vehicle hire")}
+        title={L("الأجرة تشمل التغطية وحد المسافة.", "The rate includes cover and a distance limit.")}
         lead={L("يومي أو أسبوعي أو شهري، من شركات معلنة، مع توصيل حيث هو مكتوب.", "Daily, weekly, or monthly, from named companies, with delivery where it is written.")}
+        actions={
+          <Link href="/sell/cars-rent" className="btn-primary">
+            {tx(L("أضف مركبة للإيجار", "List a hire vehicle"))}
+          </Link>
+        }
       />
       <div className="page-wrap grid gap-6 px-5 py-10 md:grid-cols-2">
         {rentals.map((car) => <RentalCard key={car.slug} car={car} />)}
@@ -94,7 +101,19 @@ export function PartsBoard() {
 
   return (
     <div>
-      <PageHeader kicker={L("قطع الغيار", "Parts")} title={L("قطعة مطابقة للهيكل.", "A part matched to the VIN.")} lead={L("جديد ومستعمل، مع طلب حر إذا لم تجد القطعة في القائمة.", "New and used, with a free request if the part is not on the list.")} />
+      <PageHeader
+        kicker={L("قطع وتجهيزات", "Parts & fitments")}
+        title={L("قطعة مطابقة للهيكل.", "A part matched to the VIN.")}
+        lead={L("جديد ومستعمل، مع طلب حر إذا لم تجد القطعة — أو أضف عرض قطع/إطارات/زيوت.", "New and used, with a free request if missing — or list parts, tires, or fluids.")}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/sell/parts" className="btn-primary">{tx(L("أضف قطعة", "List a part"))}</Link>
+            <Link href="/sell/tires" className="btn-secondary">{tx(L("إطارات", "Tires"))}</Link>
+            <Link href="/sell/consumables" className="btn-secondary">{tx(L("زيوت", "Oils"))}</Link>
+            <Link href="/sell/accessories" className="btn-secondary">{tx(L("إضافات", "Add-ons"))}</Link>
+          </div>
+        }
+      />
       <div className="page-wrap py-10">
         <div className="grid gap-5 md:grid-cols-3">
           {parts.map((part) => (
@@ -144,7 +163,16 @@ export function ScrapBoard() {
   const [sent, setSent] = useState<string | null>(null);
   return (
     <div>
-      <PageHeader kicker={L("السكراب", "Scrap")} title={L("سيارة انتهت، بسعر وزن واضح.", "A car at the end of its life, at a stated weight price.")} lead={L("استلام من البيت حيث هو متاح، وشهادة إسقاط مع العملية.", "Home collection where it is offered, and a deregistration note with the job.")} />
+      <PageHeader
+        kicker={L("مركبات للتفكيك", "Dismantling")}
+        title={L("مركبة انتهت خدمتها، بسعر وزن واضح.", "A vehicle at end of service, at a stated weight price.")}
+        lead={L("استلام من الموقع حيث متاح، مع وثائق الإسقاط عند العملية.", "Collection where available, with deregistration papers on the job.")}
+        actions={
+          <Link href="/sell/scrap" className="btn-primary">
+            {tx(L("أضف عرض تفكيك", "List for dismantling"))}
+          </Link>
+        }
+      />
       <div className="page-wrap grid gap-5 px-5 py-10 md:grid-cols-3">
         {yards.map((yard) => (
           <article key={yard.slug} className="surface-card p-5">
@@ -176,7 +204,15 @@ export function PlatesBoard() {
   const [sent, setSent] = useState<string | null>(null);
   return (
     <div>
-      <PageHeader kicker={L("اللوحات", "Plates")} title={L("رقم مميز، بمعاملة نقل واضحة.", "A distinctive number, with a clear transfer.")} />
+      <PageHeader
+        kicker={L("أرقام مميزة", "Distinctive plates")}
+        title={L("رقم مميز، بنقل ملكية واضح.", "A distinctive number, with a clear ownership transfer.")}
+        actions={
+          <Link href="/sell/plates" className="btn-primary">
+            {tx(L("أضف رقمًا للبيع", "List a plate number"))}
+          </Link>
+        }
+      />
       <div className="page-wrap grid gap-3 px-5 py-10">
         {plates.map((plate) => (
           <article key={plate.slug} className="surface-card flex flex-wrap items-center justify-between gap-4 px-5 py-4">

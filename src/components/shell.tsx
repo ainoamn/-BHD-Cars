@@ -6,31 +6,17 @@ import { FormEvent, useState } from "react";
 import BhdProgramsStrip from "@/components/bhd/BhdProgramsStrip";
 import { markets } from "@/lib/data";
 import { usePrefs } from "@/lib/prefs";
+import {
+  footerCompany,
+  footerMarket,
+  footerServices,
+  moreNav,
+  primaryNav,
+} from "@/lib/site-menus";
 import { useStore } from "@/lib/store";
 import type { Copy, Currency } from "@/lib/types";
 
 const L = (ar: string, en: string): Copy => ({ ar, en });
-
-const primary = [
-  { href: "/cars", label: L("السيارات", "Cars") },
-  { href: "/auctions", label: L("المزادات", "Auctions") },
-  { href: "/finance", label: L("التمويل", "Finance") },
-  { href: "/insurance", label: L("التأمين", "Insurance") },
-  { href: "/inspection", label: L("الفحص", "Inspection") },
-  { href: "/import", label: L("الاستيراد", "Import") },
-  { href: "/rental", label: L("التأجير", "Rental") },
-];
-
-const more = [
-  { href: "/valuation", label: L("التثمين", "Valuation") },
-  { href: "/parts", label: L("قطع الغيار", "Parts") },
-  { href: "/scrap", label: L("السكراب", "Scrap") },
-  { href: "/plates", label: L("اللوحات", "Plates") },
-  { href: "/reports", label: L("سجل السيارة", "History") },
-  { href: "/service", label: L("الصيانة", "Service") },
-  { href: "/dealers", label: L("المعارض", "Houses") },
-  { href: "/requests", label: L("طلباتي", "Requests") },
-];
 
 const currencies: Currency[] = ["OMR", "AED", "SAR", "QAR", "BHD", "KWD", "USD", "EUR"];
 
@@ -127,8 +113,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {requests.length > 0 ? ` (${requests.length})` : ""}
               </Link>
               <Link href="/sell" className="btn-primary px-2.5 py-2 text-[11px] sm:px-4 sm:text-xs">
-                {tx(L("بيع", "Sell"))}
-                <span className="hidden min-[360px]:inline">{locale === "ar" ? " سيارة" : " a car"}</span>
+                {tx(L("أضف عرضًا", "Add offer"))}
               </Link>
               <button type="button" className="btn-secondary px-3 py-2 text-xs lg:hidden" onClick={() => setOpen((value) => !value)}>
                 {open ? tx(L("إغلاق", "Close")) : tx(L("القائمة", "Menu"))}
@@ -137,7 +122,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </div>
 
           <nav className="mt-3 hidden items-center gap-1 overflow-x-auto pb-1 text-sm lg:flex">
-            {primary.map((item) => {
+            {primaryNav.map((item) => {
               const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
@@ -154,7 +139,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 {tx(L("المزيد", "More"))}
               </summary>
               <div className="absolute start-0 z-20 mt-2 w-56 overflow-hidden rounded-2xl border border-line bg-paper p-2 shadow-[var(--shadow-lift)]">
-                {more.map((item) => (
+                {moreNav.map((item) => (
                   <Link key={item.href} href={item.href} className="block rounded-xl px-3 py-2.5 text-sm hover:bg-soft">
                     {tx(item.label)}
                   </Link>
@@ -176,7 +161,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <button type="submit" className="btn-teal shrink-0 px-4">{tx(L("بحث", "Search"))}</button>
             </form>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              {[...primary, ...more, { href: "/about", label: L("عن المنصة", "About") }, { href: "/contact", label: L("تواصل", "Contact") }].map((item) => (
+              {[
+                ...primaryNav,
+                ...moreNav,
+                { href: "/about", label: L("عن المنصة", "About") },
+                { href: "/contact", label: L("تواصل", "Contact") },
+              ].map((item) => (
                 <button key={item.href} type="button" onClick={() => go(item.href)} className="rounded-2xl border border-line bg-paper px-3 py-3 text-start">
                   {tx(item.label)}
                 </button>
@@ -209,9 +199,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
               ))}
             </p>
           </div>
-          <FooterCol title={tx(L("السوق", "Market"))} links={[["/cars", L("السيارات", "Cars")], ["/auctions", L("المزادات", "Auctions")], ["/rental", L("التأجير", "Rental")], ["/plates", L("اللوحات", "Plates")], ["/dealers", L("المعارض", "Houses")]]} />
-          <FooterCol title={tx(L("الخدمات", "Services"))} links={[["/valuation", L("التثمين", "Valuation")], ["/finance", L("التمويل", "Finance")], ["/insurance", L("التأمين", "Insurance")], ["/inspection", L("الفحص", "Inspection")], ["/import", L("الاستيراد", "Import")], ["/parts", L("القطع", "Parts")], ["/scrap", L("السكراب", "Scrap")]]} />
-          <FooterCol title={tx(L("الشركة", "House"))} links={[["/about", L("عن المنصة", "About")], ["/contact", L("تواصل", "Contact")], ["/requests", L("متابعة الطلب", "Track a request")], ["/reports", L("سجل السيارة", "History")], ["/service", L("الصيانة", "Service")]]} />
+          <FooterCol title={tx(L("السوق", "Market"))} links={footerMarket.map((item) => [item.href, item.label] as [string, Copy])} />
+          <FooterCol title={tx(L("الخدمات", "Services"))} links={footerServices.map((item) => [item.href, item.label] as [string, Copy])} />
+          <FooterCol title={tx(L("الشركة", "House"))} links={footerCompany.map((item) => [item.href, item.label] as [string, Copy])} />
           <BhdProgramsStrip variant="footer" />
         </div>
         <div className="page-wrap border-t border-white/10 py-4 text-center text-xs text-ivory/50">

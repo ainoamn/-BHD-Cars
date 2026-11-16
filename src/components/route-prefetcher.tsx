@@ -2,18 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
-const CRITICAL = [
-  "/",
-  "/cars",
-  "/auctions",
-  "/sell",
-  "/portal",
-  "/account",
-  "/finance",
-  "/insurance",
-  "/valuation",
-];
+import { criticalRoutes } from "@/lib/site-menus";
 
 /** Warm App Router RSC payloads for primary destinations after first paint. */
 export function RoutePrefetcher() {
@@ -23,7 +12,7 @@ export function RoutePrefetcher() {
     let cancelled = false;
     const run = () => {
       if (cancelled) return;
-      for (const href of CRITICAL) {
+      for (const href of criticalRoutes) {
         try {
           router.prefetch(href);
         } catch {

@@ -7,53 +7,24 @@ import { CarCard } from "@/components/car-card";
 import { Photo } from "@/components/ui";
 import { auctions, cars, makes } from "@/lib/data";
 import { usePrefs } from "@/lib/prefs";
+import { homeCategories } from "@/lib/site-menus";
 import type { Copy } from "@/lib/types";
 
 const L = (ar: string, en: string): Copy => ({ ar, en });
 
-const categories: { href: string; title: Copy; text: Copy; image: string; count: Copy }[] = [
-  {
-    href: "/cars?condition=ready",
-    title: L("سيارات للبيع", "Cars for sale"),
-    text: L("جاهزة من المعارض والأفراد", "Ready stock from houses and private sellers"),
-    image: cars[0].images[0],
-    count: L("سوق يومي", "Daily market"),
-  },
-  {
-    href: "/sell/accident",
-    title: L("حوادث معلنة", "Declared accidents"),
-    text: L("أعلن الضرر بخريطة وصور — أو تصفّح المستورد", "Declare damage with a map and photos — or browse imports"),
-    image: cars.find((car) => car.condition === "accident")?.images[0] ?? cars[0].images[0],
-    count: L("ملف شفاف", "Clear file"),
-  },
-  {
-    href: "/auctions",
-    title: L("مزادات مباشرة", "Live auctions"),
-    text: L("خطوة معلنة وعمولة واضحة", "Stated step and clear premium"),
-    image: auctions[0].image,
-    count: L("مباشر الآن", "Live now"),
-  },
-  {
-    href: "/rental",
-    title: L("تأجير", "Rental"),
-    text: L("يومي وشهري مع تأمين", "Daily and monthly with cover"),
-    image: cars[2].images[0],
-    count: L("حجز سريع", "Quick booking"),
-  },
-  {
-    href: "/parts",
-    title: L("قطع غيار", "Spare parts"),
-    text: L("جديد ومستعمل مطابق للهيكل", "New and used, matched to VIN"),
-    image: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1200&q=80",
-    count: L("طلب قطعة", "Part request"),
-  },
-  {
-    href: "/finance",
-    title: L("تمويل وتأمين وفحص", "Finance, cover, inspection"),
-    text: L("من داخل الإعلان، برقم متابعة", "From the listing, with a reference"),
-    image: cars[1].images[0],
-    count: L("خدمات مكتملة", "Full services"),
-  },
+const categoryImages = [
+  cars[0].images[0],
+  auctions[0].image,
+  cars[2]?.images[0] ?? cars[0].images[0],
+  cars.find((car) => car.condition === "accident")?.images[0] ?? cars[0].images[0],
+  "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1487754180451-c456f719a1fc?auto=format&fit=crop&w=1200&q=80",
+  "https://images.unsplash.com/photo-1632823469850-1b7b1e8b7a3d?auto=format&fit=crop&w=1200&q=80",
 ];
 
 const services: { href: string; title: Copy; text: Copy }[] = [
@@ -140,26 +111,35 @@ export function HomeView() {
       </section>
 
       <section className="page-wrap py-12">
-        <div className="mb-6 flex items-end justify-between gap-4">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="eyebrow">{tx(L("تصفّح سريع", "Quick browse"))}</p>
+            <p className="eyebrow">{tx(L("تصنيفات السوق", "Market categories"))}</p>
             <h2 className="section-title mt-2">{tx(L("ماذا تريد اليوم؟", "What do you need today?"))}</h2>
           </div>
-          <Link href="/cars" className="text-sm font-medium text-navy hover:text-brass">{tx(L("كل السيارات", "All cars"))}</Link>
+          <div className="flex flex-wrap gap-3 text-sm font-medium">
+            <Link href="/sell" className="text-navy hover:text-brass">{tx(L("مسارات العرض", "Offer paths"))}</Link>
+            <Link href="/cars" className="text-navy hover:text-brass">{tx(L("كل السيارات", "All cars"))}</Link>
+          </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {categories.map((category) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {homeCategories.map((category, index) => (
             <Link key={category.href} href={category.href} className="surface-card surface-card-hover group overflow-hidden">
               <div className="relative aspect-[16/9] overflow-hidden">
-                <Photo src={category.image} alt={tx(category.title)} className="h-full w-full transition duration-700 group-hover:scale-[1.04]" />
+                <Photo
+                  src={categoryImages[index % categoryImages.length]}
+                  alt={tx(category.label)}
+                  className="h-full w-full transition duration-700 group-hover:scale-[1.04]"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-night/70 via-night/10 to-transparent" />
-                <span className="absolute start-3 bottom-3 rounded-full bg-paper/95 px-2.5 py-1 text-[11px] font-medium text-night">
-                  {tx(category.count)}
-                </span>
+                {category.badge ? (
+                  <span className="absolute start-3 bottom-3 rounded-full bg-paper/95 px-2.5 py-1 text-[11px] font-medium text-night">
+                    {tx(category.badge)}
+                  </span>
+                ) : null}
               </div>
               <div className="p-4">
-                <h3 className="text-lg font-semibold text-night">{tx(category.title)}</h3>
-                <p className="mt-1 text-sm text-muted">{tx(category.text)}</p>
+                <h3 className="text-lg font-semibold text-night">{tx(category.label)}</h3>
+                {category.blurb ? <p className="mt-1 text-sm text-muted">{tx(category.blurb)}</p> : null}
               </div>
             </Link>
           ))}
