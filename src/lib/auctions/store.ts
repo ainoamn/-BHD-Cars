@@ -132,17 +132,29 @@ async function seedFromCatalogIfEmpty() {
   }
 }
 
-export async function listAuctionLots(input?: { q?: string }) {
+export async function listAuctionLots(input?: { q?: string; refresh?: boolean }) {
   if (!databaseConfigured()) return [] as AuctionLotRow[];
   await seedFromCatalogIfEmpty();
-  await refreshLotStatuses();
+  // Avoid write amplification on every public navigation; refresh only when asked or on bid paths.
+  if (input?.refresh) await refreshLotStatuses();
   const q = input?.q?.trim().toLowerCase() || "";
   try {
     const rows = await query<AuctionLotRow>`
-      SELECT *, now()::text as server_now
+      SELECT
+        *,
+        now()::text as server_now,
+        CASE
+          WHEN ends_at <= now() AND status IN ('scheduled', 'live') THEN 'ended'
+          WHEN starts_at <= now() AND ends_at > now() AND status = 'scheduled' THEN 'live'
+          ELSE status
+        END as status
       FROM auction_lots
       ORDER BY
-        CASE status WHEN 'live' THEN 0 WHEN 'scheduled' THEN 1 ELSE 2 END,
+        CASE
+          WHEN ends_at <= now() THEN 2
+          WHEN starts_at > now() THEN 1
+          ELSE 0
+        END,
         featured DESC,
         ends_at ASC
     `;
@@ -194,8 +206,7 @@ export async function listLotBids(lotId: string, limit = 40) {
   }
 }
 
-export async function auctionStats() {
-  const lots = await listAuctionLots();
+export function auctionStatsFromLots(lots: AuctionLotRow[]) {
   const buckets = bucketLots(lots);
   return {
     live: buckets.featured.length + buckets.live.length,
@@ -203,6 +214,10 @@ export async function auctionStats() {
     ended: buckets.ended.length,
     bids: lots.reduce((sum, lot) => sum + Number(lot.bid_count || 0), 0),
   };
+}
+
+export async function auctionStats() {
+  return auctionStatsFromLots(await listAuctionLots());
 }
 
 export type PlaceBidResult =

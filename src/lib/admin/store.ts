@@ -1,3 +1,5 @@
+import { cache } from "react";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { databaseConfigured, query } from "@/lib/db";
 import {
   DEFAULT_SITE_BUNDLE,
@@ -7,6 +9,8 @@ import {
   type PageFlags,
   type SiteBundle,
 } from "@/lib/admin/site-control";
+
+export const SITE_SETTINGS_CACHE_TAG = "site-settings";
 
 function asObject(value: unknown) {
   return value && typeof value === "object" && !Array.isArray(value)
@@ -44,7 +48,7 @@ function readDefaultMarket(value: unknown): DefaultMarketSettings {
   return { id: typeof row.id === "string" && row.id ? row.id : "om" };
 }
 
-export async function loadSiteBundle(): Promise<SiteBundle> {
+async function readSiteBundleFromDb(): Promise<SiteBundle> {
   if (!databaseConfigured()) return DEFAULT_SITE_BUNDLE;
   try {
     const rows = await query<{ key: string; value: unknown }>`
@@ -63,6 +67,14 @@ export async function loadSiteBundle(): Promise<SiteBundle> {
   }
 }
 
+const loadSiteBundleAcrossRequests = unstable_cache(readSiteBundleFromDb, ["site-bundle-v1"], {
+  revalidate: 30,
+  tags: [SITE_SETTINGS_CACHE_TAG],
+});
+
+/** One Neon round-trip per request max; shared across SiteRuntime / banner / PageGate. */
+export const loadSiteBundle = cache(async (): Promise<SiteBundle> => loadSiteBundleAcrossRequests());
+
 export async function saveSiteSetting(key: string, value: unknown, updatedBy: string) {
   await query`
     INSERT INTO site_settings (key, value, updated_by, updated_at)
@@ -70,9 +82,10 @@ export async function saveSiteSetting(key: string, value: unknown, updatedBy: st
     ON CONFLICT (key) DO UPDATE
     SET value = EXCLUDED.value, updated_by = EXCLUDED.updated_by, updated_at = now()
   `;
+  revalidateTag(SITE_SETTINGS_CACHE_TAG);
 }
 
-export async function listListingControls() {
+async function readListingControls() {
   if (!databaseConfigured()) return [] as Array<{ slug: string; status: string; notes: string }>;
   try {
     return await query<{ slug: string; status: string; notes: string }>`
@@ -82,6 +95,13 @@ export async function listListingControls() {
     return [];
   }
 }
+
+export const listListingControls = cache(async () =>
+  unstable_cache(readListingControls, ["listing-controls-v1"], {
+    revalidate: 30,
+    tags: ["listing-controls"],
+  })(),
+);
 
 export async function upsertListingControl(input: {
   slug: string;
@@ -98,6 +118,7 @@ export async function upsertListingControl(input: {
         moderated_at = now(),
         moderated_by = EXCLUDED.moderated_by
   `;
+  revalidateTag("listing-controls");
 }
 
 export async function listAuctionControls() {

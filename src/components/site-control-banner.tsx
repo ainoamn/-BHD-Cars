@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { loadSiteBundle } from "@/lib/admin/store";
+import type { SiteBundle } from "@/lib/admin/site-control";
 
-export async function SiteControlBanner() {
-  const bundle = await loadSiteBundle();
+export async function SiteControlBanner({ bundle: incoming }: { bundle?: SiteBundle } = {}) {
+  const bundle = incoming ?? (await loadSiteBundle());
   const jar = await cookies();
   const ar = jar.get("bhd_locale")?.value !== "en";
 

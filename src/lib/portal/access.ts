@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { authSecret, readSessionToken, SESSION_COOKIE, type ProductSession } from "@/lib/auth/session";
 import { isAdminDevOpen } from "@/lib/admin/access";
@@ -29,11 +30,12 @@ export async function readPortalSession(): Promise<ProductSession | null> {
   return readSessionToken(jar.get(SESSION_COOKIE)?.value || "");
 }
 
-export async function resolvePortalViewer(): Promise<
+/** Deduped for layout + page in the same navigation. */
+export const resolvePortalViewer = cache(async (): Promise<
   | { kind: "ok"; viewer: PortalViewer }
   | { kind: "login" }
   | { kind: "auth-config" }
-> {
+> => {
   if (isAdminDevOpen()) {
     const session = await readPortalSession();
     if (!session) return { kind: "login" };
@@ -48,7 +50,7 @@ export async function resolvePortalViewer(): Promise<
   await acceptInvitationsForUser(session).catch(() => undefined);
   const memberships = await listMembershipsForUser(session.sub, session.email);
   return { kind: "ok", viewer: { session, memberships } };
-}
+});
 
 export async function readActiveOrgId() {
   const jar = await cookies();

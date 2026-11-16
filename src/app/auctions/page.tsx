@@ -1,13 +1,13 @@
 import { AuctionsBoard } from "@/components/auctions-board";
 import { PageGate } from "@/components/page-gate";
-import { auctionStats, bucketLots, listAuctionLots } from "@/lib/auctions/store";
+import { auctionStatsFromLots, bucketLots, listAuctionLots } from "@/lib/auctions/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
   const lots = await listAuctionLots();
   const buckets = bucketLots(lots);
-  const stats = await auctionStats();
+  const stats = auctionStatsFromLots(lots);
 
   return (
     <PageGate page="auctions">

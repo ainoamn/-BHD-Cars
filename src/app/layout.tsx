@@ -3,6 +3,7 @@ import Script from "next/script";
 import { IBM_Plex_Sans_Arabic } from "next/font/google";
 import { AppShell } from "@/components/app-shell";
 import { BhdAccountIsolation } from "@/components/bhd/BhdAccountIsolation";
+import { RoutePrefetcher } from "@/components/route-prefetcher";
 import { SiteRuntime } from "@/components/site-runtime";
 import { PrefsProvider } from "@/lib/prefs";
 import { StoreProvider } from "@/lib/store";
@@ -42,6 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-full">
         <BhdAccountIsolation />
+        <RoutePrefetcher />
         <PrefsProvider>
           <StoreProvider>
             <SiteRuntime>

@@ -17,14 +17,15 @@ export async function SiteRuntime({ children }: { children: React.ReactNode }) {
 
   if (isApi) return <>{children}</>;
 
+  // Cached per-request + across requests (30s). Never hang the whole shell on Neon.
   const bundle = await loadSiteBundle();
   if (bundle.maintenance.enabled && !isAdmin && !isPortal) {
-    return <SiteControlBanner />;
+    return <SiteControlBanner bundle={bundle} />;
   }
 
   return (
     <>
-      {!isAdmin && !isPortal ? <SiteControlBanner /> : null}
+      {!isAdmin && !isPortal ? <SiteControlBanner bundle={bundle} /> : null}
       {children}
     </>
   );
