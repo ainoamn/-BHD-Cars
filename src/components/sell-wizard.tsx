@@ -61,7 +61,8 @@ type Draft = {
   drive: string;
   exterior: string;
   interior: string;
-  keys: "1" | "2";
+  smartKeys: number;
+  regularKeys: number;
   photos: string[];
   price: string;
   deal: Deal;
@@ -70,6 +71,10 @@ type Draft = {
   wantInspection: boolean;
   wantValuation: boolean;
 };
+
+const MIN_PHOTOS = 2;
+const MAX_PHOTOS = 12;
+const KEY_COUNTS = [0, 1, 2, 3, 4, 5] as const;
 
 const empty: Draft = {
   makeId: "",
@@ -87,7 +92,8 @@ const empty: Draft = {
   drive: "",
   exterior: "",
   interior: "",
-  keys: "2",
+  smartKeys: 1,
+  regularKeys: 1,
   photos: [],
   price: "",
   deal: "sell",
@@ -203,9 +209,9 @@ export function SellWizard() {
     if (step === 10) return Boolean(draft.drive);
     if (step === 11) return Boolean(draft.exterior);
     if (step === 12) return Boolean(draft.interior);
-    if (step === 13) return Boolean(draft.keys);
+    if (step === 13) return draft.smartKeys + draft.regularKeys >= 1;
     if (step === 14) return true; // VIN optional — can skip
-    if (step === 15) return draft.photos.length > 0;
+    if (step === 15) return draft.photos.length >= MIN_PHOTOS;
     if (step === 16) return Boolean(draft.price && draft.city);
     return false;
   }
@@ -238,12 +244,10 @@ export function SellWizard() {
 
   function onFiles(files: FileList | null) {
     if (!files?.length) return;
-    const urls = Array.from(files).slice(0, 12).map((file) => URL.createObjectURL(file));
-    const nextPhotos = [...draft.photos, ...urls].slice(0, 12);
-    patch({ photos: nextPhotos });
-    if (draft.photos.length === 0 && nextPhotos.length > 0) {
-      window.setTimeout(() => go(16), 180);
-    }
+    const room = MAX_PHOTOS - draft.photos.length;
+    if (room <= 0) return;
+    const urls = Array.from(files).slice(0, room).map((file) => URL.createObjectURL(file));
+    patch({ photos: [...draft.photos, ...urls] });
   }
 
   function decodeVin() {
@@ -263,6 +267,8 @@ export function SellWizard() {
         draft.trim,
         draft.origin,
         `${mileage} km`,
+        `smartKeys:${draft.smartKeys}`,
+        `regularKeys:${draft.regularKeys}`,
         `${draft.price} OMR`,
         cityLabel ? tx(cityLabel) : draft.city,
         draft.deal,
@@ -568,14 +574,42 @@ export function SellWizard() {
           )}
 
           {step === 13 && (
-            <Question title={tx(L("عدد المفاتيح", "Number of keys"))}>
-              <div className="grid grid-cols-2 gap-2">
-                <Chip active={draft.keys === "1"} onClick={() => choose("keys", "1")}>
-                  1
-                </Chip>
-                <Chip active={draft.keys === "2"} onClick={() => choose("keys", "2")}>
-                  2
-                </Chip>
+            <Question
+              title={tx(L("المفاتيح", "Keys"))}
+              lead={tx(
+                L(
+                  "حدّد عدد المفاتيح الذكية والعادية. يجب أن يكون الإجمالي مفتاحًا واحدًا على الأقل، ثم اضغط التالي.",
+                  "Set how many smart and regular keys. Total must be at least one, then press Next.",
+                ),
+              )}
+            >
+              <div className="space-y-5">
+                <div>
+                  <p className="mb-2 text-sm font-medium text-night">{tx(L("مفاتيح ذكية", "Smart keys"))}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {KEY_COUNTS.map((n) => (
+                      <Chip key={`smart-${n}`} active={draft.smartKeys === n} onClick={() => patch({ smartKeys: n })}>
+                        {n}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-sm font-medium text-night">{tx(L("مفاتيح عادية", "Regular keys"))}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {KEY_COUNTS.map((n) => (
+                      <Chip key={`regular-${n}`} active={draft.regularKeys === n} onClick={() => patch({ regularKeys: n })}>
+                        {n}
+                      </Chip>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-sm text-muted">
+                  {tx(L("الإجمالي", "Total"))}: {draft.smartKeys + draft.regularKeys}
+                  {draft.smartKeys + draft.regularKeys < 1
+                    ? ` — ${tx(L("اختر مفتاحًا واحدًا على الأقل", "pick at least one key"))}`
+                    : ""}
+                </p>
               </div>
             </Question>
           )}
@@ -618,8 +652,13 @@ export function SellWizard() {
 
           {step === 15 && (
             <Question
-              title={`${tx(L("إضافة صور", "Add photos"))} (${draft.photos.length}/12)`}
-              lead={tx(L("أول صورة تصبح الغلاف. بعد إضافة صورة تنتقل للسعر تلقائيًا.", "The first photo becomes the cover. After adding one, you move to pricing."))}
+              title={`${tx(L("إضافة صور", "Add photos"))} (${draft.photos.length}/${MAX_PHOTOS})`}
+              lead={tx(
+                L(
+                  "مطلوب صورتان على الأقل. الصورة الأولى غلاف. لن ننتقل تلقائيًا — ارفع المزيد أو اضغط التالي عند الجاهزية.",
+                  "At least two photos are required. The first is the cover. We will not auto-advance — add more or press Next when ready.",
+                ),
+              )}
             >
               <button
                 type="button"
@@ -627,10 +666,17 @@ export function SellWizard() {
                 className="flex w-full flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-brass/50 bg-soft/50 px-6 py-14 text-center"
               >
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brass text-2xl text-white">+</span>
-                <span className="mt-3 font-semibold text-night">{tx(L("أضف صور السيارة", "Add car photos"))}</span>
-                <span className="mt-1 text-xs text-muted">{tx(L("jpg أو png · حتى 12 صورة", "jpg or png · up to 12 photos"))}</span>
+                <span className="mt-3 font-semibold text-night">
+                  {draft.photos.length
+                    ? tx(L("أضف المزيد من الصور", "Add more photos"))
+                    : tx(L("أضف صور السيارة", "Add car photos"))}
+                </span>
+                <span className="mt-1 text-xs text-muted">
+                  {tx(L("jpg أو png · الحد الأدنى صورتان · حتى 12", "jpg or png · minimum 2 · up to 12"))}
+                </span>
               </button>
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(event) => onFiles(event.target.files)} />
+
               {draft.photos.length > 0 && (
                 <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
                   {draft.photos.map((src, index) => (
@@ -652,6 +698,43 @@ export function SellWizard() {
                   ))}
                 </div>
               )}
+
+              <div className="rounded-2xl border border-line bg-soft/50 px-4 py-3 text-sm text-muted">
+                {draft.photos.length === 0
+                  ? tx(L("لم تُرفع أي صورة بعد. ارفع صورتين على الأقل للمتابعة.", "No photos yet. Upload at least two to continue."))
+                  : draft.photos.length < MIN_PHOTOS
+                    ? tx(
+                        L(
+                          `لديك ${draft.photos.length} — أضف صورة أخرى على الأقل، أو ارفع المزيد ثم اضغط التالي.`,
+                          `You have ${draft.photos.length} — add at least one more, or upload more then press Next.`,
+                        ),
+                      )
+                    : tx(
+                        L(
+                          `جاهز (${draft.photos.length} صور). يمكنك رفع المزيد أو الضغط على التالي للاستمرار.`,
+                          `Ready (${draft.photos.length} photos). You can add more or press Next to continue.`,
+                        ),
+                      )}
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  disabled={draft.photos.length >= MAX_PHOTOS}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {tx(L("رفع المزيد", "Upload more"))}
+                </button>
+                <button
+                  type="button"
+                  className={`btn-primary ${draft.photos.length < MIN_PHOTOS ? "opacity-40" : ""}`}
+                  disabled={draft.photos.length < MIN_PHOTOS}
+                  onClick={() => go(16)}
+                >
+                  {tx(L("الاستمرار للسعر", "Continue to pricing"))}
+                </button>
+              </div>
             </Question>
           )}
 
@@ -810,6 +893,16 @@ export function SellWizard() {
                 )}
                 {draft.gearbox && (
                   <span className="chip">{draft.gearbox === "auto" ? tx(L("أوتوماتيك", "Auto")) : tx(L("عادي", "Manual"))}</span>
+                )}
+                {draft.smartKeys > 0 && (
+                  <span className="chip">
+                    {draft.smartKeys} {tx(L("ذكي", "smart"))}
+                  </span>
+                )}
+                {draft.regularKeys > 0 && (
+                  <span className="chip">
+                    {draft.regularKeys} {tx(L("عادي", "regular"))}
+                  </span>
                 )}
               </div>
               {model ? (
