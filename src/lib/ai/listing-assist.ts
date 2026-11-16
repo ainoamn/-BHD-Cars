@@ -9,6 +9,16 @@ export type ListingAssistInput = {
   sectionId?: string;
   style?: "calm" | "clear" | "warm";
   facts?: Record<string, string | number | string[] | null | undefined>;
+  /** When true (default for title/description), also produce the other language in the background. */
+  bilingual?: boolean;
+};
+
+export type ListingAssistCopyResult = {
+  ok: true;
+  source: "ai" | "template";
+  text: string;
+  textAr: string;
+  textEn: string;
 };
 
 function sectionCatalog() {
@@ -58,141 +68,137 @@ function templateRoute(prompt: string, locale: "ar" | "en") {
   };
 }
 
-function entityWord(sectionId: string | undefined, locale: "ar" | "en") {
-  const id = sectionId || "";
-  if (locale === "ar") {
-    if (id === "boats") return "الوحدة البحرية";
-    if (id === "motorcycle") return "الدراجة";
-    if (id === "heavy") return "المعدة";
-    if (id === "trucks") return "المركبة";
-    if (id === "parts" || id === "consumables" || id === "accessories" || id === "tires") return "القطعة";
-    if (id === "plates") return "اللوحة";
-    if (id === "cars-rent") return "المركبة";
-    if (id === "scrap") return "مركبة التفكيك";
-    return "السيارة";
-  }
-  if (id === "boats") return "vessel";
-  if (id === "motorcycle") return "motorcycle";
-  if (id === "heavy") return "equipment";
-  if (id === "trucks") return "truck";
-  if (id === "parts" || id === "consumables" || id === "accessories" || id === "tires") return "item";
-  if (id === "plates") return "plate";
-  if (id === "scrap") return "dismantling vehicle";
-  return "vehicle";
+function fact(f: ListingAssistInput["facts"], key: string) {
+  const v = f?.[key];
+  if (v === null || v === undefined) return "";
+  if (Array.isArray(v)) return v.filter(Boolean).join(", ");
+  return String(v).trim();
 }
 
 function isSeriousSection(sectionId?: string) {
   return sectionId === "scrap" || sectionId === "heavy";
 }
 
-const FACT_LABELS: Record<string, { ar: string; en: string }> = {
-  make: { ar: "الشركة", en: "Make" },
-  model: { ar: "الطراز", en: "Model" },
-  year: { ar: "سنة الصنع", en: "Year" },
-  condition: { ar: "الحالة", en: "Condition" },
-  location: { ar: "الموقع", en: "Location" },
-  vesselType: { ar: "نوع الوحدة", en: "Vessel type" },
-  length: { ar: "الطول", en: "Length" },
-  engineHours: { ar: "ساعات المحرك", en: "Engine hours" },
-  trailer: { ar: "المقطورة", en: "Trailer" },
-  price: { ar: "السعر", en: "Price" },
-  payment: { ar: "أسلوب السداد", en: "Payment" },
-  phone: { ar: "التواصل", en: "Contact" },
-  mileage: { ar: "الممشى", en: "Mileage" },
-  hours: { ar: "ساعات التشغيل", en: "Operating hours" },
-  color: { ar: "اللون", en: "Colour" },
-  fuel: { ar: "الوقود", en: "Fuel" },
-  gearbox: { ar: "ناقل الحركة", en: "Gearbox" },
-  seats: { ar: "المقاعد", en: "Seats" },
-  body: { ar: "الهيكل", en: "Body" },
-  origin: { ar: "مصدر المواصفات", en: "Spec origin" },
-  trim: { ar: "التجهيز", en: "Trim" },
-  section: { ar: "القسم", en: "Section" },
-  partName: { ar: "اسم القطعة", en: "Part name" },
-  name: { ar: "الاسم", en: "Name" },
-  plateDigits: { ar: "الرقم", en: "Digits" },
-  equipType: { ar: "نوع المعدة", en: "Equipment type" },
-  rentPeriod: { ar: "مدة التأجير", en: "Hire period" },
-  scrapType: { ar: "شكل العرض", en: "Offer form" },
-  damageLevel: { ar: "شدة الضرر", en: "Damage severity" },
-  titleStatus: { ar: "وثائق الملكية", en: "Ownership papers" },
-  exportable: { ar: "إمكانية الشحن خارج السلطنة", en: "Export readiness" },
-  cylinders: { ar: "الإسطوانات", en: "Cylinders" },
-  engine: { ar: "المحرك", en: "Engine" },
-};
-
-const SKIP_FACT_KEYS = new Set([
-  "title",
-  "photos",
-  "note",
-  "makeId",
-  "modelId",
-  "governorate",
-  "wilayat",
-  "village",
-  "section",
-]);
+function titleBits(facts: ListingAssistInput["facts"], sectionId?: string) {
+  const f = facts ?? {};
+  if (sectionId === "tires") {
+    return [fact(f, "brand"), fact(f, "size") || fact(f, "diameter"), fact(f, "product"), fact(f, "quantity") ? `×${fact(f, "quantity")}` : ""]
+      .filter(Boolean);
+  }
+  if (sectionId === "parts" || sectionId === "consumables" || sectionId === "accessories") {
+    return [fact(f, "partName") || fact(f, "name") || fact(f, "brand"), fact(f, "make"), fact(f, "model")].filter(Boolean);
+  }
+  if (sectionId === "plates") {
+    return [fact(f, "plateDigits") || fact(f, "name"), fact(f, "code")].filter(Boolean);
+  }
+  return [
+    fact(f, "make"),
+    fact(f, "model"),
+    fact(f, "year"),
+    fact(f, "partName"),
+    fact(f, "name"),
+    fact(f, "plateDigits"),
+    fact(f, "equipType"),
+    fact(f, "brand"),
+  ].filter(Boolean);
+}
 
 function templateTitle(facts: ListingAssistInput["facts"], locale: "ar" | "en", style?: ListingAssistInput["style"], sectionId?: string) {
-  const f = facts ?? {};
-  const bits = [f.make, f.model, f.year, f.partName, f.name, f.plateDigits, f.equipType]
-    .filter(Boolean)
-    .map(String);
-  const base = bits.join(" ") || (locale === "ar" ? "عرض على BHD Cars" : "Listing on BHD Cars");
+  const bits = titleBits(facts, sectionId);
+  const base =
+    bits.join(locale === "ar" ? " " : " ") ||
+    (locale === "ar" ? listingSections.find((s) => s.id === sectionId)?.name.ar ?? "عرض على BHD Cars" : listingSections.find((s) => s.id === sectionId)?.name.en ?? "Listing on BHD Cars");
+
   if (sectionId === "scrap") {
     return locale === "ar" ? `${base} — للتفكيك ببيانات معلنة` : `${base} — for dismantling, details declared`;
   }
-  if (style === "warm") {
+  if (sectionId === "tires") {
+    return locale === "ar" ? `${base} للبيع` : `${base} for sale`;
+  }
+  if (sectionId === "parts" || sectionId === "consumables" || sectionId === "accessories") {
+    return locale === "ar" ? `${base} — قطعة جاهزة` : `${base} — ready part`;
+  }
+  if (style === "warm" && !isSeriousSection(sectionId)) {
     if (sectionId === "boats") {
-      return locale === "ar" ? `${base} — جاهز يفرّح البحر!` : `${base} — ready for bright days on the water!`;
+      return locale === "ar" ? `${base} — جاهز للبحر` : `${base} — ready for the water`;
     }
-    return locale === "ar" ? `${base} — فرصة تفرّح العين!` : `${base} — ready to brighten your day!`;
+    return locale === "ar" ? `${base} للبيع` : `${base} for sale`;
   }
   return locale === "ar" ? `${base} — جاهز للمعاينة` : `${base} — ready to view`;
 }
 
-function templateDescription(input: ListingAssistInput) {
-  const f = input.facts ?? {};
-  const ar = input.locale !== "en";
-  const style = input.style ?? "clear";
-  const entity = entityWord(input.sectionId, ar ? "ar" : "en");
-  const serious = isSeriousSection(input.sectionId);
-  const lines = Object.entries(f)
-    .filter(([k, v]) => !SKIP_FACT_KEYS.has(k) && v !== null && v !== undefined && String(v).trim() !== "")
-    .slice(0, 10)
-    .map(([k, v]) => {
-      const label = FACT_LABELS[k]?.[ar ? "ar" : "en"] ?? (ar ? k : k.replace(/([A-Z])/g, " $1").trim());
-      const value = Array.isArray(v) ? v.join(ar ? "، " : ", ") : String(v);
-      return `• ${label}: ${value}`;
-    });
+function proseFacts(facts: ListingAssistInput["facts"], locale: "ar" | "en", sectionId?: string) {
+  const f = facts ?? {};
+  const parts: string[] = [];
+  const push = (arLabel: string, enLabel: string, key: string, transform?: (v: string) => string) => {
+    const raw = fact(f, key);
+    if (!raw) return;
+    const value = transform ? transform(raw) : raw;
+    parts.push(locale === "ar" ? `${arLabel} ${value}` : `${enLabel} ${value}`);
+  };
 
-  if (ar) {
-    const opener = serious
-      ? `عرض ${entity} عبر BHD Cars — البيانات معلنة بوضوح:`
-      : style === "warm"
-        ? `مرحبا! ${entity} جاهزة تفرّح يومك عبر BHD Cars.`
-        : style === "calm"
-          ? `تفاصيل ${entity} كما أدخلها البائع:`
-          : `ملخص العرض:`;
-    const closer = serious
-      ? "المعاينة والفحص حسب الاتفاق قبل إتمام الصفقة."
-      : "المعاينة والفحص متاحان حسب الاتفاق.";
-    return [opener, ...lines, closer].join("\n");
+  if (sectionId === "tires") {
+    push("النوع:", "Type:", "product");
+    push("العلامة:", "Brand:", "brand");
+    push("المقاس:", "Size:", "size");
+    push("القطر:", "Diameter:", "diameter");
+    push("الكمية:", "Qty:", "quantity");
+    push("الحالة:", "Condition:", "condition");
+    push("يناسب:", "Fits:", "fitment");
+  } else if (sectionId === "scrap") {
+    push("الشركة:", "Make:", "make");
+    push("الطراز:", "Model:", "model");
+    push("السنة:", "Year:", "year");
+    push("المحرك:", "Engine:", "cylinders");
+    push("الضرر:", "Damage:", "damageLevel");
+    push("الوثائق:", "Papers:", "titleStatus");
+    push("الشحن خارج السلطنة:", "Export:", "exportable");
+  } else {
+    push("الشركة:", "Make:", "make");
+    push("الطراز:", "Model:", "model");
+    push("السنة:", "Year:", "year");
+    push("القطعة:", "Part:", "partName");
+    push("العلامة:", "Brand:", "brand");
+    push("الحالة:", "Condition:", "condition");
+    push("الممشى:", "Mileage:", "mileage");
   }
-  const opener = serious
-    ? `A ${entity} listing on BHD Cars — facts declared clearly:`
-    : style === "warm"
-      ? `Hello! This ${entity} is ready to brighten your day on BHD Cars.`
-      : style === "calm"
-        ? `Listing facts for this ${entity}:`
-        : "Listing summary:";
-  const closer = serious
-    ? "Viewing and inspection by arrangement before the deal."
-    : "Viewing and inspection by arrangement.";
-  return [opener, ...lines, closer].join("\n");
+  push("الموقع:", "Location:", "location");
+  push("السعر:", "Price:", "price");
+  push("السداد:", "Payment:", "payment");
+  return parts;
 }
 
-async function callModel(system: string, user: string) {
+function templateDescription(input: ListingAssistInput) {
+  const locale = input.locale === "en" ? "en" : "ar";
+  const sectionId = input.sectionId;
+  const style = input.style ?? "clear";
+  const serious = isSeriousSection(sectionId);
+  const lines = proseFacts(input.facts, locale, sectionId);
+  const body = lines.join(locale === "ar" ? " · " : " · ");
+
+  if (locale === "ar") {
+    const opener = serious
+      ? "عرض معلن عبر BHD Cars:"
+      : sectionId === "tires"
+        ? "إطارات وعجلات معروضة عبر BHD Cars:"
+        : style === "warm"
+          ? "عرض جاهز عبر BHD Cars:"
+          : "تفاصيل العرض:";
+    const closer = "المعاينة حسب الاتفاق.";
+    return [opener, body, closer].filter(Boolean).join("\n");
+  }
+
+  const opener = serious
+    ? "Declared listing on BHD Cars:"
+    : sectionId === "tires"
+      ? "Tires & wheels listed on BHD Cars:"
+      : style === "warm"
+        ? "Ready listing on BHD Cars:"
+        : "Listing details:";
+  return [opener, body, "Viewing by arrangement."].filter(Boolean).join("\n");
+}
+
+async function callModel(system: string, user: string, temperature = 0.55) {
   const key = process.env.OPENAI_API_KEY?.trim() || process.env.GROQ_API_KEY?.trim() || "";
   if (!key) return null;
   const useGroq = Boolean(process.env.GROQ_API_KEY?.trim()) && !process.env.OPENAI_API_KEY?.trim();
@@ -209,7 +215,7 @@ async function callModel(system: string, user: string) {
       },
       body: JSON.stringify({
         model,
-        temperature: 0.65,
+        temperature,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -222,6 +228,58 @@ async function callModel(system: string, user: string) {
   } catch {
     return null;
   }
+}
+
+function parseBilingual(raw: string | null): { ar?: string; en?: string } | null {
+  if (!raw) return null;
+  try {
+    const cleaned = raw.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(cleaned) as { ar?: string; en?: string };
+    if (parsed.ar || parsed.en) return parsed;
+  } catch {
+    /* not json */
+  }
+  return null;
+}
+
+async function generateBilingualCopy(input: ListingAssistInput, kind: "title" | "description"): Promise<ListingAssistCopyResult> {
+  const locale = input.locale === "en" ? "en" : "ar";
+  const serious = isSeriousSection(input.sectionId);
+  const fallbackAr = kind === "title"
+    ? templateTitle(input.facts, "ar", input.style, input.sectionId)
+    : templateDescription({ ...input, locale: "ar" });
+  const fallbackEn = kind === "title"
+    ? templateTitle(input.facts, "en", input.style, input.sectionId)
+    : templateDescription({ ...input, locale: "en" });
+
+  const styleHint =
+    serious
+      ? "honest, declared, non-celebratory"
+      : input.style === "warm"
+        ? "warm and inviting but realistic marketplace tone"
+        : input.style === "calm"
+          ? "calm professional"
+          : "short and direct";
+
+  const system =
+    kind === "title"
+      ? `You write realistic marketplace listing titles for BHD Cars (Oman). Return JSON only: {"ar":"...","en":"..."}.
+Rules: use the given facts (brand, size, make, model, year, quantity, etc.). Never invent specs. Never use raw field keys. Never write generic filler like "عرض على BHD Cars" or "فرصة تفرّح العين" unless facts are empty. Max 80 chars each language. Tone: ${styleHint}. Arabic in ar, English in en.`
+      : `You write realistic marketplace listing descriptions for BHD Cars (Oman). Return JSON only: {"ar":"...","en":"..."}.
+Rules: 1–2 short paragraphs or natural Arabic/English sentences (bullets OK if natural). Use only given facts. Never dump English keys like product/brand/diameter. Never celebratory nonsense for scrap. Tone: ${styleHint}. Arabic in ar, English in en. Mention viewing by arrangement once.`;
+
+  const ai = await callModel(system, JSON.stringify({ sectionId: input.sectionId, facts: input.facts, preferredLocale: locale }), 0.5);
+  const parsed = parseBilingual(ai);
+  const textAr = (parsed?.ar || fallbackAr).slice(0, kind === "title" ? 100 : 4000);
+  const textEn = (parsed?.en || fallbackEn).slice(0, kind === "title" ? 100 : 4000);
+  const text = locale === "ar" ? textAr : textEn;
+  return {
+    ok: true,
+    source: parsed?.ar || parsed?.en ? "ai" : "template",
+    text,
+    textAr,
+    textEn,
+  };
 }
 
 export async function runListingAssist(input: ListingAssistInput) {
@@ -253,64 +311,11 @@ export async function runListingAssist(input: ListingAssistInput) {
   }
 
   if (input.action === "title") {
-    const serious = isSeriousSection(input.sectionId);
-    const cheerful = input.style === "warm" && !serious;
-    const fallback = templateTitle(input.facts, locale, input.style, input.sectionId);
-    const langLock =
-      locale === "ar"
-        ? "اكتب بالعربية فقط. ممنوع أي كلمة إنجليزية أو ترجمة مزدوجة."
-        : "Write in English only. No Arabic text and no bilingual dual lines.";
-    const ai = await callModel(
-      locale === "ar"
-        ? serious
-          ? `اكتب عنوان عرض تفكيك/معدات قصيرًا وواضحًا بالعربية الفصحى السهلة (أقل من 80 حرفًا). صيغة واقعية معلنة — بلا احتفال أو «تفرّح العين». ${langLock} أرجع النص فقط.`
-          : cheerful
-            ? `اكتب عنوان عرض قصير مرحًا وودّيًا بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. حيوي ومشجّع دون مبالغة كاذبة. ${langLock} أرجع النص فقط.`
-            : `اكتب عنوان عرض قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. بلا مبالغة. ${langLock} أرجع النص فقط.`
-        : serious
-          ? `Write a short clear dismantling/equipment listing title under 80 chars. Honest and declared — no party/hype tone. ${langLock} Return text only.`
-          : cheerful
-            ? `Write a short cheerful, warm listing title under 80 chars from the given facts. Inviting but factual. ${langLock} Return text only.`
-            : `Write a short factual listing title under 80 chars from the given facts. No hype. ${langLock} Return text only.`,
-      JSON.stringify({ facts: input.facts, sectionId: input.sectionId }),
-    );
-    return { ok: true as const, source: ai ? ("ai" as const) : ("template" as const), text: (ai || fallback).slice(0, 100) };
+    return generateBilingualCopy(input, "title");
   }
 
   if (input.action === "description" || input.action === "polish") {
-    const fallback = templateDescription({ ...input, locale });
-    const serious = isSeriousSection(input.sectionId);
-    const styleHint = serious
-      ? locale === "ar"
-        ? "بنبرة واضحة وواقعية ومعلنة — مناسبة للتفكيك أو المعدات، دون مرح احتفالي"
-        : "clear, factual, and declared — suitable for dismantling or equipment, not celebratory"
-      : input.style === "warm"
-        ? locale === "ar"
-          ? "بنبرة مرحة وودّية ومشرقة — قصيرة ومشجّعة دون مبالغة كاذبة"
-          : "cheerful, warm, and upbeat — short and inviting, still factual"
-        : input.style === "calm"
-          ? locale === "ar"
-            ? "بنبرة هادئة مهنية"
-            : "calm professional"
-          : locale === "ar"
-            ? "بأسلوب واضح مباشر"
-            : "clear and direct";
-    const langLock =
-      locale === "ar"
-        ? "اكتب بالعربية فقط. ممنوع الإنجليزية أو عرض لغتين معًا."
-        : "Write in English only. Do not include Arabic or dual-language lines.";
-    const entity = entityWord(input.sectionId, locale);
-    const ai = await callModel(
-      locale === "ar"
-        ? `اكتب وصف عرض حقيقي ومفيد بالعربية الفصحى السهلة ${styleHint}. استخدم كلمة مناسبة مثل «${entity}» لا كلمة خاطئة. لا تعرض مفاتيح إنجليزية للحقول؛ اكتب تسميات عربية طبيعية. فقرة أو نقاط من البيانات فقط. ${langLock} أرجع النص فقط.`
-        : `Write a real, useful listing description ${styleHint}. Refer to it as a “${entity}” (not the wrong category). Never dump raw field keys; use natural English labels. One short paragraph or bullets from facts only. ${langLock} Return text only.`,
-      JSON.stringify({ facts: input.facts, sectionId: input.sectionId, prompt: input.prompt }),
-    );
-    return {
-      ok: true as const,
-      source: ai ? ("ai" as const) : ("template" as const),
-      text: (ai || fallback).slice(0, 4000),
-    };
+    return generateBilingualCopy(input, "description");
   }
 
   return { ok: false as const, error: "Unknown action" };

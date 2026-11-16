@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { MakePicker } from "@/components/make-picker";
 import { ModelThumb } from "@/components/model-thumb";
@@ -150,6 +150,8 @@ export function SectionWizard({ section }: { section: ListingSection }) {
   }, [selectedMake, modelQuery, locale]);
 
   const previewTitle = useMemo(() => {
+    const fromLocale = locale === "ar" ? values.titleAr : values.titleEn;
+    if (fromLocale?.trim()) return fromLocale.trim();
     if (values.title?.trim()) return values.title.trim();
     const makeLabel = selectedMake ? (locale === "ar" ? selectedMake.name.ar : selectedMake.name.en) : values.make;
     const modelLabel = (() => {
@@ -157,11 +159,46 @@ export function SectionWizard({ section }: { section: ListingSection }) {
       if (found) return locale === "ar" ? found.name.ar : found.name.en;
       return values.model;
     })();
-    const bits = [makeLabel, modelLabel, values.year, values.partName, values.name, values.plateDigits]
+    const bits = [
+      values.brand,
+      values.size,
+      values.diameter ? (locale === "ar" ? `${values.diameter} بوصة` : `${values.diameter}"`) : "",
+      makeLabel,
+      modelLabel,
+      values.year,
+      values.partName,
+      values.name,
+      values.plateDigits,
+      values.quantity ? `×${values.quantity}` : "",
+    ]
       .filter(Boolean)
       .join(" ");
     return bits || tx(section.name);
   }, [values, section.name, tx, selectedMake, locale]);
+
+  useEffect(() => {
+    setValues((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      if (locale === "ar" && prev.titleAr?.trim() && prev.title !== prev.titleAr) {
+        next.title = prev.titleAr;
+        changed = true;
+      }
+      if (locale === "en" && prev.titleEn?.trim() && prev.title !== prev.titleEn) {
+        next.title = prev.titleEn;
+        changed = true;
+      }
+      if (locale === "ar" && prev.noteAr?.trim() && prev.note !== prev.noteAr) {
+        next.note = prev.noteAr;
+        changed = true;
+      }
+      if (locale === "en" && prev.noteEn?.trim() && prev.note !== prev.noteEn) {
+        next.note = prev.noteEn;
+        changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [locale]);
 
   const readiness = useMemo(() => {
     const required = fields.filter((item) => item.required);
@@ -242,13 +279,35 @@ export function SectionWizard({ section }: { section: ListingSection }) {
           action,
           style: style ?? "warm",
           sectionId: section.id,
+          bilingual: true,
           facts: localizedFacts(),
         }),
       });
-      const json = (await res.json()) as { text?: string };
-      if (!json.text) return;
-      if (action === "title") patch("title", json.text.slice(0, 100));
-      else patch("note", json.text.slice(0, 4000));
+      const json = (await res.json()) as {
+        text?: string;
+        textAr?: string;
+        textEn?: string;
+      };
+      if (!json.text && !json.textAr && !json.textEn) return;
+      if (action === "title") {
+        const ar = (json.textAr || (locale === "ar" ? json.text : "") || "").slice(0, 100);
+        const en = (json.textEn || (locale === "en" ? json.text : "") || "").slice(0, 100);
+        setValues((prev) => ({
+          ...prev,
+          title: locale === "ar" ? ar || en : en || ar,
+          titleAr: ar,
+          titleEn: en,
+        }));
+      } else {
+        const ar = (json.textAr || (locale === "ar" ? json.text : "") || "").slice(0, 4000);
+        const en = (json.textEn || (locale === "en" ? json.text : "") || "").slice(0, 4000);
+        setValues((prev) => ({
+          ...prev,
+          note: locale === "ar" ? ar || en : en || ar,
+          noteAr: ar,
+          noteEn: en,
+        }));
+      }
     } finally {
       setAiBusy(false);
     }
@@ -262,6 +321,14 @@ export function SectionWizard({ section }: { section: ListingSection }) {
         next.village = "";
       }
       if (id === "wilayat") next.village = "";
+      if (id === "title") {
+        if (locale === "ar") next.titleAr = value;
+        else next.titleEn = value;
+      }
+      if (id === "note") {
+        if (locale === "ar") next.noteAr = value;
+        else next.noteEn = value;
+      }
       return next;
     });
   }

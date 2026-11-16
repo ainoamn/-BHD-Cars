@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrandLogo, ModelName } from "@/components/brand-logo";
 import { MakePicker } from "@/components/make-picker";
 import { ModelThumb } from "@/components/model-thumb";
@@ -115,7 +115,11 @@ type Draft = {
   wilayatId: string;
   villageId: string;
   adTitle: string;
+  adTitleAr: string;
+  adTitleEn: string;
   note: string;
+  noteAr: string;
+  noteEn: string;
   price: string;
   priceNegotiable: boolean;
   payment: string;
@@ -166,7 +170,11 @@ const empty: Draft = {
   wilayatId: "",
   villageId: "",
   adTitle: "",
+  adTitleAr: "",
+  adTitleEn: "",
   note: "",
+  noteAr: "",
+  noteEn: "",
   price: "",
   priceNegotiable: true,
   payment: "",
@@ -510,6 +518,30 @@ export function SellWizard() {
     }
   }
 
+  useEffect(() => {
+    setDraft((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      if (locale === "ar" && prev.adTitleAr?.trim() && prev.adTitle !== prev.adTitleAr) {
+        next.adTitle = prev.adTitleAr;
+        changed = true;
+      }
+      if (locale === "en" && prev.adTitleEn?.trim() && prev.adTitle !== prev.adTitleEn) {
+        next.adTitle = prev.adTitleEn;
+        changed = true;
+      }
+      if (locale === "ar" && prev.noteAr?.trim() && prev.note !== prev.noteAr) {
+        next.note = prev.noteAr;
+        changed = true;
+      }
+      if (locale === "en" && prev.noteEn?.trim() && prev.note !== prev.noteEn) {
+        next.note = prev.noteEn;
+        changed = true;
+      }
+      return changed ? next : prev;
+    });
+  }, [locale]);
+
   async function generateTitleAi() {
     setAiBusy(true);
     try {
@@ -520,17 +552,28 @@ export function SellWizard() {
           locale,
           action: "title",
           style: "warm",
+          bilingual: true,
           sectionId: "cars-sale",
           facts: {
             make: make ? tx(make.name) : "",
             model: model ? tx(model.name) : "",
             year: draft.year,
             trim: draft.trim,
+            condition: optionLabel(conditions, draft.condition, tx),
+            mileage: draft.mileageBand ? `${mileage}` : "",
           },
         }),
       });
-      const json = (await res.json()) as { text?: string };
-      if (json.text) patch({ adTitle: json.text.slice(0, TITLE_MAX) });
+      const json = (await res.json()) as { text?: string; textAr?: string; textEn?: string };
+      const ar = (json.textAr || (locale === "ar" ? json.text : "") || "").slice(0, TITLE_MAX);
+      const en = (json.textEn || (locale === "en" ? json.text : "") || "").slice(0, TITLE_MAX);
+      if (ar || en) {
+        patch({
+          adTitle: locale === "ar" ? ar || en : en || ar,
+          adTitleAr: ar,
+          adTitleEn: en,
+        });
+      }
     } finally {
       setAiBusy(false);
     }
@@ -563,63 +606,49 @@ export function SellWizard() {
       advance();
       return;
     }
+    const assistStyle = style === "casual" ? "warm" : style === "professional" ? "calm" : "clear";
     setAiBusy(true);
     try {
-      const res = await fetch("/api/ai/listing-description", {
+      const res = await fetch("/api/ai/listing-assist", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           locale,
-          style,
-          title,
-          make: make ? tx(make.name) : "",
-          model: model ? tx(model.name) : "",
-          year: draft.year,
-          condition: optionLabel(conditions, draft.condition, tx),
-          mileage: draft.mileageBand
-            ? `${mileage.toLocaleString()} ${locale === "ar" ? "كم" : "km"}`
-            : "",
-          origin: optionLabel(regionalSpecs, draft.origin, tx),
-          trim: draft.trim,
-          body: bodyTypes.find((b) => b.id === draft.body)
-            ? tx(bodyTypes.find((b) => b.id === draft.body)!.name)
-            : draft.body,
-          seats: optionLabel(seatCounts, draft.seats, tx),
-          fuel: optionLabel(fuelTypes, draft.fuel, tx),
-          gearbox:
-            draft.gearbox === "auto"
-              ? locale === "ar"
-                ? "أوتوماتيك"
-                : "Automatic"
-              : draft.gearbox === "manual"
-                ? locale === "ar"
-                  ? "عادي"
-                  : "Manual"
-                : draft.gearbox,
-          cylinders: draft.cylinders,
-          drive: draft.drive,
-          exterior: exteriorColors.find((c) => c.id === draft.exterior)
-            ? tx(exteriorColors.find((c) => c.id === draft.exterior)!.name)
-            : draft.exterior,
-          interior: interiorColors.find((c) => c.id === draft.interior)
-            ? tx(interiorColors.find((c) => c.id === draft.interior)!.name)
-            : draft.interior,
-          license: optionLabel(licenseStatuses, draft.license, tx),
-          insurance: optionLabel(insuranceStatuses, draft.insurance, tx),
-          interiorFeatures: draft.interiorFeatureIds.map((id) => optionLabel(interiorFeatures, id, tx)),
-          exteriorFeatures: draft.exteriorFeatureIds.map((id) => optionLabel(exteriorFeatures, id, tx)),
-          techFeatures: draft.techFeatureIds.map((id) => optionLabel(techFeatures, id, tx)),
-          smartKeys: draft.smartKeys,
-          regularKeys: draft.regularKeys,
-          price: draft.price,
-          priceNegotiable: draft.priceNegotiable,
-          payment: optionLabel(paymentMethods, draft.payment, tx),
-          location: placeLabel,
-          vin: draft.vin,
+          action: "description",
+          style: assistStyle,
+          bilingual: true,
+          sectionId: "cars-sale",
+          facts: {
+            title,
+            make: make ? tx(make.name) : "",
+            model: model ? tx(model.name) : "",
+            year: draft.year,
+            condition: optionLabel(conditions, draft.condition, tx),
+            mileage: draft.mileageBand
+              ? `${mileage.toLocaleString()} ${locale === "ar" ? "كم" : "km"}`
+              : "",
+            origin: optionLabel(regionalSpecs, draft.origin, tx),
+            trim: draft.trim,
+            body: bodyTypes.find((b) => b.id === draft.body)
+              ? tx(bodyTypes.find((b) => b.id === draft.body)!.name)
+              : draft.body,
+            fuel: optionLabel(fuelTypes, draft.fuel, tx),
+            price: draft.price ? `${draft.price} OMR` : "",
+            payment: optionLabel(paymentMethods, draft.payment, tx),
+            location: placeLabel,
+          },
         }),
       });
-      const json = (await res.json()) as { ok?: boolean; text?: string };
-      if (json.ok && json.text) patch({ note: json.text.slice(0, NOTE_MAX) });
+      const json = (await res.json()) as { text?: string; textAr?: string; textEn?: string };
+      const ar = (json.textAr || (locale === "ar" ? json.text : "") || "").slice(0, NOTE_MAX);
+      const en = (json.textEn || (locale === "en" ? json.text : "") || "").slice(0, NOTE_MAX);
+      if (ar || en) {
+        patch({
+          note: locale === "ar" ? ar || en : en || ar,
+          noteAr: ar,
+          noteEn: en,
+        });
+      }
     } finally {
       setAiBusy(false);
     }
@@ -1490,7 +1519,14 @@ export function SellWizard() {
                   className="field"
                   value={draft.adTitle}
                   maxLength={TITLE_MAX}
-                  onChange={(event) => patch({ adTitle: event.target.value.slice(0, TITLE_MAX) })}
+                  onChange={(event) => {
+                    const value = event.target.value.slice(0, TITLE_MAX);
+                    patch(
+                      locale === "ar"
+                        ? { adTitle: value, adTitleAr: value }
+                        : { adTitle: value, adTitleEn: value },
+                    );
+                  }}
                   placeholder={
                     autoTitle
                       ? `${autoTitle}${locale === "ar" ? " للبيع" : " for sale"}`
@@ -1556,7 +1592,14 @@ export function SellWizard() {
                 rows={7}
                 value={draft.note}
                 maxLength={NOTE_MAX}
-                onChange={(event) => patch({ note: event.target.value.slice(0, NOTE_MAX) })}
+                onChange={(event) => {
+                  const value = event.target.value.slice(0, NOTE_MAX);
+                  patch(
+                    locale === "ar"
+                      ? { note: value, noteAr: value }
+                      : { note: value, noteEn: value },
+                  );
+                }}
                 placeholder={tx(
                   L(
                     "أضف المواصفات وحالة السيارة — أو اضغط التوليد المرح ثم عدّل النص.",
