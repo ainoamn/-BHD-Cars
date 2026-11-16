@@ -1,0 +1,196 @@
+import { listingSections } from "@/lib/listing-sections";
+
+export type ListingAssistAction = "route" | "title" | "description" | "polish";
+
+export type ListingAssistInput = {
+  locale: "ar" | "en";
+  action: ListingAssistAction;
+  prompt?: string;
+  sectionId?: string;
+  style?: "calm" | "clear" | "warm";
+  facts?: Record<string, string | number | string[] | null | undefined>;
+};
+
+function sectionCatalog() {
+  return listingSections.map((s) => ({
+    id: s.id,
+    nameAr: s.name.ar,
+    nameEn: s.name.en,
+    blurbAr: s.blurb.ar,
+    blurbEn: s.blurb.en,
+  }));
+}
+
+function templateRoute(prompt: string, locale: "ar" | "en") {
+  const q = prompt.toLowerCase();
+  const rules: Array<{ id: string; keys: string[] }> = [
+    { id: "cars-rent", keys: ["ايجار", "تأجير", "rent", "hire", "يومي", "شهري"] },
+    { id: "scrap", keys: ["تفكيك", "سكراب", "غير صالحة", "scrap", "salvage", "حادث كلي"] },
+    { id: "motorcycle", keys: ["دراجة", "سكوتر", "خوذة", "motorcycle", "scooter", "atv"] },
+    { id: "heavy", keys: ["حفار", "شيول", "رافعة", "كرين", "excavator", "forklift", "معدات"] },
+    { id: "trucks", keys: ["شاحنة", "حافلة", "مقطورة", "تريلا", "truck", "bus", "trailer"] },
+    { id: "boats", keys: ["قارب", "جت", "يخت", "بحري", "boat", "jetski", "yacht"] },
+    { id: "plates", keys: ["لوحة", "رقم مميز", "plate", "رقم"] },
+    { id: "tires", keys: ["إطار", "جنط", "tire", "rim", "wheel"] },
+    { id: "consumables", keys: ["زيت", "فلتر", "سائل", "oil", "fluid", "filter", "brake fluid"] },
+    { id: "parts", keys: ["قطعة", "قطع", "محرك", "فرامل", "part", "oem", "spare"] },
+    { id: "accessories", keys: ["إضافة", "تجهيز", "شاشة", "accessory", "cover", "audio"] },
+    { id: "cars-sale", keys: ["سيارة", "كامري", "لاند", "car", "sedan", "suv"] },
+  ];
+  for (const rule of rules) {
+    if (rule.keys.some((k) => q.includes(k))) {
+      const section = listingSections.find((s) => s.id === rule.id);
+      return {
+        sectionId: rule.id,
+        reason:
+          locale === "ar"
+            ? `أنسب مسار حسب وصفك: ${section?.name.ar ?? rule.id}`
+            : `Best path from your description: ${section?.name.en ?? rule.id}`,
+      };
+    }
+  }
+  return {
+    sectionId: "cars-sale",
+    reason:
+      locale === "ar"
+        ? "لم يتضح التصنيف بدقة — نبدأ بمسار السيارات للبيع ويمكنك التغيير."
+        : "Classification unclear — starting with cars for sale; you can change.",
+  };
+}
+
+function templateTitle(facts: ListingAssistInput["facts"], locale: "ar" | "en") {
+  const f = facts ?? {};
+  const bits = [f.make, f.model, f.year, f.partName, f.name, f.plateDigits, f.equipType]
+    .filter(Boolean)
+    .map(String);
+  const base = bits.join(" ") || (locale === "ar" ? "عرض على BHD Cars" : "Listing on BHD Cars");
+  return locale === "ar" ? `${base} — جاهز للمعاينة` : `${base} — ready to view`;
+}
+
+function templateDescription(input: ListingAssistInput) {
+  const f = input.facts ?? {};
+  const ar = input.locale !== "en";
+  const style = input.style ?? "clear";
+  const lines = Object.entries(f)
+    .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "")
+    .slice(0, 12)
+    .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`);
+
+  if (ar) {
+    const opener =
+      style === "warm"
+        ? "عرض واضح ومرتب عبر BHD Cars."
+        : style === "calm"
+          ? "تفاصيل العرض كما أدخلها البائع:"
+          : "ملخص العرض:";
+    return [opener, ...lines.map((l) => `• ${l}`), "المعاينة والفحص متاحان حسب الاتفاق."].join("\n");
+  }
+  const opener =
+    style === "warm"
+      ? "A clear listing on BHD Cars."
+      : style === "calm"
+        ? "Listing facts as entered:"
+        : "Listing summary:";
+  return [opener, ...lines.map((l) => `• ${l}`), "Viewing and inspection by arrangement."].join("\n");
+}
+
+async function callModel(system: string, user: string) {
+  const key = process.env.OPENAI_API_KEY?.trim() || process.env.GROQ_API_KEY?.trim() || "";
+  if (!key) return null;
+  const useGroq = Boolean(process.env.GROQ_API_KEY?.trim()) && !process.env.OPENAI_API_KEY?.trim();
+  const endpoint = useGroq
+    ? "https://api.groq.com/openai/v1/chat/completions"
+    : "https://api.openai.com/v1/chat/completions";
+  const model = useGroq ? "llama-3.3-70b-versatile" : "gpt-4o-mini";
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${key}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.4,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    return json.choices?.[0]?.message?.content?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function runListingAssist(input: ListingAssistInput) {
+  const locale = input.locale === "en" ? "en" : "ar";
+
+  if (input.action === "route") {
+    const prompt = (input.prompt || "").trim();
+    const fallback = templateRoute(prompt, locale);
+    const ai = await callModel(
+      locale === "ar"
+        ? "أنت موجّه عروض BHD Cars. اختر sectionId واحدًا من القائمة فقط وأرجع JSON: {\"sectionId\":\"...\",\"reason\":\"...\"}. لا تنسخ أسماء مواقع أخرى."
+        : "You route BHD Cars listings. Pick one sectionId from the catalog and return JSON {\"sectionId\":\"...\",\"reason\":\"...\"}. Do not copy other marketplaces.",
+      JSON.stringify({ prompt, catalog: sectionCatalog() }),
+    );
+    if (ai) {
+      try {
+        const parsed = JSON.parse(ai.replace(/```json|```/g, "").trim()) as {
+          sectionId?: string;
+          reason?: string;
+        };
+        if (parsed.sectionId && listingSections.some((s) => s.id === parsed.sectionId)) {
+          return { ok: true as const, source: "ai" as const, ...parsed, sectionId: parsed.sectionId };
+        }
+      } catch {
+        /* fallback */
+      }
+    }
+    return { ok: true as const, source: "template" as const, ...fallback };
+  }
+
+  if (input.action === "title") {
+    const fallback = templateTitle(input.facts, locale);
+    const ai = await callModel(
+      locale === "ar"
+        ? "اكتب عنوان عرض سيارات قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا). بلا مبالغة. أرجع النص فقط."
+        : "Write a short factual vehicle listing title under 80 chars. No hype. Return text only.",
+      JSON.stringify({ facts: input.facts, sectionId: input.sectionId }),
+    );
+    return { ok: true as const, source: ai ? ("ai" as const) : ("template" as const), text: (ai || fallback).slice(0, 100) };
+  }
+
+  if (input.action === "description" || input.action === "polish") {
+    const fallback = templateDescription({ ...input, locale });
+    const styleHint =
+      input.style === "warm"
+        ? locale === "ar"
+          ? "بنبرة ودّية هادئة"
+          : "warm and friendly"
+        : input.style === "calm"
+          ? locale === "ar"
+            ? "بنبرة هادئة مهنية"
+            : "calm professional"
+          : locale === "ar"
+            ? "بأسلوب واضح مباشر"
+            : "clear and direct";
+    const ai = await callModel(
+      locale === "ar"
+        ? `اكتب وصف عرض مختصر بالعربية الفصحى السهلة ${styleHint}. فقرة أو نقاط. اعتمادًا على البيانات فقط.`
+        : `Write a concise listing description ${styleHint}. One short paragraph or bullets. Facts only.`,
+      JSON.stringify({ facts: input.facts, sectionId: input.sectionId, prompt: input.prompt }),
+    );
+    return {
+      ok: true as const,
+      source: ai ? ("ai" as const) : ("template" as const),
+      text: (ai || fallback).slice(0, 4000),
+    };
+  }
+
+  return { ok: false as const, error: "Unknown action" };
+}

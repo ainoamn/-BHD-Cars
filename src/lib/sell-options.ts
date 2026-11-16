@@ -10,14 +10,14 @@ export const conditions: Option[] = [
 ];
 
 export const regionalSpecs: Option[] = [
-  { id: "gcc", name: L("مواصفات خليجية", "Gulf specs") },
-  { id: "american", name: L("مواصفات أمريكية", "American specs") },
-  { id: "european", name: L("مواصفات أوروبية", "European specs") },
-  { id: "japanese", name: L("مواصفات يابانية", "Japanese specs") },
-  { id: "korean", name: L("مواصفات كورية", "Korean specs") },
-  { id: "chinese", name: L("مواصفات صينية", "Chinese specs") },
-  { id: "agency", name: L("وارد وكالة", "Agency import") },
-  { id: "other", name: L("مواصفات أخرى", "Other specs") },
+  { id: "gcc", name: L("مواصفات دول الخليج", "GCC-built specs") },
+  { id: "american", name: L("مواصفات السوق الأمريكي", "US-market specs") },
+  { id: "european", name: L("مواصفات السوق الأوروبي", "EU-market specs") },
+  { id: "japanese", name: L("مواصفات السوق الياباني", "Japan-market specs") },
+  { id: "korean", name: L("مواصفات السوق الكوري", "Korea-market specs") },
+  { id: "chinese", name: L("مواصفات السوق الصيني", "China-market specs") },
+  { id: "agency", name: L("مواصفات الوكالة المحلية", "Local dealer specs") },
+  { id: "other", name: L("مصدر مواصفات آخر", "Other market origin") },
 ];
 
 export const fuelTypes: Option[] = [
@@ -50,9 +50,9 @@ export const insuranceStatuses: Option[] = [
 ];
 
 export const paymentMethods: Option[] = [
-  { id: "cash", name: L("كاش", "Cash") },
-  { id: "installments", name: L("أقساط", "Installments") },
-  { id: "both", name: L("كاش أو أقساط", "Cash or installments") },
+  { id: "cash", name: L("نقدًا", "Cash") },
+  { id: "installments", name: L("بالأقساط", "Installments") },
+  { id: "both", name: L("نقدًا أو أقساط", "Cash or installments") },
 ];
 
 export const interiorFeatures: Option[] = [
@@ -118,9 +118,9 @@ export const techFeatures: Option[] = [
 ];
 
 export const aiStyles = [
-  { id: "casual", name: L("عفوي", "Casual"), emoji: "😎" },
-  { id: "professional", name: L("احترافي", "Professional"), emoji: "🎓" },
-  { id: "simple", name: L("بسيط", "Simple"), emoji: "🙂" },
+  { id: "casual", name: L("ودّي واضح", "Warm & clear"), emoji: "✦" },
+  { id: "professional", name: L("هادئ مهني", "Calm professional"), emoji: "◆" },
+  { id: "simple", name: L("مختصر مباشر", "Short & direct"), emoji: "●" },
 ] as const;
 
 export type AiStyleId = (typeof aiStyles)[number]["id"];

@@ -47,7 +47,7 @@ const STEPS = [
   { id: "model", label: L("الفئة", "Category") },
   { id: "year", label: L("سنة الصنع", "Year") },
   { id: "condition", label: L("الحالة", "Condition") },
-  { id: "specs", label: L("مواصفات إقليمية", "Regional specs") },
+  { id: "specs", label: L("مصدر المواصفات", "Specs origin") },
   { id: "mileage", label: L("الممشى", "Mileage") },
   { id: "trim", label: L("التجهيز", "Trim") },
   { id: "body", label: L("نوع الهيكل", "Body type") },
@@ -69,7 +69,7 @@ const STEPS = [
   { id: "governorate", label: L("المحافظة", "Governorate") },
   { id: "wilayat", label: L("الولاية", "Wilayat") },
   { id: "village", label: L("القرية", "Village") },
-  { id: "title", label: L("اسم الإعلان", "Ad title") },
+  { id: "title", label: L("عنوان العرض", "Listing headline") },
   { id: "description", label: L("الوصف", "Description") },
   { id: "price", label: L("السعر", "Price") },
   { id: "payment", label: L("طريقة الدفع", "Payment") },
@@ -708,8 +708,8 @@ export function SellWizard() {
 
           {stepId === "specs" && (
             <Question
-              title={tx(L("مواصفات إقليمية", "Regional specifications"))}
-              lead={tx(L("اختر مصدر المواصفات الأنسب للسيارة.", "Pick the closest regional / import origin."))}
+              title={tx(L("مصدر المواصفات", "Specs origin"))}
+              lead={tx(L("سوق التصنيع أو مواصفات الوكالة — بمصطلح دقيق.", "Build market or local dealer specs — precise terms."))}
             >
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {regionalSpecs.map((item) => (
@@ -1200,7 +1200,7 @@ export function SellWizard() {
 
           {stepId === "title" && (
             <Question
-              title={tx(L("اسم الإعلان", "Ad title"))}
+              title={tx(L("عنوان العرض", "Listing headline"))}
               lead={tx(
                 L(
                   "أضف الماركة والموديل والسنة ليجدك المشتري بسرعة.",
@@ -1239,11 +1239,11 @@ export function SellWizard() {
           {stepId === "description" && (
             <Question
               title={tx(L("وصف الإعلان", "Ad description"))}
-              lead={tx(L("اكتب يدويًا أو دع الذكاء الاصطناعي يقترح أسلوبًا.", "Write yourself or let AI draft a style."))}
+              lead={tx(L("اكتب بنفسك أو اطلب صياغة من مساعد BHD.", "Write yourself or ask the BHD assistant to draft."))}
             >
               <div className="rounded-2xl border border-line bg-soft/50 p-4">
                 <p className="mb-3 text-sm font-semibold text-night">
-                  {tx(L("دع الذكاء الاصطناعي يكتب إعلانك", "Let AI write your ad"))}
+                  {tx(L("مساعد صياغة التفاصيل", "Details drafting assistant"))}
                 </p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                   {aiStyles.map((style) => (

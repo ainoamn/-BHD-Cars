@@ -59,13 +59,13 @@ export default function Page() {
             {section.icon} {tx(section.name)}
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-night md:text-4xl">
-            {tx(L("ما نوع السيارة؟", "What kind of car?"))}
+            {tx(L("اختر حالة السيارة بصدق", "Choose the car’s real condition"))}
           </h1>
           <p className="mt-3 max-w-2xl text-muted">
             {tx(
               L(
-                "نفرّق الجاهزة عن الحادث حتى لا تختلط الثقة — ثم نفتح قائمة الإدخال الخاصة بكل مسار.",
-                "We separate ready from accident so trust stays clear — then open the right entry list.",
+                "مساران منفصلان: جاهزة للسير، أو بحادث معلن. الشفافية هنا أقوى من أي قائمة طويلة.",
+                "Two separate paths: road-ready, or a declared accident. Transparency beats any long menu.",
               ),
             )}
           </p>

@@ -101,6 +101,7 @@ export function SectionWizard({ section }: { section: ListingSection }) {
   const [multi, setMulti] = useState<Record<string, string[]>>({});
   const [photos, setPhotos] = useState<string[]>([]);
   const [sent, setSent] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const maxReached = useRef(0);
 
@@ -124,6 +125,47 @@ export function SectionWizard({ section }: { section: ListingSection }) {
       .join(" ");
     return bits || tx(section.name);
   }, [values, section.name, tx]);
+
+  const readiness = useMemo(() => {
+    const required = fields.filter((item) => item.required);
+    if (!required.length) return 0;
+    let filled = 0;
+    for (const item of required) {
+      if (item.kind === "photos") {
+        if (photos.length >= (item.minPhotos ?? MIN_PHOTOS_DEFAULT)) filled += 1;
+        continue;
+      }
+      if (item.kind === "multi") {
+        if ((multi[item.id] ?? []).length) filled += 1;
+        continue;
+      }
+      if ((values[item.id] ?? "").trim()) filled += 1;
+    }
+    return Math.round((filled / required.length) * 100);
+  }, [fields, values, multi, photos]);
+
+  async function runAi(action: "title" | "description", style?: "calm" | "clear" | "warm") {
+    setAiBusy(true);
+    try {
+      const res = await fetch("/api/ai/listing-assist", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          locale,
+          action,
+          style: style ?? "clear",
+          sectionId: section.id,
+          facts: { ...values, photos: photos.length, title: values.title || previewTitle },
+        }),
+      });
+      const json = (await res.json()) as { text?: string };
+      if (!json.text) return;
+      if (action === "title") patch("title", json.text.slice(0, 100));
+      else patch("note", json.text.slice(0, 4000));
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   function patch(id: string, value: string) {
     setValues((prev) => {
@@ -277,20 +319,23 @@ export function SectionWizard({ section }: { section: ListingSection }) {
               {section.icon} {tx(section.name)}
             </p>
             <h1 className="text-xl font-bold tracking-tight text-night md:text-2xl">
-              {tx(L("أنشئ إعلانك بخطوات واضحة", "Build your listing in clear steps"))}
+              {tx(L("أكمل العرض بخطوات سلسة", "Complete the offer in smooth steps"))}
             </h1>
           </div>
           <Link href="/sell" className="rounded-full border border-line px-3 py-2 text-sm text-muted hover:text-night">
-            {tx(L("الأقسام", "Sections"))}
+            {tx(L("المسارات", "Paths"))}
           </Link>
         </div>
 
         <div className="mx-auto max-w-6xl space-y-3 px-5 pb-4">
-          <div className="flex items-center justify-between gap-3 text-xs text-muted">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
             <span>
               {tx(L("الخطوة", "Step"))} {step + 1} / {fields.length}
             </span>
             <span className="font-semibold text-night">{tx(field.label)}</span>
+            <span className="rounded-full border border-teal/30 bg-teal/10 px-2.5 py-1 font-semibold text-night">
+              {tx(L("جاهزية العرض", "Offer readiness"))}: {readiness}%
+            </span>
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-line">
             <div className="h-full rounded-full bg-brass transition-all duration-300" style={{ width: `${progress}%` }} />
@@ -376,34 +421,68 @@ export function SectionWizard({ section }: { section: ListingSection }) {
             )}
 
             {field.kind === "title" && (
-              <label className="block space-y-2">
-                <input
-                  className="field"
-                  maxLength={field.maxLength ?? 100}
-                  value={values.title ?? ""}
-                  onChange={(event) => patch("title", event.target.value.slice(0, field.maxLength ?? 100))}
-                  placeholder={field.placeholder ? tx(field.placeholder) : previewTitle}
-                />
-                <span className="block text-xs text-muted">
-                  {(values.title ?? "").length} / {field.maxLength ?? 100}
-                </span>
-              </label>
+              <div className="space-y-3">
+                <label className="block space-y-2">
+                  <input
+                    className="field"
+                    maxLength={field.maxLength ?? 100}
+                    value={values.title ?? ""}
+                    onChange={(event) => patch("title", event.target.value.slice(0, field.maxLength ?? 100))}
+                    placeholder={field.placeholder ? tx(field.placeholder) : previewTitle}
+                  />
+                  <span className="block text-xs text-muted">
+                    {(values.title ?? "").length} / {field.maxLength ?? 100}
+                  </span>
+                </label>
+                <button
+                  type="button"
+                  className="btn-teal"
+                  disabled={aiBusy}
+                  onClick={() => void runAi("title")}
+                >
+                  {aiBusy
+                    ? tx(L("جارٍ الصياغة…", "Drafting…"))
+                    : tx(L("صياغة العنوان بالمساعد", "Draft headline with assistant"))}
+                </button>
+              </div>
             )}
 
             {field.kind === "textarea" && (
-              <label className="block space-y-2">
-                <textarea
-                  className="field"
-                  rows={6}
-                  maxLength={field.maxLength ?? 4000}
-                  value={values.note ?? ""}
-                  onChange={(event) => patch("note", event.target.value.slice(0, field.maxLength ?? 4000))}
-                  placeholder={field.placeholder ? tx(field.placeholder) : undefined}
-                />
-                <span className="block text-xs text-muted">
-                  {(values.note ?? "").length} / {field.maxLength ?? 4000}
-                </span>
-              </label>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {(
+                    [
+                      ["warm", L("ودّي واضح", "Warm & clear")],
+                      ["calm", L("هادئ مهني", "Calm professional")],
+                      ["clear", L("مختصر مباشر", "Short & direct")],
+                    ] as const
+                  ).map(([style, label]) => (
+                    <button
+                      key={style}
+                      type="button"
+                      className="rounded-2xl border border-line bg-soft/50 px-3 py-3 text-sm font-medium text-night hover:border-teal/40"
+                      disabled={aiBusy}
+                      onClick={() => void runAi("description", style)}
+                    >
+                      {tx(label)}
+                    </button>
+                  ))}
+                </div>
+                <label className="block space-y-2">
+                  <textarea
+                    className="field"
+                    rows={6}
+                    maxLength={field.maxLength ?? 4000}
+                    value={values.note ?? ""}
+                    onChange={(event) => patch("note", event.target.value.slice(0, field.maxLength ?? 4000))}
+                    placeholder={field.placeholder ? tx(field.placeholder) : undefined}
+                  />
+                  <span className="block text-xs text-muted">
+                    {(values.note ?? "").length} / {field.maxLength ?? 4000}
+                    {aiBusy ? ` · ${tx(L("جارٍ التوليد…", "Generating…"))}` : ""}
+                  </span>
+                </label>
+              </div>
             )}
 
             {field.kind === "price" && (
@@ -510,7 +589,7 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                 disabled={!canNext()}
                 className={`btn-teal flex-1 ${!canNext() ? "opacity-40" : ""}`}
               >
-                {tx(L("حفظ و نشر الإعلان", "Save and publish"))}
+                {tx(L("حفظ ونشر العرض", "Save and publish offer"))}
               </button>
             )}
           </div>
@@ -519,7 +598,7 @@ export function SectionWizard({ section }: { section: ListingSection }) {
         <aside className="hidden lg:block">
           <div className="surface-card sticky top-28 overflow-hidden">
             <div className="bg-night px-5 py-3 text-xs font-medium tracking-[0.14em] text-brass">
-              {tx(L("معاينة مباشرة", "Live preview"))}
+              {tx(L("معاينة العرض", "Offer preview"))} · {readiness}%
             </div>
             <div className="aspect-[16/10] bg-soft">
               {photos[0] ? (
