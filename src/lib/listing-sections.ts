@@ -28,6 +28,7 @@ export type FieldDef = {
   optionsSource?: OptionsSource;
   placeholder?: Copy;
   minPhotos?: number;
+  maxPhotos?: number;
   maxLength?: number;
   suffix?: Copy;
   hold?: boolean;
@@ -175,18 +176,24 @@ function listingTail(opts?: {
   priceLabel?: Copy;
   priceLead?: Copy;
   minPhotos?: number;
+  maxPhotos?: number;
   photosLead?: Copy;
 }): FieldDef[] {
+  const minPhotos = opts?.minPhotos ?? 1;
+  const maxPhotos = opts?.maxPhotos ?? 1;
   return [
     {
       id: "photos",
       label: L("صور العرض", "Listing photos"),
       lead:
         opts?.photosLead ??
-        L("صورتان واضحتان على الأقل — الغلاف أول صورة.", "At least two clear photos — first image is the cover."),
+        (maxPhotos <= 1
+          ? L("صورة واحدة واضحة كافية لهذا العرض.", "One clear photo is enough for this listing.")
+          : L("صورتان واضحتان على الأقل — الغلاف أول صورة.", "At least two clear photos — first image is the cover.")),
       kind: "photos",
       required: true,
-      minPhotos: opts?.minPhotos ?? 2,
+      minPhotos,
+      maxPhotos,
     },
     ...locationFields(),
     {
@@ -385,7 +392,9 @@ export const listingSections: ListingSection[] = [
         ],
       },
       ...listingTail({
-        photosLead: L("صوّر نقاط الضرر والهيكل من زوايا متعددة.", "Photograph damage points and the shell from several angles."),
+        minPhotos: 1,
+        maxPhotos: 1,
+        photosLead: L("صورة واحدة واضحة لنقاط الضرر أو الهيكل تكفي.", "One clear photo of damage points or the shell is enough."),
       }),
     ],
   },
@@ -431,7 +440,7 @@ export const listingSections: ListingSection[] = [
       { id: "condition", label: L("حالة الاستخدام", "Condition"), kind: "choice", required: true, options: conditions },
       { id: "color", label: L("اللون", "Colour"), kind: "choice", required: true, options: colors },
       { id: "license", label: L("حالة الترخيص", "Registration status"), kind: "choice", required: true, options: licenseStatuses },
-      ...listingTail(),
+      ...listingTail({ minPhotos: 1, maxPhotos: 1 }),
     ],
   },
   {
@@ -488,7 +497,11 @@ export const listingSections: ListingSection[] = [
           { id: "none", name: L("بدون ملحقات", "None") },
         ],
       },
-      ...listingTail(),
+      ...listingTail({
+        minPhotos: 2,
+        maxPhotos: 12,
+        photosLead: L("صورتان على الأقل للمعدة من زوايا واضحة.", "At least two clear photos of the equipment."),
+      }),
     ],
   },
   {
@@ -552,7 +565,11 @@ export const listingSections: ListingSection[] = [
           { id: "manual", name: L("يدوي", "Manual") },
         ],
       },
-      ...listingTail(),
+      ...listingTail({
+        minPhotos: 2,
+        maxPhotos: 12,
+        photosLead: L("صورتان على الأقل للشاحنة أو الحافلة من زوايا واضحة.", "At least two clear photos of the truck or bus."),
+      }),
     ],
   },
   {
@@ -614,7 +631,11 @@ export const listingSections: ListingSection[] = [
           { id: "no", name: L("غير مرفقة", "Not included") },
         ],
       },
-      ...listingTail(),
+      ...listingTail({
+        minPhotos: 2,
+        maxPhotos: 12,
+        photosLead: L("صورتان على الأقل للوحدة البحرية.", "At least two clear photos of the watercraft."),
+      }),
     ],
   },
   {

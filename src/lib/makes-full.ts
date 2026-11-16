@@ -392,9 +392,18 @@ export const allMakes: SellMake[] = [
     m("boss", "بوس", "Boss", "truck", truck, ["Standard"]),
   ], "truck"),
   make("other", "أخرى", "Other", "OT", [
-    m("custom", "مخصص", "Custom", "sedan", generic, ["Base"]),
+    m("custom", "مخصص / غير مدرج", "Custom / not listed", "sedan", generic, ["Base"]),
     m("kit", "معدل / كيت", "Kit / Modified", "coupe", coupe, ["Custom"]),
-  ], "other"),
+  ], "cars"),
+  make("other-moto", "أخرى", "Other", "OT", [
+    m("custom", "طراز مخصص / غير مدرج", "Custom / not listed", "moto", bike, ["Base"]),
+  ], "moto"),
+  make("other-truck", "أخرى", "Other", "OT", [
+    m("custom", "طراز مخصص / غير مدرج", "Custom / not listed", "truck", truck, ["Base"]),
+  ], "truck"),
+  make("other-boat", "أخرى", "Other", "OT", [
+    m("custom", "طراز مخصص / غير مدرج", "Custom / not listed", "boat", boat, ["Base"]),
+  ], "boat"),
   make("rox", "روكس", "ROX", "ROX", [
     m("01", "01", "01", "suv", suv, ["Standard", "Premium"]),
     m("other", "طراز آخر", "Other", "suv", suv, ["Base"]),

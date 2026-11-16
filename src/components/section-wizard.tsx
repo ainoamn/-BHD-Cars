@@ -19,8 +19,8 @@ import { useStore } from "@/lib/store";
 import type { Copy } from "@/lib/types";
 
 const L = (ar: string, en: string): Copy => ({ ar, en });
-const MIN_PHOTOS_DEFAULT = 2;
-const MAX_PHOTOS = 12;
+const MIN_PHOTOS_DEFAULT = 1;
+const MAX_PHOTOS_DEFAULT = 12;
 
 function makeCategoryForSection(sectionId: string): {
   defaultCategory: "all" | "cars" | "luxury" | "china" | "moto" | "truck" | "boat" | "other";
@@ -35,6 +35,10 @@ function makeCategoryForSection(sectionId: string): {
     return { defaultCategory: "cars", allowedCategories: ["cars", "luxury", "china"] };
   }
   return { defaultCategory: "all" };
+}
+
+function isOtherMakeId(id?: string) {
+  return Boolean(id && (id === "other" || id.startsWith("other-")));
 }
 
 function Chip({
@@ -344,21 +348,37 @@ export function SectionWizard({ section }: { section: ListingSection }) {
     setValues((prev) => ({
       ...prev,
       makeId: id,
-      make: label,
+      make: isOtherMakeId(id) ? "" : label,
+      customMake: "",
       modelId: "",
       model: "",
+      customModel: "",
     }));
     setModelQuery("");
     window.setTimeout(() => go(step + 1), 120);
   }
 
   function pickModel(id: string) {
+    if (isOtherMakeId(values.makeId)) return;
     const found = selectedMake?.models.find((item) => item.id === id);
     const label = found ? (locale === "ar" ? found.name.ar : found.name.en) : id;
     setValues((prev) => ({
       ...prev,
       modelId: id,
       model: label,
+    }));
+    window.setTimeout(() => go(step + 1), 120);
+  }
+
+  function confirmOtherMakeModel() {
+    const makeName = (values.customMake || values.make || "").trim();
+    const modelName = (values.customModel || values.model || "").trim();
+    if (!makeName || !modelName) return;
+    setValues((prev) => ({
+      ...prev,
+      make: makeName,
+      model: modelName,
+      modelId: "custom",
     }));
     window.setTimeout(() => go(step + 1), 120);
   }
@@ -394,7 +414,12 @@ export function SectionWizard({ section }: { section: ListingSection }) {
     }
     if (field.kind === "multi") return true;
     if (field.id === "make") return Boolean(values.makeId || values.make);
-    if (field.id === "model") return Boolean(values.modelId || values.model);
+    if (field.id === "model") {
+      if (isOtherMakeId(values.makeId)) {
+        return Boolean((values.customMake || values.make || "").trim() && (values.customModel || values.model || "").trim());
+      }
+      return Boolean(values.modelId || values.model);
+    }
     if (field.kind === "textarea" || field.kind === "title") {
       if (!field.required) return true;
       return Boolean((values[field.id] ?? "").trim().length >= (field.kind === "title" ? 4 : 0));
@@ -426,7 +451,8 @@ export function SectionWizard({ section }: { section: ListingSection }) {
 
   function onFiles(files: FileList | null) {
     if (!files?.length) return;
-    const room = MAX_PHOTOS - photos.length;
+    const maxPhotos = field?.maxPhotos ?? MAX_PHOTOS_DEFAULT;
+    const room = maxPhotos - photos.length;
     if (room <= 0) return;
     const urls = Array.from(files).slice(0, room).map((file) => URL.createObjectURL(file));
     setPhotos((prev) => [...prev, ...urls]);
@@ -495,6 +521,7 @@ export function SectionWizard({ section }: { section: ListingSection }) {
   const progress = ((step + 1) / fields.length) * 100;
   const options = resolveOptions(field);
   const minPhotos = field.minPhotos ?? MIN_PHOTOS_DEFAULT;
+  const maxPhotos = field.maxPhotos ?? MAX_PHOTOS_DEFAULT;
 
   return (
     <div className="min-h-[80vh] bg-gradient-to-b from-sand/40 to-ivory">
@@ -600,7 +627,39 @@ export function SectionWizard({ section }: { section: ListingSection }) {
 
             {field.id === "model" && (
               <div className="space-y-4">
-                {selectedMake ? (
+                {selectedMake && isOtherMakeId(selectedMake.id) ? (
+                  <>
+                    <div className="rounded-2xl border border-dashed border-brass/40 bg-sand/30 px-4 py-3 text-sm text-night">
+                      {tx(L("الشركة غير مدرجة — اكتب الاسم والطراز يدويًا.", "Make not listed — type the name and model manually."))}
+                    </div>
+                    <label className="block space-y-2">
+                      <span className="text-sm font-medium text-night">{tx(L("اسم الشركة", "Manufacturer name"))}</span>
+                      <input
+                        className="field"
+                        value={values.customMake ?? values.make ?? ""}
+                        onChange={(event) => patch("customMake", event.target.value)}
+                        placeholder={tx(L("مثال: شركة غير مدرجة", "e.g. Unlisted brand"))}
+                      />
+                    </label>
+                    <label className="block space-y-2">
+                      <span className="text-sm font-medium text-night">{tx(L("اسم الطراز", "Model name"))}</span>
+                      <input
+                        className="field"
+                        value={values.customModel ?? values.model ?? ""}
+                        onChange={(event) => patch("customModel", event.target.value)}
+                        placeholder={tx(L("مثال: طراز مخصص", "e.g. Custom model"))}
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className={`btn-primary ${!canNext() ? "opacity-40" : ""}`}
+                      disabled={!canNext()}
+                      onClick={confirmOtherMakeModel}
+                    >
+                      {tx(L("متابعة", "Continue"))}
+                    </button>
+                  </>
+                ) : selectedMake ? (
                   <>
                     <div className="flex items-center gap-3 rounded-2xl border border-line bg-soft/40 px-3 py-2">
                       <BrandLogo
@@ -803,7 +862,9 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                       : tx(L("أضف الصور", "Add photos"))}
                   </span>
                   <span className="mt-1 text-xs text-muted">
-                    {tx(L(`الحد الأدنى ${minPhotos} · حتى ${MAX_PHOTOS}`, `Minimum ${minPhotos} · up to ${MAX_PHOTOS}`))}
+                    {maxPhotos <= 1
+                      ? tx(L("صورة واحدة فقط لهذا العرض", "One photo only for this listing"))
+                      : tx(L(`الحد الأدنى ${minPhotos} · حتى ${maxPhotos}`, `Minimum ${minPhotos} · up to ${maxPhotos}`))}
                   </span>
                 </button>
                 <input
