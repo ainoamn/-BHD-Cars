@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { CarCard } from "@/components/car-card";
 import { DemoNote, Field, FormShell, PageHeader, Primary, Receipt, fieldClass } from "@/components/ui";
@@ -104,7 +105,7 @@ export function ImportDesk() {
           <div>
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-live/20 bg-[#fdf4f2] px-4 py-3">
               <p className="text-sm text-night">{tx(L("تملك سيارة بحادث؟ أعلن الضرر بوضوح.", "Selling an accident car? Declare the damage clearly."))}</p>
-              <a href="/sell/accident" className="btn-secondary text-sm">{tx(L("أضف إعلان حادث", "Add accident listing"))}</a>
+              <Link href="/sell/accident" className="btn-secondary text-sm">{tx(L("أضف إعلان حادث", "Add accident listing"))}</Link>
             </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {salvage.map((car) => <CarCard key={car.slug} car={car} />)}

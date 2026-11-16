@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { BrandLogo } from "@/components/brand-logo";
@@ -495,7 +496,7 @@ export function CarsBrowser({ initialCars }: CarsBrowserProps) {
           "فلاتر كاملة: الشركات، الموديلات، التجهيز، السنة، المواصفات، والألوان والمناطق.",
           "Full filters: makes, models, trims, year, specs, colors, and regions.",
         )}
-        actions={<a href="/sell" className="btn-primary">{tx(L("أضف إعلانك", "Add your listing"))}</a>}
+        actions={<Link href="/sell" className="btn-primary">{tx(L("أضف إعلانك", "Add your listing"))}</Link>}
       />
 
       <div className="market-shell">
