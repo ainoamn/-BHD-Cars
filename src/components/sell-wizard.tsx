@@ -96,7 +96,9 @@ type Draft = {
   cylinders: string;
   drive: string;
   exterior: string;
+  exteriorHex: string;
   interior: string;
+  interiorHex: string;
   smartKeys: number;
   regularKeys: number;
   vin: string;
@@ -123,8 +125,9 @@ type Draft = {
   wantValuation: boolean;
 };
 
-const MIN_PHOTOS = 2;
+const MIN_PHOTOS = 3;
 const MAX_PHOTOS = 12;
+const FEATURE_PREVIEW = 10;
 const KEY_COUNTS = [0, 1, 2, 3, 4, 5] as const;
 const TITLE_MAX = 100;
 const NOTE_MAX = 4000;
@@ -144,7 +147,9 @@ const empty: Draft = {
   cylinders: "",
   drive: "",
   exterior: "",
+  exteriorHex: "",
   interior: "",
+  interiorHex: "",
   smartKeys: 1,
   regularKeys: 1,
   vin: "",
@@ -253,6 +258,12 @@ export function SellWizard() {
   const [modelQuery, setModelQuery] = useState("");
   const [sent, setSent] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const [plateBusy, setPlateBusy] = useState(false);
+  const [expandInterior, setExpandInterior] = useState(false);
+  const [expandExterior, setExpandExterior] = useState(false);
+  const [expandTech, setExpandTech] = useState(false);
+  const [showExteriorCatalog, setShowExteriorCatalog] = useState(false);
+  const [showInteriorCatalog, setShowInteriorCatalog] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLInputElement>(null);
   const maxReached = useRef(0);
@@ -335,9 +346,9 @@ export function SellWizard() {
       case "drive":
         return Boolean(draft.drive);
       case "exterior":
-        return Boolean(draft.exterior);
+        return Boolean(draft.exterior) || Boolean(draft.exteriorHex);
       case "interior":
-        return Boolean(draft.interior);
+        return Boolean(draft.interior) || Boolean(draft.interiorHex);
       case "keys":
         return draft.smartKeys + draft.regularKeys >= 1;
       case "vin":
@@ -426,12 +437,60 @@ export function SellWizard() {
     window.setTimeout(() => go(2), 120);
   }
 
-  function onFiles(files: FileList | null) {
+  async function onFiles(files: FileList | null) {
     if (!files?.length) return;
     const room = MAX_PHOTOS - draft.photos.length;
     if (room <= 0) return;
-    const urls = Array.from(files).slice(0, room).map((file) => URL.createObjectURL(file));
+    let urls = Array.from(files).slice(0, room).map((file) => URL.createObjectURL(file));
+    if (draft.hidePlate) {
+      setPlateBusy(true);
+      try {
+        const { obscurePlatesOnImages } = await import("@/lib/plate-obscure");
+        urls = await obscurePlatesOnImages(urls);
+      } finally {
+        setPlateBusy(false);
+      }
+    }
     patch({ photos: [...draft.photos, ...urls] });
+  }
+
+  async function toggleHidePlate(checked: boolean) {
+    patch({ hidePlate: checked });
+    if (!checked || !draft.photos.length) return;
+    setPlateBusy(true);
+    try {
+      const { obscurePlatesOnImages } = await import("@/lib/plate-obscure");
+      const next = await obscurePlatesOnImages(draft.photos);
+      patch({ photos: next, hidePlate: true });
+    } finally {
+      setPlateBusy(false);
+    }
+  }
+
+  async function generateTitleAi() {
+    setAiBusy(true);
+    try {
+      const res = await fetch("/api/ai/listing-assist", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          locale,
+          action: "title",
+          style: "warm",
+          sectionId: "cars-sale",
+          facts: {
+            make: make ? tx(make.name) : "",
+            model: model ? tx(model.name) : "",
+            year: draft.year,
+            trim: draft.trim,
+          },
+        }),
+      });
+      const json = (await res.json()) as { text?: string };
+      if (json.text) patch({ adTitle: json.text.slice(0, TITLE_MAX) });
+    } finally {
+      setAiBusy(false);
+    }
   }
 
   function onVideo(files: FileList | null) {
@@ -722,8 +781,29 @@ export function SellWizard() {
           )}
 
           {stepId === "mileage" && (
-            <Question title={tx(L("الممشى", "Mileage"))}>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <Question
+              title={tx(L("الممشى", "Mileage"))}
+              lead={tx(L("على الجوال قائمة منسدلة — وعلى الشاشات الأوسع أزرار سريعة.", "Dropdown on phone — quick chips on larger screens."))}
+            >
+              <label className="block sm:hidden">
+                <select
+                  className="field"
+                  value={draft.mileageBand}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    if (!value) return;
+                    choose("mileageBand", value);
+                  }}
+                >
+                  <option value="">{tx(L("اختر الممشى", "Select mileage"))}</option>
+                  {mileageBands.map((band) => (
+                    <option key={band.id} value={band.id}>
+                      {tx(band.label)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="hidden max-h-[50vh] grid-cols-2 gap-2 overflow-y-auto sm:grid sm:grid-cols-3 md:grid-cols-4">
                 {mileageBands.map((band) => (
                   <Chip
                     key={band.id}
@@ -838,10 +918,21 @@ export function SellWizard() {
           )}
 
           {stepId === "exterior" && (
-            <Question title={tx(L("اللون الخارجي", "Exterior colour"))}>
+            <Question
+              title={tx(L("اللون الخارجي", "Exterior colour"))}
+              lead={tx(L("اختر من الكتالوج أو افتح منتقي الألوان / أدخل كود اللون.", "Pick from the catalog, or open the picker / enter a color code."))}
+            >
               <div className="flex flex-wrap gap-3">
-                {exteriorColors.map((color) => (
-                  <button key={color.id} type="button" onClick={() => choose("exterior", color.id)} className="text-center">
+                {(showExteriorCatalog ? exteriorColors : exteriorColors.slice(0, 12)).map((color) => (
+                  <button
+                    key={color.id}
+                    type="button"
+                    onClick={() => {
+                      patch({ exterior: color.id, exteriorHex: color.hex });
+                      window.setTimeout(() => go(step + 1), 120);
+                    }}
+                    className="text-center"
+                  >
                     <span
                       className={`mx-auto block h-11 w-11 rounded-full border-2 ${
                         draft.exterior === color.id ? "scale-110 border-night" : "border-line"
@@ -852,14 +943,59 @@ export function SellWizard() {
                   </button>
                 ))}
               </div>
+              <button
+                type="button"
+                className="text-sm font-medium text-teal"
+                onClick={() => setShowExteriorCatalog((v) => !v)}
+              >
+                {showExteriorCatalog
+                  ? tx(L("طي الكتالوج", "Collapse catalog"))
+                  : tx(L("فتح كتالوج الألوان الكامل", "Open full color catalog"))}
+              </button>
+              <div className="rounded-2xl border border-line bg-soft/40 p-4">
+                <p className="mb-3 text-sm font-medium text-night">{tx(L("لون مخصص", "Custom colour"))}</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    type="color"
+                    value={draft.exteriorHex || "#092d24"}
+                    onChange={(event) => patch({ exterior: "custom", exteriorHex: event.target.value })}
+                    className="h-11 w-14 cursor-pointer rounded-xl border border-line bg-paper"
+                    aria-label={tx(L("منتقي اللون", "Colour picker"))}
+                  />
+                  <input
+                    className="field max-w-[10rem] font-mono uppercase"
+                    value={draft.exteriorHex}
+                    placeholder="#1A1A1A"
+                    onChange={(event) => {
+                      const hex = event.target.value.trim();
+                      patch({ exterior: "custom", exteriorHex: hex });
+                    }}
+                  />
+                  <span
+                    className="h-11 w-11 rounded-full border border-line"
+                    style={{ background: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(draft.exteriorHex) ? draft.exteriorHex : "#ddd" }}
+                  />
+                </div>
+              </div>
             </Question>
           )}
 
           {stepId === "interior" && (
-            <Question title={tx(L("اللون الداخلي", "Interior colour"))}>
+            <Question
+              title={tx(L("اللون الداخلي", "Interior colour"))}
+              lead={tx(L("اختر من الكتالوج أو أدخل كود لون مخصص.", "Pick from the catalog or enter a custom color code."))}
+            >
               <div className="flex flex-wrap gap-3">
-                {interiorColors.map((color) => (
-                  <button key={color.id} type="button" onClick={() => choose("interior", color.id)} className="text-center">
+                {(showInteriorCatalog ? interiorColors : interiorColors.slice(0, 10)).map((color) => (
+                  <button
+                    key={color.id}
+                    type="button"
+                    onClick={() => {
+                      patch({ interior: color.id, interiorHex: color.hex });
+                      window.setTimeout(() => go(step + 1), 120);
+                    }}
+                    className="text-center"
+                  >
                     <span
                       className={`mx-auto block h-11 w-11 rounded-full border-2 ${
                         draft.interior === color.id ? "scale-110 border-night" : "border-line"
@@ -869,6 +1005,36 @@ export function SellWizard() {
                     <span className="mt-1 block text-[11px] text-muted">{tx(color.name)}</span>
                   </button>
                 ))}
+              </div>
+              <button
+                type="button"
+                className="text-sm font-medium text-teal"
+                onClick={() => setShowInteriorCatalog((v) => !v)}
+              >
+                {showInteriorCatalog
+                  ? tx(L("طي الكتالوج", "Collapse catalog"))
+                  : tx(L("فتح كتالوج الألوان الكامل", "Open full color catalog"))}
+              </button>
+              <div className="rounded-2xl border border-line bg-soft/40 p-4">
+                <p className="mb-3 text-sm font-medium text-night">{tx(L("لون مخصص", "Custom colour"))}</p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <input
+                    type="color"
+                    value={draft.interiorHex || "#1a1a1a"}
+                    onChange={(event) => patch({ interior: "custom", interiorHex: event.target.value })}
+                    className="h-11 w-14 cursor-pointer rounded-xl border border-line bg-paper"
+                  />
+                  <input
+                    className="field max-w-[10rem] font-mono uppercase"
+                    value={draft.interiorHex}
+                    placeholder="#1A1A1A"
+                    onChange={(event) => patch({ interior: "custom", interiorHex: event.target.value.trim() })}
+                  />
+                  <span
+                    className="h-11 w-11 rounded-full border border-line"
+                    style={{ background: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(draft.interiorHex) ? draft.interiorHex : "#ddd" }}
+                  />
+                </div>
               </div>
             </Question>
           )}
@@ -983,10 +1149,10 @@ export function SellWizard() {
           {stepId === "feat-interior" && (
             <Question
               title={tx(L("مواصفات داخلية", "Interior features"))}
-              lead={tx(L("اختر ما ينطبق ثم اضغط التالي — يمكن التخطي.", "Select what applies, then Next — skippable."))}
+              lead={tx(L("نعرض حتى 10 أولًا — يمكنك التمديد لرؤية التقنيات الأحدث.", "We show up to 10 first — expand for newer tech."))}
             >
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {interiorFeatures.map((item) => (
+                {(expandInterior ? interiorFeatures : interiorFeatures.slice(0, FEATURE_PREVIEW)).map((item) => (
                   <CheckTile
                     key={item.id}
                     active={draft.interiorFeatureIds.includes(item.id)}
@@ -996,16 +1162,23 @@ export function SellWizard() {
                   </CheckTile>
                 ))}
               </div>
+              {interiorFeatures.length > FEATURE_PREVIEW && (
+                <button type="button" className="text-sm font-medium text-teal" onClick={() => setExpandInterior((v) => !v)}>
+                  {expandInterior
+                    ? tx(L("عرض أقل", "Show less"))
+                    : tx(L(`عرض المزيد (${interiorFeatures.length - FEATURE_PREVIEW})`, `Show more (${interiorFeatures.length - FEATURE_PREVIEW})`))}
+                </button>
+              )}
             </Question>
           )}
 
           {stepId === "feat-exterior" && (
             <Question
               title={tx(L("مواصفات خارجية", "Exterior features"))}
-              lead={tx(L("اختر ما ينطبق ثم اضغط التالي.", "Select what applies, then Next."))}
+              lead={tx(L("حتى 10 ظاهرة أولًا مع إمكانية التمديد.", "Up to 10 shown first, with expand."))}
             >
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {exteriorFeatures.map((item) => (
+                {(expandExterior ? exteriorFeatures : exteriorFeatures.slice(0, FEATURE_PREVIEW)).map((item) => (
                   <CheckTile
                     key={item.id}
                     active={draft.exteriorFeatureIds.includes(item.id)}
@@ -1015,16 +1188,23 @@ export function SellWizard() {
                   </CheckTile>
                 ))}
               </div>
+              {exteriorFeatures.length > FEATURE_PREVIEW && (
+                <button type="button" className="text-sm font-medium text-teal" onClick={() => setExpandExterior((v) => !v)}>
+                  {expandExterior
+                    ? tx(L("عرض أقل", "Show less"))
+                    : tx(L(`عرض المزيد (${exteriorFeatures.length - FEATURE_PREVIEW})`, `Show more (${exteriorFeatures.length - FEATURE_PREVIEW})`))}
+                </button>
+              )}
             </Question>
           )}
 
           {stepId === "feat-tech" && (
             <Question
               title={tx(L("مواصفات تقنية", "Technical features"))}
-              lead={tx(L("أمان وتقنية — اختر ثم تابع.", "Safety & tech — select then continue."))}
+              lead={tx(L("أمان وتقنية حديثة — 10 أولًا ثم التمديد.", "Modern safety & tech — 10 first, then expand."))}
             >
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                {techFeatures.map((item) => (
+                {(expandTech ? techFeatures : techFeatures.slice(0, FEATURE_PREVIEW)).map((item) => (
                   <CheckTile
                     key={item.id}
                     active={draft.techFeatureIds.includes(item.id)}
@@ -1034,6 +1214,13 @@ export function SellWizard() {
                   </CheckTile>
                 ))}
               </div>
+              {techFeatures.length > FEATURE_PREVIEW && (
+                <button type="button" className="text-sm font-medium text-teal" onClick={() => setExpandTech((v) => !v)}>
+                  {expandTech
+                    ? tx(L("عرض أقل", "Show less"))
+                    : tx(L(`عرض المزيد (${techFeatures.length - FEATURE_PREVIEW})`, `Show more (${techFeatures.length - FEATURE_PREVIEW})`))}
+                </button>
+              )}
             </Question>
           )}
 
@@ -1042,11 +1229,14 @@ export function SellWizard() {
               title={`${tx(L("الصور والفيديو", "Photos & video"))} (${draft.photos.length}/${MAX_PHOTOS})`}
               lead={tx(
                 L(
-                  "مطلوب صورتان على الأقل. صور أكثر تعني فرص بيع أكبر.",
-                  "At least two photos required. More photos mean better selling odds.",
+                  "تنبيه: ارفع 3 صور على الأقل. صور أكثر تعني فرص بيع أكبر.",
+                  "Notice: upload at least 3 photos. More photos mean better selling odds.",
                 ),
               )}
             >
+              <div className="rounded-2xl border border-dashed border-brass/40 bg-sand/30 px-4 py-3 text-sm text-night">
+                {tx(L("الحد الأدنى 3 صور للمتابعة — الصورة الأولى هي الغلاف.", "Minimum 3 photos to continue — the first is the cover."))}
+              </div>
               <div className="grid gap-3 sm:grid-cols-[120px_1fr]">
                 <button
                   type="button"
@@ -1070,21 +1260,34 @@ export function SellWizard() {
                       : tx(L("أضف صور السيارة", "Add car photos"))}
                   </span>
                   <span className="mt-1 text-xs text-muted">
-                    {tx(L("jpg أو png · الحد الأدنى صورتان · حتى 12", "jpg or png · min 2 · up to 12"))}
+                    {tx(L("jpg أو png · الحد الأدنى 3 · حتى 12", "jpg or png · min 3 · up to 12"))}
                   </span>
                 </button>
               </div>
               <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => onFiles(e.target.files)} />
               <input ref={videoRef} type="file" accept="video/*" className="hidden" onChange={(e) => onVideo(e.target.files)} />
 
-              <label className="flex items-center gap-2 rounded-2xl border border-line bg-soft/40 px-4 py-3 text-sm">
-                <input
-                  type="checkbox"
-                  checked={draft.hidePlate}
-                  onChange={(event) => patch({ hidePlate: event.target.checked })}
-                  className="accent-[var(--color-brass)]"
-                />
-                {tx(L("إخفاء رقم اللوحة", "Hide plate number"))}
+              <label className="flex flex-col gap-2 rounded-2xl border border-line bg-soft/40 px-4 py-3 text-sm">
+                <span className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={draft.hidePlate}
+                    disabled={plateBusy}
+                    onChange={(event) => void toggleHidePlate(event.target.checked)}
+                    className="accent-[var(--color-brass)]"
+                  />
+                  {tx(L("إخفاء رقم اللوحة بشعار BHD", "Hide plate number with BHD mark"))}
+                </span>
+                <span className="text-xs text-muted">
+                  {plateBusy
+                    ? tx(L("جارٍ تضليل اللوحة واستبدالها بالشعار…", "Obscuring plate and applying the logo…"))
+                    : tx(
+                        L(
+                          "عند التفعيل يُضلَّل شريط اللوحة الشائع في الصور ويُستبدل بشعار الموقع تلقائيًا.",
+                          "When enabled, the common plate band is obscured and replaced with the site logo automatically.",
+                        ),
+                      )}
+                </span>
               </label>
 
               {draft.photos.length > 0 && (
@@ -1111,12 +1314,12 @@ export function SellWizard() {
 
               <div className="rounded-2xl border border-line bg-soft/50 px-4 py-3 text-sm text-muted">
                 {draft.photos.length === 0
-                  ? tx(L("لم تُرفع أي صورة بعد. ارفع صورتين على الأقل للمتابعة.", "No photos yet. Upload at least two to continue."))
+                  ? tx(L("لم تُرفع أي صورة بعد. ارفع 3 صور على الأقل للمتابعة.", "No photos yet. Upload at least 3 to continue."))
                   : draft.photos.length < MIN_PHOTOS
                     ? tx(
                         L(
-                          `لديك ${draft.photos.length} — أضف صورة أخرى على الأقل ثم اضغط التالي.`,
-                          `You have ${draft.photos.length} — add at least one more, then press Next.`,
+                          `لديك ${draft.photos.length} من 3 — أضف ${MIN_PHOTOS - draft.photos.length} على الأقل ثم اضغط التالي.`,
+                          `You have ${draft.photos.length} of 3 — add at least ${MIN_PHOTOS - draft.photos.length} more, then Next.`,
                         ),
                       )
                     : tx(
@@ -1203,25 +1406,26 @@ export function SellWizard() {
               title={tx(L("عنوان العرض", "Listing headline"))}
               lead={tx(
                 L(
-                  "أضف الماركة والموديل والسنة ليجدك المشتري بسرعة.",
-                  "Include brand, model, and year so buyers understand quickly.",
+                  "ولّده بالمساعد (مرح) أو اكتبه يدويًا وعدّله كما تشاء.",
+                  "Generate with the assistant (cheerful) or write and edit manually.",
                 ),
               )}
             >
-              <div className="rounded-2xl border border-dashed border-brass/40 bg-sand/30 px-4 py-3 text-sm text-muted">
-                {tx(
-                  L(
-                    "تفاصيل العنوان تزيد فرص ظهور إعلانك في البحث.",
-                    "A clear title improves search discovery.",
-                  ),
-                )}
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className="btn-teal" disabled={aiBusy} onClick={() => void generateTitleAi()}>
+                  {aiBusy
+                    ? tx(L("جارٍ التوليد…", "Generating…"))
+                    : tx(L("توليد عنوان مرح بالذكاء الاصطناعي", "Generate a cheerful AI title"))}
+                </button>
+                <button type="button" className="btn-secondary" onClick={ensureTitle}>
+                  {tx(L("اقتراح سريع من البيانات", "Quick suggestion from facts"))}
+                </button>
               </div>
               <label className="block space-y-2">
                 <input
                   className="field"
                   value={draft.adTitle}
                   maxLength={TITLE_MAX}
-                  onFocus={ensureTitle}
                   onChange={(event) => patch({ adTitle: event.target.value.slice(0, TITLE_MAX) })}
                   placeholder={
                     autoTitle
@@ -1230,7 +1434,7 @@ export function SellWizard() {
                   }
                 />
                 <span className="block text-xs text-muted">
-                  {draft.adTitle.length} / {TITLE_MAX}
+                  {draft.adTitle.length} / {TITLE_MAX} · {tx(L("يمكنك التعديل بحرية بعد التوليد", "You can edit freely after generation"))}
                 </span>
               </label>
             </Question>
@@ -1238,33 +1442,48 @@ export function SellWizard() {
 
           {stepId === "description" && (
             <Question
-              title={tx(L("وصف الإعلان", "Ad description"))}
-              lead={tx(L("اكتب بنفسك أو اطلب صياغة من مساعد BHD.", "Write yourself or ask the BHD assistant to draft."))}
+              title={tx(L("تفاصيل العرض", "Listing details"))}
+              lead={tx(
+                L(
+                  "النص المرح هو الافتراضي — أو اكتب يدويًا وعدّل في أي وقت.",
+                  "Cheerful tone is the default — or write manually and edit anytime.",
+                ),
+              )}
             >
               <div className="rounded-2xl border border-line bg-soft/50 p-4">
                 <p className="mb-3 text-sm font-semibold text-night">
-                  {tx(L("مساعد صياغة التفاصيل", "Details drafting assistant"))}
+                  {tx(L("مساعد صياغة مرحة", "Cheerful drafting assistant"))}
                 </p>
                 <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {aiStyles.map((style) => (
-                    <button
-                      key={style.id}
-                      type="button"
-                      disabled={aiBusy}
-                      onClick={() => void generateAi(style.id)}
-                      className="rounded-2xl border border-line bg-paper px-3 py-3 text-sm font-medium text-night transition hover:border-teal/50"
-                    >
-                      <span className="me-1">{style.emoji}</span>
-                      {tx(style.name)}
-                    </button>
-                  ))}
+                  <button
+                    type="button"
+                    disabled={aiBusy}
+                    onClick={() => void generateAi("casual")}
+                    className="rounded-2xl border border-teal/40 bg-teal/10 px-3 py-3 text-sm font-medium text-night"
+                  >
+                    ✦ {tx(L("مرح وودّي", "Cheerful & warm"))}
+                  </button>
+                  {aiStyles
+                    .filter((style) => style.id !== "casual")
+                    .map((style) => (
+                      <button
+                        key={style.id}
+                        type="button"
+                        disabled={aiBusy}
+                        onClick={() => void generateAi(style.id)}
+                        className="rounded-2xl border border-line bg-paper px-3 py-3 text-sm font-medium text-night transition hover:border-teal/50"
+                      >
+                        <span className="me-1">{style.emoji}</span>
+                        {tx(style.name)}
+                      </button>
+                    ))}
                   <button
                     type="button"
                     disabled={aiBusy}
                     onClick={() => void generateAi("skip")}
                     className="rounded-2xl border border-line bg-paper px-3 py-3 text-sm text-muted"
                   >
-                    {tx(L("لا أريد، شكرًا", "No thanks"))}
+                    {tx(L("سأكتب يدويًا", "I’ll write myself"))}
                   </button>
                 </div>
               </div>
@@ -1276,8 +1495,8 @@ export function SellWizard() {
                 onChange={(event) => patch({ note: event.target.value.slice(0, NOTE_MAX) })}
                 placeholder={tx(
                   L(
-                    "أضف المواصفات وحالة السيارة وما يريد المشتري معرفته.",
-                    "Add features, condition, and what buyers should know.",
+                    "أضف المواصفات وحالة السيارة — أو اضغط التوليد المرح ثم عدّل النص.",
+                    "Add features and condition — or tap cheerful generate, then edit.",
                   ),
                 )}
               />

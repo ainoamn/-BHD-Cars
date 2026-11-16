@@ -58,12 +58,15 @@ function templateRoute(prompt: string, locale: "ar" | "en") {
   };
 }
 
-function templateTitle(facts: ListingAssistInput["facts"], locale: "ar" | "en") {
+function templateTitle(facts: ListingAssistInput["facts"], locale: "ar" | "en", style?: ListingAssistInput["style"]) {
   const f = facts ?? {};
   const bits = [f.make, f.model, f.year, f.partName, f.name, f.plateDigits, f.equipType]
     .filter(Boolean)
     .map(String);
   const base = bits.join(" ") || (locale === "ar" ? "عرض على BHD Cars" : "Listing on BHD Cars");
+  if (style === "warm") {
+    return locale === "ar" ? `${base} — فرصة تفرّح العين!` : `${base} — ready to brighten your drive!`;
+  }
   return locale === "ar" ? `${base} — جاهز للمعاينة` : `${base} — ready to view`;
 }
 
@@ -79,7 +82,7 @@ function templateDescription(input: ListingAssistInput) {
   if (ar) {
     const opener =
       style === "warm"
-        ? "عرض واضح ومرتب عبر BHD Cars."
+        ? "مرحبا! هذه السيارة جاهزة تفرّح يومك عبر BHD Cars."
         : style === "calm"
           ? "تفاصيل العرض كما أدخلها البائع:"
           : "ملخص العرض:";
@@ -87,7 +90,7 @@ function templateDescription(input: ListingAssistInput) {
   }
   const opener =
     style === "warm"
-      ? "A clear listing on BHD Cars."
+      ? "Hello! This vehicle is ready to brighten your day on BHD Cars."
       : style === "calm"
         ? "Listing facts as entered:"
         : "Listing summary:";
@@ -155,11 +158,16 @@ export async function runListingAssist(input: ListingAssistInput) {
   }
 
   if (input.action === "title") {
-    const fallback = templateTitle(input.facts, locale);
+    const cheerful = input.style === "warm";
+    const fallback = templateTitle(input.facts, locale, input.style);
     const ai = await callModel(
       locale === "ar"
-        ? "اكتب عنوان عرض سيارات قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا). بلا مبالغة. أرجع النص فقط."
-        : "Write a short factual vehicle listing title under 80 chars. No hype. Return text only.",
+        ? cheerful
+          ? "اكتب عنوان عرض سيارات قصير مرحًا وودّيًا بالعربية الفصحى السهلة (أقل من 80 حرفًا). حيوي ومشجّع دون مبالغة كاذبة. أرجع النص فقط."
+          : "اكتب عنوان عرض سيارات قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا). بلا مبالغة. أرجع النص فقط."
+        : cheerful
+          ? "Write a short cheerful, warm vehicle listing title under 80 chars. Inviting but factual. Return text only."
+          : "Write a short factual vehicle listing title under 80 chars. No hype. Return text only.",
       JSON.stringify({ facts: input.facts, sectionId: input.sectionId }),
     );
     return { ok: true as const, source: ai ? ("ai" as const) : ("template" as const), text: (ai || fallback).slice(0, 100) };
@@ -170,8 +178,8 @@ export async function runListingAssist(input: ListingAssistInput) {
     const styleHint =
       input.style === "warm"
         ? locale === "ar"
-          ? "بنبرة ودّية هادئة"
-          : "warm and friendly"
+          ? "بنبرة مرحة وودّية ومشرقة — قصيرة ومشجّعة دون مبالغة كاذبة"
+          : "cheerful, warm, and upbeat — short and inviting, still factual"
         : input.style === "calm"
           ? locale === "ar"
             ? "بنبرة هادئة مهنية"

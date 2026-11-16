@@ -33,13 +33,13 @@ export type ListingDescriptionInput = {
 };
 
 function styleHint(style: AiListingStyle | undefined, locale: "ar" | "en") {
-  const s = style ?? "professional";
+  const s = style ?? "casual";
   if (locale === "ar") {
-    if (s === "casual") return "بنبرة عفوية ودّية قريبة من المحادثة، دون عامية مفرطة.";
+    if (s === "casual") return "بنبرة مرحة وودّية ومشرقة، قصيرة ومشجّعة، دون مبالغة كاذبة.";
     if (s === "simple") return "بأسلوب بسيط وواضح وجمل قصيرة جدًا.";
     return "بنبرة احترافية هادئة ومختصرة.";
   }
-  if (s === "casual") return "in a friendly casual tone, still clear and polite.";
+  if (s === "casual") return "in a cheerful, warm, upbeat tone — short and inviting, still factual.";
   if (s === "simple") return "in very simple short sentences.";
   return "in a calm professional tone.";
 }
@@ -47,7 +47,7 @@ function styleHint(style: AiListingStyle | undefined, locale: "ar" | "en") {
 function templateDescription(input: ListingDescriptionInput) {
   const ar = input.locale !== "en";
   const title = input.title || [input.make, input.model, input.year].filter(Boolean).join(" ");
-  const style = input.style ?? "professional";
+  const style = input.style ?? "casual";
   const features = [
     ...(input.interiorFeatures ?? []),
     ...(input.exteriorFeatures ?? []),
@@ -57,7 +57,7 @@ function templateDescription(input: ListingDescriptionInput) {
   if (ar) {
     const opener =
       style === "casual"
-        ? `${title || "سيارة"} جاهزة للبيع عبر BHD Cars — تفاصيلها واضحة بدون لف.`
+        ? `${title || "سيارة"} جاهزة تفرح العين عبر BHD Cars — تعال شوفها عن قرب!`
         : style === "simple"
           ? `${title || "سيارة"} للبيع.`
           : `${title || "سيارة"} معروضة للبيع مباشرة عبر BHD Cars.`;
@@ -99,7 +99,7 @@ function templateDescription(input: ListingDescriptionInput) {
 
   const opener =
     style === "casual"
-      ? `${title || "Vehicle"} is up for sale on BHD Cars — facts first, no fluff.`
+      ? `${title || "Vehicle"} is ready to brighten your drive on BHD Cars — come take a look!`
       : style === "simple"
         ? `${title || "Vehicle"} for sale.`
         : `${title || "Vehicle"} listed for sale on BHD Cars.`;

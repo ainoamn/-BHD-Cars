@@ -71,10 +71,12 @@ const years = Array.from({ length: 30 }, (_, i) => {
 
 const mileageBands: FieldOption[] = [
   { id: "0-20", name: L("أقل من 20 ألف كم", "Under 20k km") },
-  { id: "20-50", name: L("20–50 ألف كم", "20–50k km") },
-  { id: "50-100", name: L("50–100 ألف كم", "50–100k km") },
-  { id: "100-150", name: L("100–150 ألف كم", "100–150k km") },
-  { id: "150+", name: L("أكثر من 150 ألف كم", "150k+ km") },
+  ...Array.from({ length: 29 }, (_, i) => {
+    const start = (i + 1) * 20;
+    const end = start + 20;
+    return { id: `${start}-${end}`, name: L(`${start}–${end} ألف كم`, `${start}–${end}k km`) };
+  }),
+  { id: "600+", name: L("أكبر من 600 ألف كم", "Over 600k km") },
 ];
 
 const colors: FieldOption[] = [
@@ -82,11 +84,28 @@ const colors: FieldOption[] = [
   { id: "black", name: L("أسود", "Black") },
   { id: "silver", name: L("فضي", "Silver") },
   { id: "grey", name: L("رمادي", "Grey") },
+  { id: "graphite", name: L("رمادي غامق", "Graphite") },
   { id: "red", name: L("أحمر", "Red") },
+  { id: "burgundy", name: L("خمري", "Burgundy") },
+  { id: "maroon", name: L("عنابي", "Maroon") },
   { id: "blue", name: L("أزرق", "Blue") },
+  { id: "navy", name: L("كحلي", "Navy") },
+  { id: "sky", name: L("أزرق سماوي", "Sky blue") },
+  { id: "teal", name: L("تركواز", "Teal") },
   { id: "green", name: L("أخضر", "Green") },
+  { id: "night-green", name: L("أخضر ليلي", "Night green") },
+  { id: "olive", name: L("زيتي", "Olive") },
+  { id: "brown", name: L("بني", "Brown") },
+  { id: "bronze", name: L("برونزي", "Bronze") },
+  { id: "gold", name: L("ذهبي", "Gold") },
   { id: "beige", name: L("بيج", "Beige") },
-  { id: "other", name: L("لون آخر", "Other") },
+  { id: "sandy", name: L("رملي", "Sandy") },
+  { id: "pearl", name: L("لؤلؤي", "Pearl") },
+  { id: "orange", name: L("برتقالي", "Orange") },
+  { id: "yellow", name: L("أصفر", "Yellow") },
+  { id: "purple", name: L("بنفسجي", "Purple") },
+  { id: "pink", name: L("وردي", "Pink") },
+  { id: "other", name: L("لون مخصص / كود", "Custom / hex code") },
 ];
 
 /** Accurate Gulf terms — not marketplace slang copy. */

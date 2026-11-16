@@ -15,34 +15,49 @@ export const bodyTypes = [
 
 export const exteriorColors = [
   { id: "black", name: L("أسود", "Black"), hex: "#1a1a1a" },
-  { id: "red", name: L("أحمر", "Red"), hex: "#b91c1c" },
   { id: "white", name: L("أبيض", "White"), hex: "#f5f5f5" },
-  { id: "brown", name: L("بني", "Brown"), hex: "#7c4a2d" },
-  { id: "purple", name: L("بنفسجي", "Purple"), hex: "#6d28d9" },
-  { id: "gold", name: L("ذهبي", "Gold"), hex: "#b58d55" },
-  { id: "sandy", name: L("رملي", "Sandy"), hex: "#c2a878" },
-  { id: "blue", name: L("أزرق", "Blue"), hex: "#1d4ed8" },
-  { id: "grey", name: L("رمادي", "Grey"), hex: "#7a7a7a" },
   { id: "silver", name: L("فضي", "Silver"), hex: "#c0c0c0" },
+  { id: "grey", name: L("رمادي", "Grey"), hex: "#7a7a7a" },
+  { id: "graphite", name: L("رمادي غامق", "Graphite"), hex: "#4b5563" },
+  { id: "red", name: L("أحمر", "Red"), hex: "#b91c1c" },
+  { id: "burgundy", name: L("خمري", "Burgundy"), hex: "#7f1d1d" },
+  { id: "maroon", name: L("عنابي", "Maroon"), hex: "#6b1e2a" },
+  { id: "blue", name: L("أزرق", "Blue"), hex: "#1d4ed8" },
+  { id: "navy", name: L("كحلي", "Navy"), hex: "#174b70" },
+  { id: "sky", name: L("أزرق سماوي", "Sky blue"), hex: "#38bdf8" },
+  { id: "teal", name: L("تركواز", "Teal"), hex: "#08a39f" },
+  { id: "green", name: L("أخضر", "Green"), hex: "#166534" },
+  { id: "night-green", name: L("أخضر ليلي", "Night green"), hex: "#092d24" },
+  { id: "olive", name: L("زيتي", "Olive"), hex: "#556b2f" },
+  { id: "brown", name: L("بني", "Brown"), hex: "#7c4a2d" },
+  { id: "bronze", name: L("برونزي", "Bronze"), hex: "#8c6239" },
+  { id: "gold", name: L("ذهبي", "Gold"), hex: "#b58d55" },
+  { id: "beige", name: L("بيج", "Beige"), hex: "#d6c3a3" },
+  { id: "sandy", name: L("رملي", "Sandy"), hex: "#c2a878" },
+  { id: "pearl", name: L("لؤلؤي", "Pearl"), hex: "#f0ebe3" },
   { id: "orange", name: L("برتقالي", "Orange"), hex: "#ea580c" },
   { id: "yellow", name: L("أصفر", "Yellow"), hex: "#eab308" },
-  { id: "beige", name: L("بيج", "Beige"), hex: "#d6c3a3" },
-  { id: "green", name: L("أخضر", "Green"), hex: "#166534" },
-  { id: "maroon", name: L("عنابي", "Maroon"), hex: "#7f1d1d" },
+  { id: "purple", name: L("بنفسجي", "Purple"), hex: "#6d28d9" },
+  { id: "pink", name: L("وردي", "Pink"), hex: "#db2777" },
 ];
 
 export const interiorColors = [
-  { id: "silver", name: L("فضي", "Silver"), hex: "#c0c0c0" },
   { id: "black", name: L("أسود", "Black"), hex: "#1a1a1a" },
-  { id: "red", name: L("أحمر", "Red"), hex: "#991b1b" },
-  { id: "white", name: L("أبيض", "White"), hex: "#f5f5f5" },
   { id: "grey", name: L("رمادي", "Grey"), hex: "#9ca3af" },
-  { id: "blue", name: L("أزرق", "Blue"), hex: "#1d4ed8" },
+  { id: "charcoal", name: L("فحمي", "Charcoal"), hex: "#374151" },
+  { id: "silver", name: L("فضي", "Silver"), hex: "#c0c0c0" },
   { id: "beige", name: L("بيج", "Beige"), hex: "#d6c3a3" },
-  { id: "yellow", name: L("أصفر", "Yellow"), hex: "#eab308" },
-  { id: "orange", name: L("برتقالي", "Orange"), hex: "#ea580c" },
+  { id: "cream", name: L("كريمي", "Cream"), hex: "#f5f0e6" },
   { id: "brown", name: L("بني", "Brown"), hex: "#7c4a2d" },
+  { id: "tan", name: L("بني فاتح", "Tan"), hex: "#c4a484" },
+  { id: "red", name: L("أحمر", "Red"), hex: "#991b1b" },
   { id: "maroon", name: L("عنابي", "Maroon"), hex: "#7f1d1d" },
+  { id: "blue", name: L("أزرق", "Blue"), hex: "#1d4ed8" },
+  { id: "navy", name: L("كحلي", "Navy"), hex: "#174b70" },
+  { id: "white", name: L("أبيض", "White"), hex: "#f5f5f5" },
+  { id: "orange", name: L("برتقالي", "Orange"), hex: "#ea580c" },
+  { id: "yellow", name: L("أصفر", "Yellow"), hex: "#eab308" },
+  { id: "green", name: L("أخضر", "Green"), hex: "#166534" },
 ];
 
 export const citiesOm = [
@@ -58,13 +73,19 @@ export const citiesOm = [
   L("البريمي", "Al Buraimi"),
 ];
 
+/** 20k steps up to 600k, then “over 600”. */
 export const mileageBands = [
-  { id: "0-20", label: L("أقل من 20 ألف", "Under 20k"), value: 15000 },
-  { id: "20-40", label: L("20–40 ألف", "20–40k"), value: 30000 },
-  { id: "40-60", label: L("40–60 ألف", "40–60k"), value: 50000 },
-  { id: "60-80", label: L("60–80 ألف", "60–80k"), value: 70000 },
-  { id: "80-100", label: L("80–100 ألف", "80–100k"), value: 90000 },
-  { id: "100+", label: L("أكثر من 100 ألف", "Over 100k"), value: 120000 },
+  { id: "0-20", label: L("أقل من 20 ألف", "Under 20k"), value: 15_000 },
+  ...Array.from({ length: 29 }, (_, i) => {
+    const start = (i + 1) * 20;
+    const end = start + 20;
+    return {
+      id: `${start}-${end}`,
+      label: L(`${start}–${end} ألف`, `${start}–${end}k`),
+      value: start * 1000 + 10_000,
+    };
+  }),
+  { id: "600+", label: L("أكبر من 600 ألف", "Over 600k"), value: 650_000 },
 ];
 
 export const years = Array.from({ length: 20 }, (_, i) => 2026 - i);
