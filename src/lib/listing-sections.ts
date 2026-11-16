@@ -123,6 +123,27 @@ const partSystems: FieldOption[] = [
   { id: "other", name: L("أخرى", "Other") },
 ];
 
+function makeModelFields(makePlaceholder: Copy, modelPlaceholder: Copy, labels?: { make?: Copy; model?: Copy }): FieldDef[] {
+  return [
+    {
+      id: "make",
+      label: labels?.make ?? L("الشركة المصنّعة", "Make"),
+      lead: L("اختر شعار الشركة — ثم تظهر الطرازات كأيقونات.", "Pick the brand logo — models then appear as icons."),
+      kind: "text",
+      required: true,
+      placeholder: makePlaceholder,
+    },
+    {
+      id: "model",
+      label: labels?.model ?? L("الطراز", "Model"),
+      lead: L("أيقونات الطراز حسب الشركة المختارة — لغة الواجهة فقط.", "Model icons for the selected make — UI language only."),
+      kind: "text",
+      required: true,
+      placeholder: modelPlaceholder,
+    },
+  ];
+}
+
 function locationFields(): FieldDef[] {
   return [
     {
@@ -169,25 +190,6 @@ function listingTail(opts?: {
     },
     ...locationFields(),
     {
-      id: "title",
-      label: L("عنوان العرض", "Listing headline"),
-      lead: L("عنوان قصير يوضح ماذا تبيع دون مبالغة.", "A short headline that states what you offer — no hype."),
-      kind: "title",
-      required: true,
-      maxLength: 100,
-      placeholder: L("مثال: تويوتا لاندكروزر 2021 — فل كامل", "e.g. Toyota Land Cruiser 2021 — full option"),
-      ai: "title",
-    },
-    {
-      id: "note",
-      label: L("تفاصيل العرض", "Listing details"),
-      lead: L("اكتب ما يحتاجه المشتري، أو اطلب صياغة من المساعد.", "Write what buyers need, or ask the assistant to draft."),
-      kind: "textarea",
-      maxLength: 4000,
-      placeholder: L("الحالة، الصيانة، سبب البيع، وما يُسلَّم مع العرض…", "Condition, service history, reason for sale, what is included…"),
-      ai: "description",
-    },
-    {
       id: "price",
       label: opts?.priceLabel ?? L("السعر المطلوب", "Asking price"),
       lead: opts?.priceLead ?? L("السعر الكامل بالريال العماني — لا تضع عربونًا مكان السعر.", "Full price in OMR — do not enter a deposit as the price."),
@@ -208,6 +210,31 @@ function listingTail(opts?: {
       lead: L("رقم عُماني يصل للمشتري لهذا العرض فقط.", "An Omani number for this listing."),
       kind: "phone",
       required: true,
+    },
+    {
+      id: "title",
+      label: L("عنوان العرض", "Listing headline"),
+      lead: L(
+        "آخر الخطوات: ولّد العنوان من بياناتك بلغة الواجهة فقط، ثم عدّله إن شئت.",
+        "Final steps: generate the headline from your facts in the UI language only, then edit if you like.",
+      ),
+      kind: "title",
+      required: true,
+      maxLength: 100,
+      placeholder: L("مثال: تويوتا لاندكروزر 2021 — فل كامل", "e.g. Toyota Land Cruiser 2021 — full option"),
+      ai: "title",
+    },
+    {
+      id: "note",
+      label: L("تفاصيل العرض", "Listing details"),
+      lead: L(
+        "الخطوة الأخيرة: توليد نص حقيقي من المعلومات المدخلة — بلغة الواجهة الحالية فقط.",
+        "Last step: real text from the facts you entered — in the current UI language only.",
+      ),
+      kind: "textarea",
+      maxLength: 4000,
+      placeholder: L("الحالة، الصيانة، سبب البيع، وما يُسلَّم مع العرض…", "Condition, service history, reason for sale, what is included…"),
+      ai: "description",
     },
   ];
 }
@@ -246,8 +273,7 @@ export const listingSections: ListingSection[] = [
           { id: "bus", name: L("حافلة صغيرة", "Mini bus") },
         ],
       },
-      { id: "make", label: L("الشركة المصنّعة", "Make"), kind: "text", required: true, placeholder: L("مثال: تويوتا", "e.g. Toyota") },
-      { id: "model", label: L("الطراز", "Model"), kind: "text", required: true, placeholder: L("مثال: كامري", "e.g. Camry") },
+      ...makeModelFields(L("مثال: تويوتا", "e.g. Toyota"), L("مثال: كامري", "e.g. Camry")),
       { id: "year", label: L("سنة الصنع", "Model year"), kind: "choice", required: true, options: years },
       {
         id: "gearbox",
@@ -327,8 +353,7 @@ export const listingSections: ListingSection[] = [
           { id: "engine", name: L("محرك أو ناقل", "Engine or gearbox") },
         ],
       },
-      { id: "make", label: L("الشركة المصنّعة", "Make"), kind: "text", required: true, placeholder: L("مثال: نيسان", "e.g. Nissan") },
-      { id: "model", label: L("الطراز", "Model"), kind: "text", required: true, placeholder: L("مثال: باترول", "e.g. Patrol") },
+      ...makeModelFields(L("مثال: نيسان", "e.g. Nissan"), L("مثال: باترول", "e.g. Patrol")),
       { id: "year", label: L("سنة الصنع", "Model year"), kind: "choice", required: true, options: years },
       {
         id: "damageLevel",
@@ -392,8 +417,7 @@ export const listingSections: ListingSection[] = [
           { id: "parts", name: L("قطع دراجة", "Bike parts") },
         ],
       },
-      { id: "make", label: L("الشركة المصنّعة", "Make"), kind: "text", required: true, placeholder: L("مثال: ياماها", "e.g. Yamaha") },
-      { id: "model", label: L("الطراز", "Model"), kind: "text", required: true, placeholder: L("مثال: R3", "e.g. R3") },
+      ...makeModelFields(L("مثال: ياماها", "e.g. Yamaha"), L("مثال: R3", "e.g. R3")),
       { id: "year", label: L("سنة الصنع", "Model year"), kind: "choice", required: true, options: years },
       {
         id: "cc",
@@ -442,8 +466,7 @@ export const listingSections: ListingSection[] = [
           { id: "other", name: L("أخرى", "Other") },
         ],
       },
-      { id: "make", label: L("الشركة المصنّعة", "Make"), kind: "text", required: true, placeholder: L("مثال: كاتربيلر", "e.g. Caterpillar") },
-      { id: "model", label: L("الطراز", "Model"), kind: "text", required: true, placeholder: L("مثال: 320D", "e.g. 320D") },
+      ...makeModelFields(L("مثال: كاتربيلر", "e.g. Caterpillar"), L("مثال: 320D", "e.g. 320D")),
       { id: "year", label: L("سنة الصنع", "Model year"), kind: "choice", required: true, options: years },
       {
         id: "hours",
@@ -497,8 +520,7 @@ export const listingSections: ListingSection[] = [
           { id: "box", name: L("صندوق مغلق", "Box body") },
         ],
       },
-      { id: "make", label: L("الشركة المصنّعة", "Make"), kind: "text", required: true, placeholder: L("مثال: مرسيدس", "e.g. Mercedes") },
-      { id: "model", label: L("الطراز", "Model"), kind: "text", required: true, placeholder: L("مثال: أكتروس", "e.g. Actros") },
+      ...makeModelFields(L("مثال: مرسيدس", "e.g. Mercedes"), L("مثال: أكتروس", "e.g. Actros")),
       { id: "year", label: L("سنة الصنع", "Model year"), kind: "choice", required: true, options: years },
       {
         id: "axles",
@@ -560,8 +582,7 @@ export const listingSections: ListingSection[] = [
           { id: "dinghy", name: L("قارب صغير", "Dinghy") },
         ],
       },
-      { id: "make", label: L("الشركة المصنّعة", "Make"), kind: "text", required: true, placeholder: L("مثال: ياماها", "e.g. Yamaha") },
-      { id: "model", label: L("الطراز", "Model"), kind: "text", required: true, placeholder: L("مثال: VX", "e.g. VX") },
+      ...makeModelFields(L("مثال: ياماها", "e.g. Yamaha"), L("مثال: VX", "e.g. VX")),
       { id: "year", label: L("سنة الصنع", "Model year"), kind: "choice", required: true, options: years },
       {
         id: "length",
@@ -771,8 +792,10 @@ export const listingSections: ListingSection[] = [
           { id: "unknown", name: L("غير محدد", "Unspecified") },
         ],
       },
-      { id: "make", label: L("يناسب الشركة", "Fits make"), kind: "text", required: true, placeholder: L("مثال: تويوتا", "e.g. Toyota") },
-      { id: "model", label: L("يناسب الطراز", "Fits model"), kind: "text", required: true, placeholder: L("مثال: كورولا", "e.g. Corolla") },
+      ...makeModelFields(L("مثال: تويوتا", "e.g. Toyota"), L("مثال: كورولا", "e.g. Corolla"), {
+        make: L("يناسب الشركة", "Fits make"),
+        model: L("يناسب الطراز", "Fits model"),
+      }),
       { id: "yearFrom", label: L("من سنة", "From year"), kind: "choice", required: true, options: years },
       { id: "yearTo", label: L("إلى سنة", "To year"), kind: "choice", required: true, options: years },
       { id: "condition", label: L("حالة الاستخدام", "Condition"), kind: "choice", required: true, options: conditions },

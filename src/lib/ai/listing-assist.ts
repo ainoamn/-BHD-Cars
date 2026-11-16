@@ -114,7 +114,7 @@ async function callModel(system: string, user: string) {
       },
       body: JSON.stringify({
         model,
-        temperature: 0.4,
+        temperature: 0.65,
         messages: [
           { role: "system", content: system },
           { role: "user", content: user },
@@ -160,14 +160,18 @@ export async function runListingAssist(input: ListingAssistInput) {
   if (input.action === "title") {
     const cheerful = input.style === "warm";
     const fallback = templateTitle(input.facts, locale, input.style);
+    const langLock =
+      locale === "ar"
+        ? "اكتب بالعربية فقط. ممنوع أي كلمة إنجليزية أو ترجمة مزدوجة."
+        : "Write in English only. No Arabic text and no bilingual dual lines.";
     const ai = await callModel(
       locale === "ar"
         ? cheerful
-          ? "اكتب عنوان عرض سيارات قصير مرحًا وودّيًا بالعربية الفصحى السهلة (أقل من 80 حرفًا). حيوي ومشجّع دون مبالغة كاذبة. أرجع النص فقط."
-          : "اكتب عنوان عرض سيارات قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا). بلا مبالغة. أرجع النص فقط."
+          ? `اكتب عنوان عرض قصير مرحًا وودّيًا بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. حيوي ومشجّع دون مبالغة كاذبة. ${langLock} أرجع النص فقط.`
+          : `اكتب عنوان عرض قصير ودقيق بالعربية الفصحى السهلة (أقل من 80 حرفًا) من البيانات المعطاة. بلا مبالغة. ${langLock} أرجع النص فقط.`
         : cheerful
-          ? "Write a short cheerful, warm vehicle listing title under 80 chars. Inviting but factual. Return text only."
-          : "Write a short factual vehicle listing title under 80 chars. No hype. Return text only.",
+          ? `Write a short cheerful, warm listing title under 80 chars from the given facts. Inviting but factual. ${langLock} Return text only.`
+          : `Write a short factual listing title under 80 chars from the given facts. No hype. ${langLock} Return text only.`,
       JSON.stringify({ facts: input.facts, sectionId: input.sectionId }),
     );
     return { ok: true as const, source: ai ? ("ai" as const) : ("template" as const), text: (ai || fallback).slice(0, 100) };
@@ -187,10 +191,14 @@ export async function runListingAssist(input: ListingAssistInput) {
           : locale === "ar"
             ? "بأسلوب واضح مباشر"
             : "clear and direct";
+    const langLock =
+      locale === "ar"
+        ? "اكتب بالعربية فقط. ممنوع الإنجليزية أو عرض لغتين معًا."
+        : "Write in English only. Do not include Arabic or dual-language lines.";
     const ai = await callModel(
       locale === "ar"
-        ? `اكتب وصف عرض مختصر بالعربية الفصحى السهلة ${styleHint}. فقرة أو نقاط. اعتمادًا على البيانات فقط.`
-        : `Write a concise listing description ${styleHint}. One short paragraph or bullets. Facts only.`,
+        ? `اكتب وصف عرض حقيقي ومفيد بالعربية الفصحى السهلة ${styleHint}. فقرة أو نقاط. اعتمد على البيانات المدخلة فقط. ${langLock} أرجع النص فقط.`
+        : `Write a real, useful listing description ${styleHint}. One short paragraph or bullets. Use only the given facts. ${langLock} Return text only.`,
       JSON.stringify({ facts: input.facts, sectionId: input.sectionId, prompt: input.prompt }),
     );
     return {

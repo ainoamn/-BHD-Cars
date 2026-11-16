@@ -2,8 +2,12 @@
 
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
+import { MakePicker } from "@/components/make-picker";
+import { ModelThumb } from "@/components/model-thumb";
 import { Receipt } from "@/components/ui";
 import type { FieldDef, FieldOption, ListingSection } from "@/lib/listing-sections";
+import { allMakes } from "@/lib/makes-full";
 import {
   findGovernorate,
   findWilayat,
@@ -17,6 +21,21 @@ import type { Copy } from "@/lib/types";
 const L = (ar: string, en: string): Copy => ({ ar, en });
 const MIN_PHOTOS_DEFAULT = 2;
 const MAX_PHOTOS = 12;
+
+function makeCategoryForSection(sectionId: string): {
+  defaultCategory: "all" | "cars" | "luxury" | "china" | "moto" | "truck" | "other";
+  allowedCategories?: Array<"cars" | "luxury" | "china" | "moto" | "truck" | "other">;
+} {
+  if (sectionId === "motorcycle") return { defaultCategory: "moto", allowedCategories: ["moto", "other"] };
+  if (sectionId === "heavy" || sectionId === "trucks") {
+    return { defaultCategory: "truck", allowedCategories: ["truck", "other"] };
+  }
+  if (sectionId === "boats") return { defaultCategory: "other", allowedCategories: ["other", "moto"] };
+  if (sectionId === "cars-rent" || sectionId === "scrap" || sectionId === "parts") {
+    return { defaultCategory: "cars", allowedCategories: ["cars", "luxury", "china"] };
+  }
+  return { defaultCategory: "all" };
+}
 
 function Chip({
   active,
@@ -102,6 +121,8 @@ export function SectionWizard({ section }: { section: ListingSection }) {
   const [photos, setPhotos] = useState<string[]>([]);
   const [sent, setSent] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const [modelQuery, setModelQuery] = useState("");
+  const [aiSource, setAiSource] = useState<"ai" | "template" | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const maxReached = useRef(0);
 
@@ -117,14 +138,31 @@ export function SectionWizard({ section }: { section: ListingSection }) {
     villageId,
     locale,
   });
+  const selectedMake = allMakes.find((item) => item.id === values.makeId);
+  const makePickerCats = makeCategoryForSection(section.id);
+  const filteredModels = useMemo(() => {
+    const list = selectedMake?.models ?? [];
+    const q = modelQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((item) => {
+      const label = locale === "ar" ? item.name.ar : item.name.en.toLowerCase();
+      return locale === "ar" ? item.name.ar.includes(modelQuery) || item.name.en.toLowerCase().includes(q) : label.includes(q) || item.name.ar.includes(modelQuery);
+    });
+  }, [selectedMake, modelQuery, locale]);
 
   const previewTitle = useMemo(() => {
     if (values.title?.trim()) return values.title.trim();
-    const bits = [values.make, values.model, values.year, values.partName, values.name, values.plateDigits]
+    const makeLabel = selectedMake ? (locale === "ar" ? selectedMake.name.ar : selectedMake.name.en) : values.make;
+    const modelLabel = (() => {
+      const found = selectedMake?.models.find((item) => item.id === values.modelId);
+      if (found) return locale === "ar" ? found.name.ar : found.name.en;
+      return values.model;
+    })();
+    const bits = [makeLabel, modelLabel, values.year, values.partName, values.name, values.plateDigits]
       .filter(Boolean)
       .join(" ");
     return bits || tx(section.name);
-  }, [values, section.name, tx]);
+  }, [values, section.name, tx, selectedMake, locale]);
 
   const readiness = useMemo(() => {
     const required = fields.filter((item) => item.required);
@@ -139,13 +177,64 @@ export function SectionWizard({ section }: { section: ListingSection }) {
         if ((multi[item.id] ?? []).length) filled += 1;
         continue;
       }
+      if (item.id === "make") {
+        if ((values.makeId || values.make || "").trim()) filled += 1;
+        continue;
+      }
+      if (item.id === "model") {
+        if ((values.modelId || values.model || "").trim()) filled += 1;
+        continue;
+      }
       if ((values[item.id] ?? "").trim()) filled += 1;
     }
     return Math.round((filled / required.length) * 100);
   }, [fields, values, multi, photos]);
 
+  function localizedFacts() {
+    const facts: Record<string, string | number | null> = {
+      section: tx(section.name),
+      photos: photos.length,
+      title: values.title || previewTitle,
+      location: placeLabel || null,
+    };
+    for (const item of fields) {
+      if (item.kind === "photos" || item.kind === "title" || item.kind === "textarea") continue;
+      if (item.kind === "multi") {
+        const ids = multi[item.id] ?? [];
+        if (ids.length) facts[item.id] = ids.map((id) => optionName(item.options, id, tx)).join(", ");
+        continue;
+      }
+      const raw = values[item.id];
+      if (!raw) continue;
+      if (item.id === "make") {
+        facts.make = selectedMake ? (locale === "ar" ? selectedMake.name.ar : selectedMake.name.en) : raw;
+        continue;
+      }
+      if (item.id === "model") {
+        const found = selectedMake?.models.find((m) => m.id === values.modelId);
+        facts.model = found ? (locale === "ar" ? found.name.ar : found.name.en) : raw;
+        continue;
+      }
+      if (item.kind === "choice" || item.optionsSource) {
+        facts[item.id] = optionName(resolveOptions(item), raw, tx);
+        continue;
+      }
+      if (item.id === "phone") {
+        facts.phone = `+968 ${raw}`;
+        continue;
+      }
+      if (item.id === "price") {
+        facts.price = `${raw} OMR`;
+        continue;
+      }
+      facts[item.id] = raw;
+    }
+    return facts;
+  }
+
   async function runAi(action: "title" | "description", style?: "calm" | "clear" | "warm") {
     setAiBusy(true);
+    setAiSource(null);
     try {
       const res = await fetch("/api/ai/listing-assist", {
         method: "POST",
@@ -153,13 +242,14 @@ export function SectionWizard({ section }: { section: ListingSection }) {
         body: JSON.stringify({
           locale,
           action,
-          style: style ?? "clear",
+          style: style ?? "warm",
           sectionId: section.id,
-          facts: { ...values, photos: photos.length, title: values.title || previewTitle },
+          facts: localizedFacts(),
         }),
       });
-      const json = (await res.json()) as { text?: string };
+      const json = (await res.json()) as { text?: string; source?: "ai" | "template" };
       if (!json.text) return;
+      setAiSource(json.source ?? "template");
       if (action === "title") patch("title", json.text.slice(0, 100));
       else patch("note", json.text.slice(0, 4000));
     } finally {
@@ -177,6 +267,31 @@ export function SectionWizard({ section }: { section: ListingSection }) {
       if (id === "wilayat") next.village = "";
       return next;
     });
+  }
+
+  function pickMake(id: string) {
+    const found = allMakes.find((item) => item.id === id);
+    const label = found ? (locale === "ar" ? found.name.ar : found.name.en) : id;
+    setValues((prev) => ({
+      ...prev,
+      makeId: id,
+      make: label,
+      modelId: "",
+      model: "",
+    }));
+    setModelQuery("");
+    window.setTimeout(() => go(step + 1), 120);
+  }
+
+  function pickModel(id: string) {
+    const found = selectedMake?.models.find((item) => item.id === id);
+    const label = found ? (locale === "ar" ? found.name.ar : found.name.en) : id;
+    setValues((prev) => ({
+      ...prev,
+      modelId: id,
+      model: label,
+    }));
+    window.setTimeout(() => go(step + 1), 120);
   }
 
   function go(to: number) {
@@ -209,6 +324,8 @@ export function SectionWizard({ section }: { section: ListingSection }) {
       return photos.length >= min;
     }
     if (field.kind === "multi") return true;
+    if (field.id === "make") return Boolean(values.makeId || values.make);
+    if (field.id === "model") return Boolean(values.modelId || values.model);
     if (field.kind === "textarea" || field.kind === "title") {
       if (!field.required) return true;
       return Boolean((values[field.id] ?? "").trim().length >= (field.kind === "title" ? 4 : 0));
@@ -401,7 +518,87 @@ export function SectionWizard({ section }: { section: ListingSection }) {
               </div>
             )}
 
-            {(field.kind === "text" || field.kind === "number") && (
+            {field.id === "make" && (
+              <MakePicker
+                selectedId={values.makeId}
+                onSelect={pickMake}
+                defaultCategory={makePickerCats.defaultCategory}
+                allowedCategories={makePickerCats.allowedCategories}
+                title={L("اختر الشركة المصنّعة", "Choose the manufacturer")}
+                subtitle={L("شعارات حقيقية — اضغط الشعار للمتابعة إلى الطرازات.", "Real logos — tap a logo to continue to models.")}
+              />
+            )}
+
+            {field.id === "model" && (
+              <div className="space-y-4">
+                {selectedMake ? (
+                  <>
+                    <div className="flex items-center gap-3 rounded-2xl border border-line bg-soft/40 px-3 py-2">
+                      <BrandLogo
+                        id={selectedMake.id}
+                        mark={selectedMake.mark}
+                        name={locale === "ar" ? selectedMake.name.ar : selectedMake.name.en}
+                        className="h-10 w-10"
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-night">
+                          {locale === "ar" ? selectedMake.name.ar : selectedMake.name.en}
+                        </p>
+                        <p className="text-xs text-muted">
+                          {tx(L("اختر الطراز كأيقونة", "Pick the model as an icon"))}
+                        </p>
+                      </div>
+                    </div>
+                    <input
+                      className="field"
+                      value={modelQuery}
+                      onChange={(event) => setModelQuery(event.target.value)}
+                      placeholder={tx(L("ابحث عن الطراز", "Search model"))}
+                    />
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                      {filteredModels.map((item) => {
+                        const label = locale === "ar" ? item.name.ar : item.name.en;
+                        const active = values.modelId === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => pickModel(item.id)}
+                            className={`overflow-hidden rounded-2xl border bg-white text-center transition hover:border-brass/50 ${
+                              active ? "border-brass ring-2 ring-brass/25" : "border-line"
+                            }`}
+                          >
+                            <ModelThumb
+                              src={item.image}
+                              alt={label}
+                              body={item.body}
+                              makeId={selectedMake.id}
+                              modelId={item.id}
+                              className="aspect-[4/3] w-full object-cover"
+                            />
+                            <span className="block px-2 py-2 text-xs font-medium text-night">{label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {!filteredModels.length && (
+                      <p className="rounded-2xl border border-dashed border-line bg-soft/50 px-4 py-8 text-center text-sm text-muted">
+                        {tx(L("لا طرازات مطابقة — جرّب بحثًا آخر.", "No matching models — try another search."))}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div className="rounded-2xl border border-dashed border-line bg-soft/50 px-4 py-8 text-center text-sm text-muted">
+                    <p>{tx(L("اختر الشركة المصنّعة أولًا لعرض الطرازات.", "Pick a manufacturer first to see models."))}</p>
+                    <button type="button" className="btn-secondary mt-4" onClick={() => go(Math.max(0, step - 1))}>
+                      {tx(L("العودة للشركات", "Back to makes"))}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {(field.kind === "text" || field.kind === "number") && field.id !== "make" && field.id !== "model" && (
               <label className="block space-y-2">
                 <div className="relative">
                   <input
@@ -422,6 +619,24 @@ export function SectionWizard({ section }: { section: ListingSection }) {
 
             {field.kind === "title" && (
               <div className="space-y-3">
+                <div className="rounded-2xl border border-teal/30 bg-teal/5 px-4 py-3 text-sm text-night">
+                  {tx(
+                    L(
+                      `التوليد بلغة الواجهة الحالية فقط (${locale === "ar" ? "العربية" : "English"}). لن تظهر الترجمة الأخرى إلا بعد تغيير اللغة.`,
+                      `Generation uses the current UI language only (${locale === "ar" ? "Arabic" : "English"}). The other language appears only after you switch locale.`,
+                    ),
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className="btn-teal w-full sm:w-auto"
+                  disabled={aiBusy}
+                  onClick={() => void runAi("title", "warm")}
+                >
+                  {aiBusy
+                    ? tx(L("جارٍ التوليد الحقيقي…", "Generating for real…"))
+                    : tx(L("توليد العنوان من البيانات المدخلة", "Generate headline from entered facts"))}
+                </button>
                 <label className="block space-y-2">
                   <input
                     className="field"
@@ -432,27 +647,28 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                   />
                   <span className="block text-xs text-muted">
                     {(values.title ?? "").length} / {field.maxLength ?? 100}
+                    {aiSource
+                      ? ` · ${aiSource === "ai" ? tx(L("مولّد بالذكاء الاصطناعي", "AI generated")) : tx(L("قالب احتياطي", "Template fallback"))}`
+                      : ""}
                   </span>
                 </label>
-                <button
-                  type="button"
-                  className="btn-teal"
-                  disabled={aiBusy}
-                  onClick={() => void runAi("title")}
-                >
-                  {aiBusy
-                    ? tx(L("جارٍ الصياغة…", "Drafting…"))
-                    : tx(L("صياغة العنوان بالمساعد", "Draft headline with assistant"))}
-                </button>
               </div>
             )}
 
             {field.kind === "textarea" && (
               <div className="space-y-3">
+                <div className="rounded-2xl border border-brass/30 bg-sand/40 px-4 py-3 text-sm text-night">
+                  {tx(
+                    L(
+                      "الخطوة الأخيرة: ولّد نصًا حقيقيًا من كل الحقول السابقة، بلغة الواجهة فقط، ثم عدّله يدويًا إن أردت.",
+                      "Last step: generate real text from all previous fields, in the UI language only, then edit manually if you want.",
+                    ),
+                  )}
+                </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   {(
                     [
-                      ["warm", L("ودّي واضح", "Warm & clear")],
+                      ["warm", L("مرح وودّي", "Cheerful & warm")],
                       ["calm", L("هادئ مهني", "Calm professional")],
                       ["clear", L("مختصر مباشر", "Short & direct")],
                     ] as const
@@ -460,7 +676,9 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                     <button
                       key={style}
                       type="button"
-                      className="rounded-2xl border border-line bg-soft/50 px-3 py-3 text-sm font-medium text-night hover:border-teal/40"
+                      className={`rounded-2xl border px-3 py-3 text-sm font-medium text-night hover:border-teal/40 ${
+                        style === "warm" ? "border-teal/40 bg-teal/10" : "border-line bg-soft/50"
+                      }`}
                       disabled={aiBusy}
                       onClick={() => void runAi("description", style)}
                     >
@@ -471,15 +689,20 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                 <label className="block space-y-2">
                   <textarea
                     className="field"
-                    rows={6}
+                    rows={7}
                     maxLength={field.maxLength ?? 4000}
                     value={values.note ?? ""}
                     onChange={(event) => patch("note", event.target.value.slice(0, field.maxLength ?? 4000))}
                     placeholder={field.placeholder ? tx(field.placeholder) : undefined}
+                    dir={locale === "ar" ? "rtl" : "ltr"}
+                    lang={locale}
                   />
                   <span className="block text-xs text-muted">
                     {(values.note ?? "").length} / {field.maxLength ?? 4000}
                     {aiBusy ? ` · ${tx(L("جارٍ التوليد…", "Generating…"))}` : ""}
+                    {aiSource && !aiBusy
+                      ? ` · ${aiSource === "ai" ? tx(L("مولّد بالذكاء الاصطناعي", "AI generated")) : tx(L("قالب احتياطي (أضف مفتاح AI لجودة أعلى)", "Template fallback (add AI key for higher quality)"))}`
+                      : ""}
                   </span>
                 </label>
               </div>

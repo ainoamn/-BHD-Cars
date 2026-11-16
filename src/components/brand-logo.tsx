@@ -55,14 +55,10 @@ export function ModelName({
   locale: "ar" | "en";
   className?: string;
 }) {
-  const primary = name[locale];
-  const secondary = locale === "ar" ? name.en : name.ar;
-  const showSecondary = secondary && secondary !== primary;
-
+  /** Active UI language only — the other language appears after the user switches locale. */
   return (
-    <span className={`block ${className}`}>
-      <span className="block font-semibold leading-snug text-night">{primary}</span>
-      {showSecondary && <span className="mt-0.5 block text-[11px] text-muted">{secondary}</span>}
+    <span className={`block font-semibold leading-snug text-night ${className}`}>
+      {name[locale]}
     </span>
   );
 }

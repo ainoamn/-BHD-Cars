@@ -167,8 +167,8 @@ export async function generateListingDescription(input: ListingDescriptionInput)
             role: "system",
             content:
               input.locale === "ar"
-                ? `اكتب وصف إعلان سيارة بالعربية الفصحى السهلة، فقرة أو فقرتين، اعتمادًا على البيانات فقط ودون مبالغة. اكتب ${hint}`
-                : `Write a concise car listing description in clear English, one or two short paragraphs, factual only, no hype. Write ${hint}`,
+                ? `اكتب وصف إعلان سيارة بالعربية الفصحى السهلة، فقرة أو فقرتين، اعتمادًا على البيانات فقط ودون مبالغة. اكتب ${hint}. اكتب بالعربية فقط — ممنوع الإنجليزية أو نص بلغتين.`
+                : `Write a concise car listing description in clear English, one or two short paragraphs, factual only, no hype. Write ${hint}. English only — no Arabic and no bilingual dual lines.`,
           },
           {
             role: "user",

@@ -23,21 +23,36 @@ export function MakePicker({
   onSelect,
   title,
   subtitle,
+  defaultCategory = "all",
+  allowedCategories,
 }: {
   selectedId?: string;
   onSelect: (id: string) => void;
   title?: { ar: string; en: string };
   subtitle?: { ar: string; en: string };
+  defaultCategory?: CategoryId;
+  /** Limit visible category chips; still includes “all” unless omitted from list. */
+  allowedCategories?: CategoryId[];
 }) {
   const { tx, locale } = usePrefs();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<CategoryId>("all");
+  const [category, setCategory] = useState<CategoryId>(defaultCategory);
   const scrollerRef = useRef<HTMLDivElement>(null);
+
+  const categoryTabs = useMemo(() => {
+    if (!allowedCategories?.length) return CATEGORIES;
+    const allow = new Set<CategoryId>(["all", ...allowedCategories]);
+    return CATEGORIES.filter((item) => allow.has(item.id));
+  }, [allowedCategories]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return allMakes.filter((item) => {
-      if (category !== "all" && (item.category ?? "cars") !== category) return false;
+      const cat = (item.category ?? "cars") as CategoryId;
+      if (allowedCategories?.length && category === "all" && !allowedCategories.includes(cat)) {
+        return false;
+      }
+      if (category !== "all" && cat !== category) return false;
       if (!q) return true;
       return (
         item.name.ar.includes(query) ||
@@ -46,7 +61,7 @@ export function MakePicker({
         item.mark.toLowerCase().includes(q)
       );
     });
-  }, [query, category]);
+  }, [query, category, allowedCategories]);
 
   function scrollByPage(dir: 1 | -1) {
     const el = scrollerRef.current;
@@ -86,7 +101,7 @@ export function MakePicker({
       />
 
       <div className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1">
-        {CATEGORIES.map((item) => {
+        {categoryTabs.map((item) => {
           const active = category === item.id;
           return (
             <button

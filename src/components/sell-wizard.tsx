@@ -69,12 +69,12 @@ const STEPS = [
   { id: "governorate", label: L("المحافظة", "Governorate") },
   { id: "wilayat", label: L("الولاية", "Wilayat") },
   { id: "village", label: L("القرية", "Village") },
-  { id: "title", label: L("عنوان العرض", "Listing headline") },
-  { id: "description", label: L("الوصف", "Description") },
   { id: "price", label: L("السعر", "Price") },
   { id: "payment", label: L("طريقة الدفع", "Payment") },
   { id: "deal", label: L("نوع الصفقة", "Deal") },
   { id: "phone", label: L("رقم الهاتف", "Phone") },
+  { id: "title", label: L("عنوان العرض", "Listing headline") },
+  { id: "description", label: L("الوصف", "Description") },
   { id: "publish", label: L("النشر", "Publish") },
 ] as const;
 
@@ -790,7 +790,7 @@ export function SellWizard() {
                   >
                     <ModelThumb
                       src={item.image}
-                      alt={`${item.name.ar} / ${item.name.en}`}
+                      alt={locale === "ar" ? item.name.ar : item.name.en}
                       body={item.body}
                       makeId={make.id}
                       modelId={item.id}
@@ -1470,11 +1470,19 @@ export function SellWizard() {
               title={tx(L("عنوان العرض", "Listing headline"))}
               lead={tx(
                 L(
-                  "ولّده بالمساعد (مرح) أو اكتبه يدويًا وعدّله كما تشاء.",
-                  "Generate with the assistant (cheerful) or write and edit manually.",
+                  "قبل النشر: ولّد العنوان من بياناتك بلغة الواجهة فقط، أو اكتبه وعدّله.",
+                  "Before publish: generate the title from your facts in the UI language only, or write and edit.",
                 ),
               )}
             >
+              <div className="rounded-2xl border border-teal/30 bg-teal/5 px-4 py-3 text-sm text-night">
+                {tx(
+                  L(
+                    `لغة التوليد = لغة الواجهة (${locale === "ar" ? "العربية" : "English"}) فقط.`,
+                    `Generation language = UI language (${locale === "ar" ? "Arabic" : "English"}) only.`,
+                  ),
+                )}
+              </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="btn-teal" disabled={aiBusy} onClick={() => void generateTitleAi()}>
                   {aiBusy
@@ -1509,8 +1517,8 @@ export function SellWizard() {
               title={tx(L("تفاصيل العرض", "Listing details"))}
               lead={tx(
                 L(
-                  "النص المرح هو الافتراضي — أو اكتب يدويًا وعدّل في أي وقت.",
-                  "Cheerful tone is the default — or write manually and edit anytime.",
+                  "الخطوة الأخيرة قبل النشر: توليد نص حقيقي من المعلومات — بلغة الواجهة فقط.",
+                  "Last step before publish: real text from your facts — UI language only.",
                 ),
               )}
             >
