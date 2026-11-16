@@ -11,6 +11,7 @@ export type PortalNavItem = {
 export const ACCOUNT_NAV: PortalNavItem[] = [
   { id: "overview", href: "/account", ar: "نظرة عامة", en: "Overview" },
   { id: "listings", href: "/account/listings", ar: "مركباتي", en: "My vehicles" },
+  { id: "auctions", href: "/account/auctions", ar: "مزاداتي", en: "My auctions" },
   { id: "requests", href: "/account/requests", ar: "طلباتي", en: "My requests" },
   { id: "orgs", href: "/account/orgs", ar: "معارضي وشركاتي", en: "My orgs" },
 ];

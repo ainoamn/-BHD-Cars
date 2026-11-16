@@ -11,7 +11,7 @@ export function AdminActionForm({
   successLabel,
 }: {
   action: string;
-  method?: "PATCH" | "PUT" | "DELETE";
+  method?: "PATCH" | "PUT" | "POST" | "DELETE";
   fields: Array<{
     name: string;
     label: string;

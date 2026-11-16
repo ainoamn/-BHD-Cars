@@ -18,8 +18,13 @@ export default async function AccountListingsPage() {
       <AdminPageHeader
         title={ar ? "مركباتي" : "My vehicles"}
         lead={ar ? "إعلاناتك الشخصية فقط." : "Your personal listings only."}
+        actions={
+          <a className="primary" href="#add-vehicle">
+            {ar ? "إضافة مركبة" : "Add vehicle"}
+          </a>
+        }
       />
-      <div className="admin-panel" style={{ marginBottom: "1rem" }}>
+      <div id="add-vehicle" className="admin-panel" style={{ marginBottom: "1rem" }}>
         <div className="admin-panel__head">
           <h2>{ar ? "إضافة مركبة" : "Add vehicle"}</h2>
         </div>

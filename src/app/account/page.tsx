@@ -24,8 +24,9 @@ export default async function AccountOverviewPage() {
         actions={
           <>
             <Link href="/account/listings">{ar ? "مركباتي" : "My vehicles"}</Link>
-            <Link className="primary" href="/portal">
-              {ar ? "المعارض" : "Dealers"}
+            <Link href="/account/auctions">{ar ? "مزاداتي" : "My auctions"}</Link>
+            <Link className="primary" href="/account/listings#add-vehicle">
+              {ar ? "إضافة مركبة" : "Add vehicle"}
             </Link>
           </>
         }

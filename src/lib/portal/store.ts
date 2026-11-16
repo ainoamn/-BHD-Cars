@@ -229,6 +229,17 @@ export async function listPersonalListings(userId: string) {
   `;
 }
 
+export async function getPersonalListing(userId: string, listingId: string) {
+  if (emptyDb()) return null;
+  const rows = await query<UserListing>`
+    SELECT id::text, owner_user_id, org_id, catalog_slug, title_ar, title_en, status, price_omr::text, created_at::text
+    FROM user_listings
+    WHERE id = ${listingId} AND owner_user_id = ${userId} AND org_id IS NULL
+    LIMIT 1
+  `;
+  return rows[0] || null;
+}
+
 /** Org listings only — never personal of others or other orgs. */
 export async function listOrgListings(orgId: string) {
   if (emptyDb()) return [] as UserListing[];
