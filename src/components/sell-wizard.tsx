@@ -8,7 +8,6 @@ import { ModelThumb } from "@/components/model-thumb";
 import { Receipt } from "@/components/ui";
 import {
   bodyTypes,
-  citiesOm,
   estimateMarketOmr,
   exteriorColors,
   interiorColors,
@@ -16,6 +15,12 @@ import {
   sellMakes,
   years,
 } from "@/lib/sell-catalog";
+import {
+  findGovernorate,
+  findWilayat,
+  locationLabel,
+  omanGovernorates,
+} from "@/lib/oman-locations";
 import { usePrefs } from "@/lib/prefs";
 import { useStore } from "@/lib/store";
 import type { Copy } from "@/lib/types";
@@ -40,7 +45,13 @@ const STEPS = [
   L("المفاتيح", "Keys"),
   L("رقم الشاصي", "VIN"),
   L("الصور", "Photos"),
-  L("السعر والنشر", "Price & publish"),
+  L("السعر", "Price"),
+  L("نوع الصفقة", "Deal"),
+  L("المحافظة", "Governorate"),
+  L("الولاية", "Wilayat"),
+  L("القرية", "Village"),
+  L("الوصف", "Description"),
+  L("النشر", "Publish"),
 ] as const;
 
 type Deal = "sell" | "trade" | "both";
@@ -66,7 +77,9 @@ type Draft = {
   photos: string[];
   price: string;
   deal: Deal;
-  city: string;
+  governorateId: string;
+  wilayatId: string;
+  villageId: string;
   note: string;
   wantInspection: boolean;
   wantValuation: boolean;
@@ -97,7 +110,9 @@ const empty: Draft = {
   photos: [],
   price: "",
   deal: "sell",
-  city: "",
+  governorateId: "",
+  wilayatId: "",
+  villageId: "",
   note: "",
   wantInspection: true,
   wantValuation: false,
@@ -152,13 +167,21 @@ export function SellWizard() {
   const [draft, setDraft] = useState<Draft>(empty);
   const [modelQuery, setModelQuery] = useState("");
   const [sent, setSent] = useState<string | null>(null);
+  const [aiBusy, setAiBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const maxReached = useRef(0);
 
   const make = sellMakes.find((item) => item.id === draft.makeId);
   const model = make?.models.find((item) => item.id === draft.modelId);
   const mileage = mileageBands.find((item) => item.id === draft.mileageBand)?.value ?? 0;
-  const cityLabel = citiesOm.find((item) => item.en === draft.city);
+  const governorate = findGovernorate(draft.governorateId);
+  const wilayat = findWilayat(draft.governorateId, draft.wilayatId);
+  const placeLabel = locationLabel({
+    governorateId: draft.governorateId,
+    wilayatId: draft.wilayatId,
+    villageId: draft.villageId,
+    locale,
+  });
 
   const market = useMemo(() => {
     if (!draft.makeId || !draft.year || !draft.body) return null;
@@ -212,7 +235,13 @@ export function SellWizard() {
     if (step === 13) return draft.smartKeys + draft.regularKeys >= 1;
     if (step === 14) return true; // VIN optional — can skip
     if (step === 15) return draft.photos.length >= MIN_PHOTOS;
-    if (step === 16) return Boolean(draft.price && draft.city);
+    if (step === 16) return Boolean(draft.price && Number(draft.price) > 0);
+    if (step === 17) return Boolean(draft.deal);
+    if (step === 18) return Boolean(draft.governorateId);
+    if (step === 19) return Boolean(draft.wilayatId);
+    if (step === 20) return Boolean(draft.villageId);
+    if (step === 21) return true; // description optional
+    if (step === 22) return Boolean(draft.price && draft.villageId);
     return false;
   }
 
@@ -270,7 +299,7 @@ export function SellWizard() {
         `smartKeys:${draft.smartKeys}`,
         `regularKeys:${draft.regularKeys}`,
         `${draft.price} OMR`,
-        cityLabel ? tx(cityLabel) : draft.city,
+        placeLabel || null,
         draft.deal,
         draft.wantInspection ? "inspection" : null,
         draft.wantValuation ? "valuation" : null,
@@ -732,17 +761,14 @@ export function SellWizard() {
                   disabled={draft.photos.length < MIN_PHOTOS}
                   onClick={() => go(16)}
                 >
-                  {tx(L("الاستمرار للسعر", "Continue to pricing"))}
+                  {tx(L("الاستمرار", "Continue"))}
                 </button>
               </div>
             </Question>
           )}
 
           {step === 16 && (
-            <Question
-              title={tx(L("السعر والمنطقة والنشر", "Price, area, and publish"))}
-              lead={tx(L("آخر خطوة — راجع المعاينة ثم أنشئ الإعلان.", "Last step — check the preview, then create the listing."))}
-            >
+            <Question title={tx(L("سعر البيع", "Asking price"))} lead={tx(L("اكتب السعر ثم اضغط التالي.", "Enter the price, then press Next."))}>
               {market && (
                 <div className="rounded-2xl border border-brass/30 bg-soft px-4 py-3 text-sm">
                   <p className="font-medium text-night">{tx(L("تقدير السوق لهذه المواصفات", "Market estimate for these specs"))}</p>
@@ -751,7 +777,6 @@ export function SellWizard() {
                   </p>
                 </div>
               )}
-
               <label className="block">
                 <span className="mb-2 block text-sm font-medium">{tx(L("سعر البيع", "Asking price"))}</span>
                 <div className="relative">
@@ -765,44 +790,145 @@ export function SellWizard() {
                   <span className="absolute end-4 top-1/2 -translate-y-1/2 text-sm text-muted">OMR</span>
                 </div>
               </label>
+            </Question>
+          )}
 
-              <div>
-                <p className="mb-2 text-sm font-medium">{tx(L("نوع الصفقة", "Deal type"))}</p>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  <Chip active={draft.deal === "sell"} onClick={() => patch({ deal: "sell" })}>
-                    {tx(L("بيع فقط", "Sell only"))}
-                  </Chip>
-                  <Chip active={draft.deal === "both"} onClick={() => patch({ deal: "both" })}>
-                    {tx(L("بيع أو تبادل", "Sell or trade"))}
-                  </Chip>
-                  <Chip active={draft.deal === "trade"} onClick={() => patch({ deal: "trade" })}>
-                    {tx(L("تبادل فقط", "Trade only"))}
-                  </Chip>
-                </div>
+          {step === 17 && (
+            <Question title={tx(L("نوع الصفقة", "Deal type"))}>
+              <div className="grid gap-2 sm:grid-cols-3">
+                <Chip active={draft.deal === "sell"} onClick={() => choose("deal", "sell")}>
+                  {tx(L("بيع فقط", "Sell only"))}
+                </Chip>
+                <Chip active={draft.deal === "both"} onClick={() => choose("deal", "both")}>
+                  {tx(L("بيع أو تبادل", "Sell or trade"))}
+                </Chip>
+                <Chip active={draft.deal === "trade"} onClick={() => choose("deal", "trade")}>
+                  {tx(L("تبادل فقط", "Trade only"))}
+                </Chip>
               </div>
+            </Question>
+          )}
 
-              <div>
-                <p className="mb-2 text-sm font-medium">{tx(L("المنطقة", "Area"))}</p>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                  {citiesOm.map((city) => (
-                    <Chip key={city.en} active={draft.city === city.en} onClick={() => patch({ city: city.en })}>
-                      {tx(city)}
-                    </Chip>
-                  ))}
-                </div>
+          {step === 18 && (
+            <Question title={tx(L("المحافظة", "Governorate"))} lead={tx(L("اختر المحافظة أولًا.", "Choose the governorate first."))}>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {omanGovernorates.map((item) => (
+                  <Chip
+                    key={item.id}
+                    active={draft.governorateId === item.id}
+                    onClick={() => {
+                      patch({ governorateId: item.id, wilayatId: "", villageId: "" });
+                      window.setTimeout(() => go(19), 120);
+                    }}
+                  >
+                    {tx(item.name)}
+                  </Chip>
+                ))}
               </div>
+            </Question>
+          )}
 
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium">{tx(L("وصف السيارة (اختياري)", "Description (optional)"))}</span>
-                <textarea
-                  className="field"
-                  rows={4}
-                  value={draft.note}
-                  onChange={(event) => patch({ note: event.target.value })}
-                  placeholder={tx(L("اكتب معلومات إضافية", "Add extra details"))}
-                />
-              </label>
+          {step === 19 && governorate && (
+            <Question title={tx(L("الولاية", "Wilayat"))} lead={tx(governorate.name)}>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {governorate.wilayats.map((item) => (
+                  <Chip
+                    key={item.id}
+                    active={draft.wilayatId === item.id}
+                    onClick={() => {
+                      patch({ wilayatId: item.id, villageId: "" });
+                      window.setTimeout(() => go(20), 120);
+                    }}
+                  >
+                    {tx(item.name)}
+                  </Chip>
+                ))}
+              </div>
+            </Question>
+          )}
 
+          {step === 20 && wilayat && (
+            <Question title={tx(L("القرية / المنطقة", "Village / area"))} lead={tx(wilayat.name)}>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {wilayat.villages.map((item) => (
+                  <Chip key={item.id} active={draft.villageId === item.id} onClick={() => choose("villageId", item.id)}>
+                    {tx(item.name)}
+                  </Chip>
+                ))}
+              </div>
+            </Question>
+          )}
+
+          {step === 21 && (
+            <Question
+              title={tx(L("وصف السيارة", "Car description"))}
+              lead={tx(L("اختياري — يمكنك الكتابة يدويًا أو توليد وصف من بيانات الإعلان.", "Optional — write manually or generate from the listing facts."))}
+            >
+              <textarea
+                className="field"
+                rows={6}
+                value={draft.note}
+                onChange={(event) => patch({ note: event.target.value })}
+                placeholder={tx(L("اكتب معلومات إضافية", "Add extra details"))}
+              />
+              <button
+                type="button"
+                className="btn-teal"
+                disabled={aiBusy}
+                onClick={async () => {
+                  setAiBusy(true);
+                  try {
+                    const res = await fetch("/api/ai/listing-description", {
+                      method: "POST",
+                      headers: { "content-type": "application/json" },
+                      body: JSON.stringify({
+                        locale,
+                        make: make ? tx(make.name) : "",
+                        model: model ? tx(model.name) : "",
+                        year: draft.year,
+                        mileage: draft.mileageBand
+                          ? `${mileage.toLocaleString()} ${locale === "ar" ? "كم" : "km"}`
+                          : "",
+                        origin: draft.origin === "gcc" ? (locale === "ar" ? "خليجي" : "GCC") : locale === "ar" ? "وارد" : "Imported",
+                        trim: draft.trim,
+                        body: bodyTypes.find((b) => b.id === draft.body) ? tx(bodyTypes.find((b) => b.id === draft.body)!.name) : draft.body,
+                        fuel: draft.fuel,
+                        gearbox: draft.gearbox === "auto" ? (locale === "ar" ? "أوتوماتيك" : "Automatic") : draft.gearbox === "manual" ? (locale === "ar" ? "عادي" : "Manual") : draft.gearbox,
+                        cylinders: draft.cylinders,
+                        drive: draft.drive,
+                        exterior: exteriorColors.find((c) => c.id === draft.exterior) ? tx(exteriorColors.find((c) => c.id === draft.exterior)!.name) : draft.exterior,
+                        interior: interiorColors.find((c) => c.id === draft.interior) ? tx(interiorColors.find((c) => c.id === draft.interior)!.name) : draft.interior,
+                        smartKeys: draft.smartKeys,
+                        regularKeys: draft.regularKeys,
+                        price: draft.price,
+                        location: placeLabel,
+                        vin: draft.vin,
+                      }),
+                    });
+                    const json = (await res.json()) as { ok?: boolean; text?: string };
+                    if (json.ok && json.text) patch({ note: json.text });
+                  } finally {
+                    setAiBusy(false);
+                  }
+                }}
+              >
+                {aiBusy
+                  ? tx(L("جارٍ التوليد…", "Generating…"))
+                  : tx(L("توليد الوصف بالذكاء الاصطناعي", "Generate description with AI"))}
+              </button>
+            </Question>
+          )}
+
+          {step === 22 && (
+            <Question
+              title={tx(L("النشر", "Publish"))}
+              lead={tx(L("اختر خدمات BHD ثم أنشئ الإعلان.", "Pick BHD services, then create the listing."))}
+            >
+              <div className="rounded-2xl border border-line bg-soft/60 px-4 py-3 text-sm text-muted">
+                <p className="font-medium text-night">{title || tx(L("سيارتك", "Your car"))}</p>
+                <p className="mt-1">{placeLabel || "—"}</p>
+                <p className="mt-1">{draft.price ? money(Number(draft.price) || 0) : "—"}</p>
+              </div>
               <div className="space-y-2 rounded-2xl border border-line bg-sand/40 p-4">
                 <p className="text-sm font-semibold text-night">{tx(L("قوة BHD — اختر ما يُرفق بالإعلان", "BHD edge — attach to the listing"))}</p>
                 <label className="flex items-center gap-2 text-sm">
@@ -882,7 +1008,7 @@ export function SellWizard() {
               <p className="text-2xl font-bold text-night">{draft.price ? money(Number(draft.price) || 0) : "—"}</p>
               <p className="font-semibold text-night">{title || tx(L("سيارتك", "Your car"))}</p>
               <p className="text-sm text-muted">
-                {[draft.year, draft.mileageBand ? `${mileage.toLocaleString()} ${tx(L("كم", "km"))}` : null, cityLabel ? tx(cityLabel) : null]
+                {[draft.year, draft.mileageBand ? `${mileage.toLocaleString()} ${tx(L("كم", "km"))}` : null, placeLabel || null]
                   .filter(Boolean)
                   .join(" · ") || tx(L("أكمل الخطوات لملء البطاقة", "Complete steps to fill the card"))}
               </p>
