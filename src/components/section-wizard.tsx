@@ -23,14 +23,14 @@ const MIN_PHOTOS_DEFAULT = 2;
 const MAX_PHOTOS = 12;
 
 function makeCategoryForSection(sectionId: string): {
-  defaultCategory: "all" | "cars" | "luxury" | "china" | "moto" | "truck" | "other";
-  allowedCategories?: Array<"cars" | "luxury" | "china" | "moto" | "truck" | "other">;
+  defaultCategory: "all" | "cars" | "luxury" | "china" | "moto" | "truck" | "boat" | "other";
+  allowedCategories?: Array<"cars" | "luxury" | "china" | "moto" | "truck" | "boat" | "other">;
 } {
-  if (sectionId === "motorcycle") return { defaultCategory: "moto", allowedCategories: ["moto", "other"] };
+  if (sectionId === "motorcycle") return { defaultCategory: "moto", allowedCategories: ["moto"] };
   if (sectionId === "heavy" || sectionId === "trucks") {
-    return { defaultCategory: "truck", allowedCategories: ["truck", "other"] };
+    return { defaultCategory: "truck", allowedCategories: ["truck"] };
   }
-  if (sectionId === "boats") return { defaultCategory: "other", allowedCategories: ["other", "moto"] };
+  if (sectionId === "boats") return { defaultCategory: "boat", allowedCategories: ["boat"] };
   if (sectionId === "cars-rent" || sectionId === "scrap" || sectionId === "parts") {
     return { defaultCategory: "cars", allowedCategories: ["cars", "luxury", "china"] };
   }

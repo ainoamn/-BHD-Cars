@@ -17,7 +17,7 @@ export type SellMake = {
   mark: string;
   logo: string;
   models: SellModel[];
-  category?: "cars" | "luxury" | "china" | "moto" | "truck" | "other";
+  category?: "cars" | "luxury" | "china" | "moto" | "truck" | "boat" | "other";
 };
 
 const u = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=80`;
@@ -29,6 +29,7 @@ const pickup = u("photo-1559416523-140ddc3d238c");
 const bike = u("photo-1558981403-c5f9899a28bc");
 const truck = u("photo-1601584115197-04ecc1da58d4");
 const ev = u("photo-1593941707882-a5bba14938c7");
+const boat = u("photo-1567899378494-47b22a81aba8");
 
 function m(id: string, ar: string, en: string, body = "sedan", image = sedan, trims: string[] = ["Base"]): SellModel {
   return { id, name: L(ar, en), body, image, trims };
@@ -40,7 +41,7 @@ function make(
   en: string,
   mark: string,
   models: SellModel[],
-  category: "cars" | "luxury" | "china" | "moto" | "truck" | "other" = "cars",
+  category: "cars" | "luxury" | "china" | "moto" | "truck" | "boat" | "other" = "cars",
 ): SellMake {
   return {
     id,
@@ -754,6 +755,33 @@ export const allMakes: SellMake[] = [
     m("air", "إير", "Air", "sedan", ev, ["Pure", "Touring", "Grand Touring"]),
     m("gravity", "غرافيتي", "Gravity", "suv", ev, ["Touring", "Grand Touring"]),
   ], "luxury"),
+  /** Marine brands — used by /sell/boats only (not motorcycle Yamaha). */
+  make("yamaha-marine", "ياماها بحري", "Yamaha Marine", "YM", [
+    m("fx-cruiser", "إف إكس كروزر", "FX Cruiser SVHO", "boat", "/models/yamaha-marine--fx-cruiser.jpg", ["SVHO"]),
+    m("vx-cruiser", "في إكس كروزر", "VX Cruiser", "boat", "/models/yamaha-marine--vx-cruiser.jpg", ["HO"]),
+    m("gp1800", "جي بي 1800", "GP1800R", "boat", "/models/yamaha-marine--gp1800.jpg", ["HO", "SVHO"]),
+    m("242x", "242 إكس", "242X E-Series", "boat", "/models/yamaha-marine--242x.jpg", ["E-Series"]),
+  ], "boat"),
+  make("sea-doo", "سي دو", "Sea-Doo", "SD", [
+    m("gtx", "جي تي إكس", "GTX", "boat", "/models/sea-doo--gtx.jpg", ["170", "230"]),
+    m("rxt-x", "آر إكس تي إكس", "RXT-X", "boat", "/models/sea-doo--rxt-x.jpg", ["300"]),
+    m("spark", "سبارك", "Spark", "boat", "/models/sea-doo--spark.jpg", ["2up", "3up"]),
+    m("fish-pro", "فيش برو", "Fish Pro", "boat", "/models/sea-doo--fish-pro.jpg", ["Sport", "Trophy"]),
+  ], "boat"),
+  make("bayliner", "بيلينر", "Bayliner", "BL", [
+    m("element", "إليمنت", "Element", "boat", "/models/bayliner--element.jpg", ["E16", "E18"]),
+    m("vr5", "في آر 5", "VR5", "boat", "/models/bayliner--vr5.jpg", ["Bowrider"]),
+    m("ciera", "سييرا", "Ciera", "boat", "/models/bayliner--ciera.jpg", ["8"]),
+  ], "boat"),
+  make("beneteau", "بينيتو", "Beneteau", "BN", [
+    m("flyer", "فلاير", "Flyer", "boat", "/models/beneteau--flyer.jpg", ["7", "8", "9"]),
+    m("antares", "أنتاريس", "Antares", "boat", "/models/beneteau--antares.jpg", ["7", "8"]),
+    m("oceanis", "أوشيانيس", "Oceanis", "boat", "/models/beneteau--oceanis.jpg", ["30.1", "34.1"]),
+  ], "boat"),
+  make("boston-whaler", "بوسطن ويلر", "Boston Whaler", "BW", [
+    m("130-super-sport", "130 سوبر سبورت", "130 Super Sport", "boat", "/models/boston-whaler--130-super-sport.jpg", ["Standard"]),
+    m("210-dauntless", "210 دونتلس", "210 Dauntless", "boat", "/models/boston-whaler--210-dauntless.jpg", ["Standard"]),
+  ], "boat"),
 ];
 
 /** Overlay expanded bilingual models + real thumbnails when generated catalog exists. */
@@ -787,5 +815,6 @@ export const makeCategories = [
   { id: "china", name: L("صينية / كهرباء", "China / EV") },
   { id: "moto", name: L("دراجات", "Motorcycles") },
   { id: "truck", name: L("شاحنات ومعدات", "Trucks & equipment") },
+  { id: "boat", name: L("قوارب وبحري", "Boats & marine") },
   { id: "other", name: L("أخرى", "Other") },
 ] as const;

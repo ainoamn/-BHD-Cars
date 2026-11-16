@@ -13,6 +13,7 @@ const CATEGORIES = [
   { id: "china", label: L("صينية", "Chinese") },
   { id: "moto", label: L("دراجات", "Motorcycles") },
   { id: "truck", label: L("شاحنات ومعدات", "Trucks & equipment") },
+  { id: "boat", label: L("قوارب وبحري", "Boats & marine") },
   { id: "other", label: L("أخرى", "Other") },
 ] as const;
 
