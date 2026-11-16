@@ -174,28 +174,47 @@ function templateDescription(input: ListingAssistInput) {
   const style = input.style ?? "clear";
   const serious = isSeriousSection(sectionId);
   const lines = proseFacts(input.facts, locale, sectionId);
-  const body = lines.join(locale === "ar" ? " · " : " · ");
+  const bullets = lines.map((line) => `• ${line}`).join("\n");
+  const compact = lines.join(locale === "ar" ? "، " : ", ");
 
   if (locale === "ar") {
-    const opener = serious
-      ? "عرض معلن عبر BHD Cars:"
-      : sectionId === "tires"
-        ? "إطارات وعجلات معروضة عبر BHD Cars:"
-        : style === "warm"
-          ? "عرض جاهز عبر BHD Cars:"
-          : "تفاصيل العرض:";
-    const closer = "المعاينة حسب الاتفاق.";
-    return [opener, body, closer].filter(Boolean).join("\n");
+    if (serious) {
+      return ["عرض معلن عبر BHD Cars:", bullets, "المعاينة حسب الاتفاق قبل إتمام الصفقة."].join("\n");
+    }
+    if (style === "calm") {
+      return [
+        "تفاصيل العرض بصيغة مهنية عبر BHD Cars:",
+        bullets,
+        "المعاينة والفحص متاحان بالتنسيق المسبق.",
+      ].join("\n");
+    }
+    if (style === "clear") {
+      return [`للبيع: ${compact || "عرض على BHD Cars"}.`, "معاينة حسب الاتفاق."].join("\n");
+    }
+    // warm
+    return [
+      sectionId === "tires"
+        ? "مرحبا! إطارات وعجلات جاهزة عبر BHD Cars."
+        : "مرحبا! عرض جاهز يسهّل قرارك عبر BHD Cars.",
+      bullets,
+      "تعال شوفها عن قرب — المعاينة حسب الاتفاق.",
+    ].join("\n");
   }
 
-  const opener = serious
-    ? "Declared listing on BHD Cars:"
-    : sectionId === "tires"
-      ? "Tires & wheels listed on BHD Cars:"
-      : style === "warm"
-        ? "Ready listing on BHD Cars:"
-        : "Listing details:";
-  return [opener, body, "Viewing by arrangement."].filter(Boolean).join("\n");
+  if (serious) {
+    return ["Declared listing on BHD Cars:", bullets, "Viewing by arrangement before the deal."].join("\n");
+  }
+  if (style === "calm") {
+    return ["Professional listing details on BHD Cars:", bullets, "Viewing and inspection by prior arrangement."].join("\n");
+  }
+  if (style === "clear") {
+    return [`For sale: ${compact || "BHD Cars listing"}.`, "Viewing by arrangement."].join("\n");
+  }
+  return [
+    sectionId === "tires" ? "Hello! Tires and wheels ready on BHD Cars." : "Hello! A ready listing on BHD Cars.",
+    bullets,
+    "Come take a look — viewing by arrangement.",
+  ].join("\n");
 }
 
 async function callModel(system: string, user: string, temperature = 0.55) {
@@ -252,23 +271,28 @@ async function generateBilingualCopy(input: ListingAssistInput, kind: "title" | 
     ? templateTitle(input.facts, "en", input.style, input.sectionId)
     : templateDescription({ ...input, locale: "en" });
 
-  const styleHint =
-    serious
-      ? "honest, declared, non-celebratory"
-      : input.style === "warm"
-        ? "warm and inviting but realistic marketplace tone"
-        : input.style === "calm"
-          ? "calm professional"
-          : "short and direct";
+  const styleId = input.style ?? "clear";
+  const styleHint = serious
+    ? "honest, declared, non-celebratory"
+    : styleId === "warm"
+      ? "warm and friendly marketplace tone — welcoming opening sentence, then facts"
+      : styleId === "calm"
+        ? "calm professional tone — formal opening, structured bullets, no exclamation"
+        : "ultra short and direct — one or two tight sentences, minimal fluff";
 
   const system =
     kind === "title"
       ? `You write realistic marketplace listing titles for BHD Cars (Oman). Return JSON only: {"ar":"...","en":"..."}.
-Rules: use the given facts (brand, size, make, model, year, quantity, etc.). Never invent specs. Never use raw field keys. Never write generic filler like "عرض على BHD Cars" or "فرصة تفرّح العين" unless facts are empty. Max 80 chars each language. Tone: ${styleHint}. Arabic in ar, English in en.`
+Rules: use the given facts (brand, size, make, model, year, quantity, etc.). Never invent specs. Never use raw field keys. Never write generic filler like "عرض على BHD Cars" or "فرصة تفرّح العين" unless facts are empty. Max 80 chars each language. Required style=${styleId}: ${styleHint}. Arabic in ar, English in en.`
       : `You write realistic marketplace listing descriptions for BHD Cars (Oman). Return JSON only: {"ar":"...","en":"..."}.
-Rules: 1–2 short paragraphs or natural Arabic/English sentences (bullets OK if natural). Use only given facts. Never dump English keys like product/brand/diameter. Never celebratory nonsense for scrap. Tone: ${styleHint}. Arabic in ar, English in en. Mention viewing by arrangement once.`;
+Required style id=${styleId}. ${styleHint}.
+Rules: Use only given facts. Never dump English field keys (product/brand/diameter). Never copy the same text for different styles — warm ≠ calm ≠ clear. Arabic in ar, English in en. Mention viewing by arrangement once.`;
 
-  const ai = await callModel(system, JSON.stringify({ sectionId: input.sectionId, facts: input.facts, preferredLocale: locale }), 0.5);
+  const ai = await callModel(
+    system,
+    JSON.stringify({ sectionId: input.sectionId, facts: input.facts, preferredLocale: locale, style: styleId }),
+    styleId === "clear" ? 0.35 : 0.55,
+  );
   const parsed = parseBilingual(ai);
   const textAr = (parsed?.ar || fallbackAr).slice(0, kind === "title" ? 100 : 4000);
   const textEn = (parsed?.en || fallbackEn).slice(0, kind === "title" ? 100 : 4000);

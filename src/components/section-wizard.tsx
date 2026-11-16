@@ -121,6 +121,7 @@ export function SectionWizard({ section }: { section: ListingSection }) {
   const [photos, setPhotos] = useState<string[]>([]);
   const [sent, setSent] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const [descStyle, setDescStyle] = useState<"warm" | "calm" | "clear">("warm");
   const [modelQuery, setModelQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const maxReached = useRef(0);
@@ -269,6 +270,8 @@ export function SectionWizard({ section }: { section: ListingSection }) {
   }
 
   async function runAi(action: "title" | "description", style?: "calm" | "clear" | "warm") {
+    const chosen = style ?? (action === "description" ? descStyle : "warm");
+    if (action === "description") setDescStyle(chosen);
     setAiBusy(true);
     try {
       const res = await fetch("/api/ai/listing-assist", {
@@ -277,13 +280,14 @@ export function SectionWizard({ section }: { section: ListingSection }) {
         body: JSON.stringify({
           locale,
           action,
-          style: style ?? "warm",
+          style: chosen,
           sectionId: section.id,
           bilingual: true,
           facts: localizedFacts(),
         }),
       });
       const json = (await res.json()) as {
+        ok?: boolean;
         text?: string;
         textAr?: string;
         textEn?: string;
@@ -301,6 +305,7 @@ export function SectionWizard({ section }: { section: ListingSection }) {
       } else {
         const ar = (json.textAr || (locale === "ar" ? json.text : "") || "").slice(0, 4000);
         const en = (json.textEn || (locale === "en" ? json.text : "") || "").slice(0, 4000);
+        // Always replace so calm/clear visibly update after warm.
         setValues((prev) => ({
           ...prev,
           note: locale === "ar" ? ar || en : en || ar,
@@ -717,17 +722,19 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                       ["calm", L("هادئ مهني", "Calm professional")],
                       ["clear", L("مختصر مباشر", "Short & direct")],
                     ] as const
-                  ).map(([style, label]) => (
+                  ).map(([id, label]) => (
                     <button
-                      key={style}
+                      key={id}
                       type="button"
-                      className={`rounded-2xl border px-3 py-3 text-sm font-medium text-night hover:border-teal/40 ${
-                        style === "warm" ? "border-teal/40 bg-teal/10" : "border-line bg-soft/50"
+                      className={`rounded-2xl border px-3 py-3 text-sm font-medium text-night transition hover:border-teal/40 disabled:opacity-50 ${
+                        descStyle === id ? "border-teal bg-teal/10 ring-1 ring-teal/30" : "border-line bg-soft/50"
                       }`}
                       disabled={aiBusy}
-                      onClick={() => void runAi("description", style)}
+                      onClick={() => void runAi("description", id)}
                     >
-                      {tx(label)}
+                      {aiBusy && descStyle === id
+                        ? tx(L("جارٍ التوليد…", "Generating…"))
+                        : tx(label)}
                     </button>
                   ))}
                 </div>
