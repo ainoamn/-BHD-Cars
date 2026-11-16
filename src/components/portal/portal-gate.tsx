@@ -45,10 +45,10 @@ export function PortalGate({
   return (
     <div className="admin-gate">
       <div className="admin-gate__card">
-        <p className="admin-eyebrow">BHD CARS · PORTAL</p>
+        <p className="admin-eyebrow">Bin Hamood · Portal</p>
         <h1>{copy.title}</h1>
         <p>{copy.body}</p>
-        <div className="admin-actions" style={{ justifyContent: "center", marginTop: "1.1rem" }}>
+        <div className="admin-actions" style={{ justifyContent: "center", marginTop: "1.25rem" }}>
           <Link className="primary" href={copy.href}>
             {copy.cta}
           </Link>

@@ -41,7 +41,7 @@ export function AdminGate({
   return (
     <div className="admin-gate">
       <div className="admin-gate__card">
-        <p className="admin-eyebrow">BHD CARS · ADMIN</p>
+        <p className="admin-eyebrow">Bin Hamood · Site Control</p>
         <h1>{copy.title}</h1>
         <p>{copy.body}</p>
         {accountHint ? (
@@ -49,7 +49,7 @@ export function AdminGate({
             {accountHint}
           </p>
         ) : null}
-        <div className="admin-actions" style={{ justifyContent: "center", marginTop: "1.1rem" }}>
+        <div className="admin-actions" style={{ justifyContent: "center", marginTop: "1.25rem" }}>
           <Link className="primary" href={copy.href}>
             {copy.cta}
           </Link>

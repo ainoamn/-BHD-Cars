@@ -21,7 +21,9 @@ export default async function PortalChooserPage() {
   return (
     <div className="admin-gate">
       <div className="admin-gate__card" style={{ width: "min(560px, 100%)", textAlign: "start" }}>
-        <p className="admin-eyebrow">BHD CARS · PORTAL</p>
+        <p className="admin-eyebrow" style={{ textAlign: "center" }}>
+          Bin Hamood · Portal
+        </p>
         <h1 style={{ textAlign: "center" }}>{ar ? "اختر مساحة التحكم" : "Choose your control space"}</h1>
         <p style={{ textAlign: "center" }}>
           {ar ? `مرحبًا ${session.name}` : `Welcome ${session.name}`}

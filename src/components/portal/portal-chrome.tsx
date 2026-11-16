@@ -41,7 +41,9 @@ export function PortalChrome({
           <div className="site-admin-nav__brand">
             <div className="site-admin-nav__mark" aria-hidden="true" />
             <div className="site-admin-nav__brand-copy">
-              <p className="site-admin-nav__product">BHD Cars</p>
+              <p className="site-admin-nav__product">
+                {kind === "workspace" ? "Bin Hamood · House" : "Bin Hamood · Account"}
+              </p>
               <p className="site-admin-nav__title">{ar ? titleAr : titleEn}</p>
             </div>
             <span className="site-admin-nav__role">{roleLabel}</span>
