@@ -7,7 +7,7 @@
 | المستودع | https://github.com/ainoamn/-BHD-Cars |
 | الإنتاج | https://bhd-cars.vercel.app |
 | التوثيق | `docs/implementation/BHD-003.md` |
-| الالتزام المرجعي | `fcfba06` (+ وثائق هذا الإصدار) |
+| الالتزام المرجعي | `84a959d` (معالج جاهز: ممشى/ألوان/لوحة/AI مرح) |
 
 ## ملخص النشر
 
