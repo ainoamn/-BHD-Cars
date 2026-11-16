@@ -27,16 +27,34 @@ export function isSsoConfigured(): boolean {
   return Boolean(oauthClientId());
 }
 
-export function oauthRedirectUri(origin: string): string {
-  const fromRequest = `${origin.replace(/\/$/, "")}/api/auth/bhd/callback`;
+/** Registered callback. Preview hosts are not on the identity client, so never invent a redirect from the request origin when this is set. */
+export function configuredRedirectUri(): string | null {
   const configured = process.env.BHD_OAUTH_REDIRECT_URI?.trim();
-  if (!configured) return fromRequest;
+  if (!configured) return null;
   try {
-    if (new URL(configured).origin === new URL(origin).origin) return configured;
+    const url = new URL(configured);
+    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+    return url.toString();
   } catch {
-    /* ignore */
+    return null;
   }
-  return fromRequest;
+}
+
+export function oauthRedirectUri(origin: string): string {
+  return configuredRedirectUri() ?? `${origin.replace(/\/$/, "")}/api/auth/bhd/callback`;
+}
+
+/** When login starts on a host the identity client does not allow, move the browser to the registered origin first so the state cookie and callback share one domain. */
+export function canonicalAuthOrigin(requestOrigin: string): string | null {
+  const configured = configuredRedirectUri();
+  if (!configured) return null;
+  try {
+    const origin = new URL(configured).origin;
+    if (origin === new URL(requestOrigin).origin) return null;
+    return origin;
+  } catch {
+    return null;
+  }
 }
 
 export function randomUrlToken(bytes = 32): string {

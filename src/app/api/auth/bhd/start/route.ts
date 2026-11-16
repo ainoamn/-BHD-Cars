@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import {
   BHD_OAUTH_STATE_COOKIE,
+  canonicalAuthOrigin,
   identityIssuer,
   isSsoConfigured,
   oauthClientId,
@@ -18,6 +19,12 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const origin = url.origin;
   const returnTo = safeReturnPath(url.searchParams.get("returnTo"));
+  const canonical = canonicalAuthOrigin(origin);
+  if (canonical) {
+    const next = new URL("/api/auth/bhd/start", canonical);
+    next.searchParams.set("returnTo", returnTo);
+    return NextResponse.redirect(next);
+  }
 
   if (!isSsoConfigured()) {
     return NextResponse.json(

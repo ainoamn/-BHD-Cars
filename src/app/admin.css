@@ -539,75 +539,61 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
   filter: brightness(1.05);
 }
 
-/* ——— Night entrance (portal + site control) ——— */
+/* ——— Portal entrance: same language as the market hero ——— */
 .portal-entrance,
 .admin-gate {
   --font-sans: var(--font-plex), "Segoe UI", Tahoma, sans-serif;
+  position: relative;
   min-height: 100dvh;
   display: flex;
-  align-items: center;
-  padding: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: flex-end;
+  overflow: hidden;
   color: var(--desk-ivory);
   font-family: var(--font-sans);
+  background: #092d24;
+}
+
+.portal-entrance__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+}
+
+.portal-entrance__shade {
+  position: absolute;
+  inset: 0;
   background:
-    radial-gradient(ellipse 55% 42% at 100% 0%, rgb(8 163 159 / 0.22), transparent 58%),
-    radial-gradient(ellipse 42% 38% at 0% 100%, rgb(181 141 85 / 0.16), transparent 52%),
-    linear-gradient(168deg, #0c342b 0%, #092d24 46%, #061c17 100%);
-  animation: desk-fade-in 0.7s var(--desk-ease) both;
+    linear-gradient(to top, rgb(9 45 36 / 0.94) 0%, rgb(9 45 36 / 0.62) 38%, rgb(9 45 36 / 0.28) 68%, rgb(9 45 36 / 0.18) 100%),
+    linear-gradient(to left, rgb(9 45 36 / 0.55), transparent 58%);
 }
 
 .portal-entrance__stage {
-  width: min(40rem, 100%);
-  animation: portal-rise 0.85s var(--desk-ease) both;
+  position: relative;
+  z-index: 1;
+  width: min(72rem, calc(100% - 2.5rem));
+  margin-inline: auto;
+  padding: 4.5rem 0 2.75rem;
+  animation: portal-rise 0.7s var(--desk-ease) both;
 }
 
-.portal-entrance--chooser .portal-entrance__stage {
-  width: min(68rem, 100%);
-}
-
-.portal-entrance__mark {
-  display: block;
-  width: min(11.5rem, 52vw);
-  height: auto;
-  margin-bottom: 1.35rem;
-  filter: drop-shadow(0 10px 24px rgb(0 0 0 / 0.25));
-}
-
-.portal-entrance__house {
+.portal-entrance__eyebrow {
   margin: 0;
-  font-size: clamp(3.1rem, 8.4vw, 5.6rem);
-  font-weight: 300;
-  letter-spacing: -0.045em;
-  line-height: 0.92;
-  color: #fbfaf7;
-}
-
-.portal-entrance__product {
-  margin: 0.55rem 0 0;
-  color: var(--desk-brass);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-}
-
-.portal-entrance__rule {
-  display: block;
-  width: 4.75rem;
-  height: 1px;
-  margin: 1.35rem 0 1.15rem;
-  background: linear-gradient(90deg, var(--desk-brass), var(--desk-teal));
-  transform-origin: right center;
-  animation: portal-rule 0.9s 0.25s var(--desk-ease) both;
+  color: #7ed4d1;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
 }
 
 .portal-entrance h1 {
-  margin: 0;
-  max-width: 18ch;
-  font-size: clamp(1.35rem, 2.5vw, 1.85rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  margin: 0.7rem 0 0;
+  max-width: 16ch;
+  font-size: clamp(2.15rem, 4.6vw, 3.6rem);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
   color: #fbfaf7;
 }
 
@@ -638,15 +624,15 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
 .portal-entrance__cta {
   display: inline-flex;
   align-items: center;
-  padding: 0.9rem 1.45rem;
-  border: 1px solid rgb(181 141 85 / 0.55);
-  background: linear-gradient(135deg, #d4b483, #b58d55 55%, #8f6d3b);
-  color: #092d24;
-  font-size: 0.92rem;
+  padding: 0.85rem 1.35rem;
+  border: 0;
+  border-radius: 0.85rem;
+  background: #08a39f;
+  color: #fff;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
   text-decoration: none;
-  box-shadow: 0 14px 30px rgb(0 0 0 / 0.22);
+  box-shadow: 0 12px 28px rgb(0 0 0 / 0.22);
   transition: transform 0.22s var(--desk-ease), filter 0.22s ease;
 }
 
@@ -678,16 +664,13 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
 .portal-room {
   display: flex;
   flex-direction: column;
-  min-height: 16rem;
-  padding: 1.35rem 1.3rem 1.2rem;
-  border: 1px solid rgb(251 250 247 / 0.12);
-  background: linear-gradient(180deg, rgb(251 250 247 / 0.06), rgb(251 250 247 / 0.02));
-  transition: border-color 0.22s ease, transform 0.22s var(--desk-ease);
-}
-
-.portal-room:hover {
-  border-color: rgb(181 141 85 / 0.45);
-  transform: translateY(-2px);
+  min-height: 13.5rem;
+  padding: 1.2rem 1.15rem 1.1rem;
+  border: 1px solid rgb(255 255 255 / 0.45);
+  border-radius: 1.15rem;
+  background: rgb(251 250 247 / 0.96);
+  color: var(--desk-ink);
+  box-shadow: 0 18px 40px rgb(9 45 36 / 0.18);
 }
 
 .portal-room__kicker {
@@ -700,16 +683,16 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
 }
 
 .portal-room h2 {
-  margin: 0.55rem 0 0;
-  font-size: 1.35rem;
-  font-weight: 600;
+  margin: 0.4rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 750;
   letter-spacing: -0.02em;
-  color: #fbfaf7;
+  color: var(--desk-ink);
 }
 
 .portal-room__lead {
-  margin: 0.55rem 0 0;
-  color: rgb(251 250 247 / 0.66);
+  margin: 0.45rem 0 0;
+  color: var(--desk-muted);
   font-size: 0.9rem;
   line-height: 1.65;
 }
@@ -721,16 +704,17 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
 
 .portal-room__link {
   display: inline-flex;
-  color: #092d24;
-  background: #fbfaf7;
-  padding: 0.7rem 1.05rem;
+  border-radius: 0.8rem;
+  background: #08a39f;
+  color: #fff;
+  padding: 0.65rem 1rem;
   font-size: 0.86rem;
   font-weight: 700;
   text-decoration: none;
 }
 
 .portal-room__link:hover {
-  background: #fff;
+  filter: brightness(1.05);
 }
 
 .portal-orgs {
@@ -745,28 +729,29 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
   justify-content: space-between;
   gap: 0.75rem;
   padding-top: 0.7rem;
-  border-top: 1px solid rgb(251 250 247 / 0.1);
+  border-top: 1px solid var(--desk-line);
 }
 
 .portal-org strong {
   display: block;
   font-size: 0.95rem;
-  font-weight: 650;
+  font-weight: 700;
+  color: var(--desk-ink);
 }
 
 .portal-org span {
   display: block;
   margin-top: 0.15rem;
-  color: rgb(251 250 247 / 0.5);
+  color: var(--desk-muted);
   font-size: 0.72rem;
-  letter-spacing: 0.04em;
 }
 
 .portal-room__enter {
   padding: 0.5rem 0.85rem;
-  border: 1px solid rgb(181 141 85 / 0.65);
-  background: transparent;
-  color: #f4e6cc;
+  border: 0;
+  border-radius: 0.7rem;
+  background: #092d24;
+  color: #fbfaf7;
   font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
@@ -778,8 +763,8 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
 }
 
 .portal-room__empty {
-  margin: 0.9rem 0 0;
-  color: rgb(251 250 247 / 0.55);
+  margin: 0.75rem 0 0;
+  color: var(--desk-muted);
   font-size: 0.88rem;
   line-height: 1.6;
 }
@@ -787,20 +772,11 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
 @keyframes portal-rise {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes portal-rule {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
   }
 }
 
@@ -809,8 +785,9 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
     grid-template-columns: 1fr;
   }
 
-  .portal-entrance__house {
-    font-size: clamp(2.6rem, 14vw, 3.6rem);
+  .portal-entrance__stage {
+    width: min(72rem, calc(100% - 1.5rem));
+    padding-bottom: 1.5rem;
   }
 }
 
@@ -948,7 +925,6 @@ html[dir="ltr"] .site-admin-nav__list a:hover {
   .portal-entrance,
   .admin-gate,
   .portal-entrance__stage,
-  .portal-entrance__rule,
   .portal-room,
   .admin-card,
   .site-admin-nav__list a,

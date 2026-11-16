@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { portalLoginHref } from "@/lib/portal/access";
+import { PortalEntrance } from "@/components/portal/portal-entrance";
 
 export function PortalGate({
   locale,
@@ -43,27 +44,20 @@ export function PortalGate({
   }[reason];
 
   const market = ar ? "العودة للسوق" : "Back to market";
+  const eyebrow = ar ? "BHD CARS · عُمان والخليج" : "BHD CARS · Oman & the Gulf";
 
   return (
-    <div className="portal-entrance">
-      <div className="portal-entrance__stage">
-        <img className="portal-entrance__mark" src="/brand/bhd-mark.svg" alt="BHD" />
-        <p className="portal-entrance__house">Bin Hamood</p>
-        <p className="portal-entrance__product">BHD Cars</p>
-        <span className="portal-entrance__rule" aria-hidden />
-        <h1>{copy.title}</h1>
-        <p className="portal-entrance__lead">{copy.body}</p>
-        <div className="portal-entrance__actions">
-          <Link className="portal-entrance__cta" href={copy.href}>
-            {copy.cta}
+    <PortalEntrance eyebrow={eyebrow} title={copy.title} lead={copy.body}>
+      <div className="portal-entrance__actions">
+        <Link className="portal-entrance__cta" href={copy.href}>
+          {copy.cta}
+        </Link>
+        {copy.href !== "/" ? (
+          <Link className="portal-entrance__quiet" href="/">
+            {market}
           </Link>
-          {copy.href !== "/" ? (
-            <Link className="portal-entrance__quiet" href="/">
-              {market}
-            </Link>
-          ) : null}
-        </div>
+        ) : null}
       </div>
-    </div>
+    </PortalEntrance>
   );
 }
