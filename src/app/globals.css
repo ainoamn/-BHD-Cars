@@ -22,9 +22,11 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
+  overflow-x: clip;
   background:
     radial-gradient(circle at top left, rgb(8 163 159 / 0.08), transparent 28%),
     radial-gradient(circle at top right, rgb(181 141 85 / 0.08), transparent 24%),

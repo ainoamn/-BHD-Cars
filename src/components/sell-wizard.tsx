@@ -288,8 +288,8 @@ export function SellWizard() {
         </div>
       </div>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-6 lg:grid-cols-[1.35fr_0.75fr]">
-        <div className="surface-card p-4 md:p-6">
+      <div className="mx-auto grid w-full max-w-6xl gap-6 px-5 py-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.75fr)]">
+        <div className="surface-card min-w-0 overflow-x-clip p-4 md:p-6">
           {step === 0 && (
             <MakePicker selectedId={draft.makeId} onSelect={pickMake} />
           )}

@@ -56,9 +56,9 @@ export function MakePicker({
   }
 
   return (
-    <section className="space-y-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+    <section className="min-w-0 max-w-full space-y-4 overflow-x-clip">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="text-lg font-semibold text-night">
             {tx(title ?? L("المُصنّعون الأكثر رواجاً", "Most popular manufacturers"))}
           </h2>
@@ -66,7 +66,7 @@ export function MakePicker({
             {tx(subtitle ?? L("شعارات رسمية حقيقية — اختر الوكالة ثم صور الفئة.", "Real official logos — pick the make, then category photos."))}
           </p>
         </div>
-        <div className="inline-flex rounded-full border border-line bg-soft p-1 text-sm">
+        <div className="inline-flex shrink-0 rounded-full border border-line bg-soft p-1 text-sm">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-night px-3 py-1.5 font-medium text-ivory">
             <span aria-hidden>◎</span>
             {tx(L("المُصنّع", "Manufacturer"))}
@@ -81,11 +81,11 @@ export function MakePicker({
       <input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        className="field"
+        className="field w-full min-w-0"
         placeholder={tx(L("ابحث عن المصنع أو الاسم الإنجليزي", "Search make in Arabic or English"))}
       />
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex max-w-full gap-2 overflow-x-auto overscroll-x-contain pb-1">
         {CATEGORIES.map((item) => {
           const active = category === item.id;
           return (
@@ -103,29 +103,31 @@ export function MakePicker({
         })}
       </div>
 
-      <div
-        ref={scrollerRef}
-        className="grid max-h-[22rem] auto-cols-[minmax(5.75rem,1fr)] grid-flow-col grid-rows-2 gap-2 overflow-x-auto overscroll-x-contain pb-2 scroll-smooth sm:auto-cols-[6.5rem]"
-      >
-        {filtered.map((item: SellMake) => {
-          const active = selectedId === item.id;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onSelect(item.id)}
-              title={tx(item.name)}
-              className={`flex w-[5.75rem] shrink-0 flex-col items-center rounded-2xl border bg-white p-2 text-center shadow-sm transition hover:border-brass/40 sm:w-[6.5rem] ${
-                active ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/30" : "border-line/80"
-              }`}
-            >
-              <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="h-14 w-14 sm:h-16 sm:w-16" />
-              <span className="mt-1.5 line-clamp-2 w-full text-[10px] leading-tight text-muted sm:text-[11px]">
-                {locale === "ar" ? item.name.ar : item.name.en}
-              </span>
-            </button>
-          );
-        })}
+      <div className="min-w-0 max-w-full overflow-hidden">
+        <div
+          ref={scrollerRef}
+          className="grid max-h-[22rem] w-full max-w-full grid-flow-col grid-rows-2 gap-2 overflow-x-auto overscroll-x-contain pb-2 scroll-smooth [grid-auto-columns:5.75rem] sm:[grid-auto-columns:6.5rem]"
+        >
+          {filtered.map((item: SellMake) => {
+            const active = selectedId === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelect(item.id)}
+                title={tx(item.name)}
+                className={`flex w-full min-w-0 flex-col items-center rounded-2xl border bg-white p-2 text-center shadow-sm transition hover:border-brass/40 ${
+                  active ? "border-[#1d4ed8] ring-2 ring-[#1d4ed8]/30" : "border-line/80"
+                }`}
+              >
+                <BrandLogo id={item.id} mark={item.mark} name={tx(item.name)} className="h-14 w-14 sm:h-16 sm:w-16" />
+                <span className="mt-1.5 line-clamp-2 w-full text-[10px] leading-tight text-muted sm:text-[11px]">
+                  {locale === "ar" ? item.name.ar : item.name.en}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {!filtered.length && (
