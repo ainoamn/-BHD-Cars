@@ -1,69 +1,88 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
+import { listingSections } from "@/lib/listing-sections";
 import { usePrefs } from "@/lib/prefs";
 import type { Copy } from "@/lib/types";
 
 const L = (ar: string, en: string): Copy => ({ ar, en });
 
-const paths = [
-  {
-    href: "/sell/ready",
-    kicker: L("بدون حادث", "No accident"),
-    title: L("سيارة جاهزة للبيع", "A ready car for sale"),
-    text: L("إعلان شفاف للسيارات السليمة. سعر مقابل السوق، وفحص اختياري.", "A clear listing for undamaged cars. Price against the market, optional inspection."),
-    tone: "ready" as const,
-  },
-  {
-    href: "/sell/accident",
-    kicker: L("حادث معلن", "Declared accident"),
-    title: L("سيارة بحادث — الضرر يُعلن لا يُخفى", "Accident car — damage is declared, not hidden"),
-    text: L("خريطة ضرر، حالة الإصلاح، صور الضرر، وملكية واضحة. أقوى من إعلان «حوادث» عام.", "A damage map, repair state, damage photos, and a clear title. Stronger than a vague salvage ad."),
-    tone: "accident" as const,
-  },
-];
-
 export default function Page() {
-  const { tx } = usePrefs();
+  const { tx, locale } = usePrefs();
+  const [query, setQuery] = useState("");
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return listingSections;
+    return listingSections.filter((section) => {
+      const ar = section.name.ar;
+      const en = section.name.en.toLowerCase();
+      const blurbAr = section.blurb.ar;
+      const blurbEn = section.blurb.en.toLowerCase();
+      return ar.includes(query) || en.includes(q) || blurbAr.includes(query) || blurbEn.includes(q);
+    });
+  }, [query]);
 
   return (
     <div className="min-h-[75vh] bg-gradient-to-b from-sand/50 to-ivory">
-      <div className="mx-auto max-w-4xl px-5 py-12 md:py-16">
+      <div className="mx-auto max-w-3xl px-5 py-12 md:py-16">
         <p className="eyebrow">{tx(L("أضف إعلاناً", "Add a listing"))}</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-night md:text-4xl">
-          {tx(L("ماذا تبيع؟", "What are you selling?"))}
+          {tx(L("اختر القسم المناسب لإضافة الإعلان", "Choose the right section for your listing"))}
         </h1>
         <p className="mt-3 max-w-2xl text-muted">
-          {tx(L(
-            "نبدأ بالتصنيف حتى لا تختلط السيارة الجاهزة بسيارة الحادث — كما يفعل سوق كارز، لكن بمسار أوضح لكل نوع.",
-            "We start with the category so a ready car never mixes with a salvage car — like Sooq Cars, but with a clearer path for each type.",
-          ))}
+          {tx(
+            L(
+              "كل قسم له قائمة إدخال خاصة بأهم بياناته — حتى يصل المشتري لما يبحث عنه بسرعة.",
+              "Each section has its own entry list with the fields that matter most — so buyers find what they need faster.",
+            ),
+          )}
         </p>
 
-        <div className="mt-10 grid gap-4 md:grid-cols-2">
-          {paths.map((path) => (
+        <label className="relative mt-8 block">
+          <span className="pointer-events-none absolute inset-y-0 start-4 flex items-center text-muted">⌕</span>
+          <input
+            className="field ps-11"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={tx(L("ابحث عن قسم…", "Search for a section…"))}
+          />
+        </label>
+
+        <div className="mt-6 space-y-3">
+          {filtered.map((section) => (
             <Link
-              key={path.href}
-              href={path.href}
-              className={`surface-card surface-card-hover block p-6 ${
-                path.tone === "accident" ? "border-live/25" : ""
-              }`}
+              key={section.id}
+              href={`/sell/${section.id}`}
+              className="surface-card surface-card-hover flex items-center gap-4 px-4 py-4 transition md:px-5"
             >
-              <p className={`text-xs font-semibold tracking-[0.14em] ${path.tone === "accident" ? "text-live" : "text-brass"}`}>
-                {tx(path.kicker)}
-              </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-night">{tx(path.title)}</h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted">{tx(path.text)}</p>
-              <span className={`mt-6 inline-flex ${path.tone === "accident" ? "btn-secondary" : "btn-primary"}`}>
-                {tx(L("ابدأ", "Start"))}
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-soft text-2xl">
+                {section.icon}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-semibold text-night">{tx(section.name)}</span>
+                <span className="mt-0.5 block text-sm text-muted">{tx(section.blurb)}</span>
+              </span>
+              <span className="shrink-0 text-lg text-muted" aria-hidden>
+                {locale === "ar" ? "‹" : "›"}
               </span>
             </Link>
           ))}
+          {filtered.length === 0 && (
+            <p className="rounded-2xl border border-dashed border-line bg-paper px-4 py-8 text-center text-sm text-muted">
+              {tx(L("لا يوجد قسم بهذا الاسم.", "No section matches that search."))}
+            </p>
+          )}
         </div>
 
-        <p className="mt-8 text-center text-sm text-muted">
-          <Link href="/plates" className="text-navy hover:text-brass">{tx(L("أو أعلن عن لوحة مميزة", "Or list a distinctive plate"))}</Link>
-        </p>
+        <div className="mt-8 rounded-2xl border border-dashed border-brass/35 bg-sand/30 px-4 py-4 text-sm text-muted">
+          <p className="font-medium text-night">{tx(L("هل تحتاج مساعدة؟", "Need help?"))}</p>
+          <p className="mt-1">{tx(L("تواصل معنا الآن لاختيار القسم المناسب.", "Contact us to pick the right section."))}</p>
+          <Link href="/contact" className="btn-secondary mt-3 inline-flex">
+            {tx(L("تواصل معنا", "Contact us"))}
+          </Link>
+        </div>
       </div>
     </div>
   );
