@@ -8,11 +8,11 @@ import { ModelThumb } from "@/components/model-thumb";
 import { Receipt } from "@/components/ui";
 import {
   bodyTypes,
-  estimateMarketOmr,
   exteriorColors,
   interiorColors,
   mileageBands,
   sellMakes,
+  valuateReadyListing,
   years,
 } from "@/lib/sell-catalog";
 import {
@@ -117,7 +117,7 @@ type Draft = {
   adTitle: string;
   note: string;
   price: string;
-  priceHidden: boolean;
+  priceNegotiable: boolean;
   payment: string;
   deal: Deal;
   phone: string;
@@ -168,7 +168,7 @@ const empty: Draft = {
   adTitle: "",
   note: "",
   price: "",
-  priceHidden: false,
+  priceNegotiable: true,
   payment: "",
   deal: "sell",
   phone: "",
@@ -262,6 +262,9 @@ export function SellWizard() {
   const [expandInterior, setExpandInterior] = useState(false);
   const [expandExterior, setExpandExterior] = useState(false);
   const [expandTech, setExpandTech] = useState(false);
+  const [previewAsk, setPreviewAsk] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
+  const previewRef = useRef<HTMLElement | null>(null);
   const [showExteriorCatalog, setShowExteriorCatalog] = useState(false);
   const [showInteriorCatalog, setShowInteriorCatalog] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -281,16 +284,56 @@ export function SellWizard() {
     locale,
   });
 
-  const market = useMemo(() => {
+  const valuation = useMemo(() => {
     if (!draft.makeId || !draft.year || !draft.body) return null;
-    return estimateMarketOmr({
+    return valuateReadyListing({
       makeId: draft.makeId,
+      modelId: draft.modelId,
       year: draft.year,
       mileage,
       body: draft.body,
       origin: draft.origin || "gcc",
+      condition: draft.condition,
+      fuel: draft.fuel,
+      gearbox: draft.gearbox,
+      trim: draft.trim,
+      cylinders: draft.cylinders,
+      drive: draft.drive,
+      smartKeys: draft.smartKeys,
+      regularKeys: draft.regularKeys,
+      interiorFeatureCount: draft.interiorFeatureIds.length,
+      exteriorFeatureCount: draft.exteriorFeatureIds.length,
+      techFeatureCount: draft.techFeatureIds.length,
     });
-  }, [draft.makeId, draft.year, draft.body, draft.origin, mileage]);
+  }, [
+    draft.makeId,
+    draft.modelId,
+    draft.year,
+    draft.body,
+    draft.origin,
+    draft.condition,
+    draft.fuel,
+    draft.gearbox,
+    draft.trim,
+    draft.cylinders,
+    draft.drive,
+    draft.smartKeys,
+    draft.regularKeys,
+    draft.interiorFeatureIds.length,
+    draft.exteriorFeatureIds.length,
+    draft.techFeatureIds.length,
+    mileage,
+  ]);
+
+  const enteredPrice = Number(draft.price) || 0;
+  const priceVsMarket =
+    valuation && enteredPrice > 0
+      ? enteredPrice < valuation.low
+        ? "below"
+        : enteredPrice > valuation.high
+          ? "above"
+          : "fair"
+      : null;
 
   const autoTitle = [make ? tx(make.name) : "", model ? tx(model.name) : "", draft.year ?? ""]
     .filter(Boolean)
@@ -374,7 +417,7 @@ export function SellWizard() {
       case "description":
         return true;
       case "price":
-        return draft.priceHidden || Boolean(draft.price && Number(draft.price) > 0);
+        return Boolean(draft.price && Number(draft.price) > 0);
       case "payment":
         return Boolean(draft.payment);
       case "deal":
@@ -385,7 +428,7 @@ export function SellWizard() {
         return (
           Boolean(draft.villageId) &&
           draft.photos.length >= MIN_PHOTOS &&
-          (draft.priceHidden || Boolean(draft.price)) &&
+          Boolean(draft.price && Number(draft.price) > 0) &&
           draft.phone.replace(/\D/g, "").length >= 8
         );
       default:
@@ -568,7 +611,8 @@ export function SellWizard() {
           techFeatures: draft.techFeatureIds.map((id) => optionLabel(techFeatures, id, tx)),
           smartKeys: draft.smartKeys,
           regularKeys: draft.regularKeys,
-          price: draft.priceHidden ? undefined : draft.price,
+          price: draft.price,
+          priceNegotiable: draft.priceNegotiable,
           payment: optionLabel(paymentMethods, draft.payment, tx),
           location: placeLabel,
           vin: draft.vin,
@@ -595,7 +639,8 @@ export function SellWizard() {
         `regularKeys:${draft.regularKeys}`,
         draft.license,
         draft.insurance,
-        draft.priceHidden ? "price:hidden" : `${draft.price} OMR`,
+        `${draft.price} OMR`,
+        draft.priceNegotiable ? "negotiable" : "fixed-price",
         draft.payment,
         placeLabel || null,
         draft.deal,
@@ -611,6 +656,25 @@ export function SellWizard() {
       status: "submitted",
     });
     setSent(created.ref);
+  }
+
+  function requestPublish() {
+    if (!canNext()) return;
+    setPreviewAsk(true);
+  }
+
+  function confirmPreviewThenStay() {
+    setPreviewAsk(false);
+    setPreviewMode(true);
+    window.setTimeout(() => {
+      previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }
+
+  function confirmPublishNow() {
+    setPreviewAsk(false);
+    setPreviewMode(false);
+    publish();
   }
 
   if (sent) {
@@ -1508,41 +1572,114 @@ export function SellWizard() {
           )}
 
           {stepId === "price" && (
-            <Question title={tx(L("السعر", "Price"))} lead={tx(L("سعر واقعي يجلب مشاهدات أكثر.", "A realistic price gets more views."))}>
-              {market && (
-                <div className="rounded-2xl border border-brass/30 bg-soft px-4 py-3 text-sm">
-                  <p className="font-medium text-night">{tx(L("تقدير السوق لهذه المواصفات", "Market estimate for these specs"))}</p>
-                  <p className="mt-1 text-brass">
-                    {money(Math.round(market * 0.92))} – {money(Math.round(market * 1.08))}
+            <Question
+              title={tx(L("السعر", "Price"))}
+              lead={tx(
+                L(
+                  "السعر مطلوب. الأداة الذكية تقيّم العمر والموديل والمواصفات وتعرض نطاق السوق.",
+                  "Price is required. The smart tool weighs age, model, and specs and shows the market band.",
+                ),
+              )}
+            >
+              {valuation && (
+                <div className="space-y-3 rounded-2xl border border-teal/30 bg-teal/5 px-4 py-4 text-sm">
+                  <p className="font-semibold text-night">
+                    {tx(L("تقييم BHD الذكي لهذه السيارة", "BHD smart valuation for this car"))}
                   </p>
+                  <p className="text-muted">
+                    {tx(
+                      L(
+                        `عمر تقريبي ${valuation.ageYears} سنة · يعتمد على الموديل والحالة والممشى والمواصفات المختارة.`,
+                        `About ${valuation.ageYears} years old · based on model, condition, mileage, and selected specs.`,
+                      ),
+                    )}
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <div className="rounded-xl border border-line bg-paper px-3 py-2">
+                      <p className="text-xs text-muted">{tx(L("الأقل في السوق", "Market low"))}</p>
+                      <p className="mt-1 text-lg font-bold text-night">{money(valuation.low)}</p>
+                    </div>
+                    <div className="rounded-xl border border-brass/40 bg-paper px-3 py-2">
+                      <p className="text-xs text-muted">{tx(L("تقدير وسط", "Mid estimate"))}</p>
+                      <p className="mt-1 text-lg font-bold text-brass">{money(valuation.mid)}</p>
+                    </div>
+                    <div className="rounded-xl border border-line bg-paper px-3 py-2">
+                      <p className="text-xs text-muted">{tx(L("الأعلى في السوق", "Market high"))}</p>
+                      <p className="mt-1 text-lg font-bold text-night">{money(valuation.high)}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-dashed border-brass/50 bg-sand/40 px-3 py-2 text-night">
+                    {tx(
+                      L(
+                        `تنبيه: سيارات مشابهة تُعرض عادة بين ${money(valuation.low)} و ${money(valuation.high)}.`,
+                        `Notice: similar cars usually list between ${money(valuation.low)} and ${money(valuation.high)}.`,
+                      ),
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    className="text-sm font-medium text-teal"
+                    onClick={() => patch({ price: String(valuation.mid) })}
+                  >
+                    {tx(L("استخدم التقدير الوسط كسعر", "Use mid estimate as price"))}
+                  </button>
                 </div>
               )}
-              <label className="flex items-center gap-2 rounded-2xl border border-line bg-sand/40 px-4 py-3 text-sm">
-                <input
-                  type="checkbox"
-                  checked={draft.priceHidden}
-                  onChange={(event) => patch({ priceHidden: event.target.checked })}
-                  className="accent-[var(--color-brass)]"
-                />
-                {tx(L("السعر غير محدد", "Price not specified"))}
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium">{tx(L("السعر المحدد (مطلوب)", "Specified price (required)"))}</span>
+                <div className="relative">
+                  <input
+                    className="field pe-16"
+                    inputMode="decimal"
+                    value={draft.price}
+                    onChange={(event) => patch({ price: event.target.value.replace(/[^\d.]/g, "") })}
+                    placeholder={valuation ? String(valuation.mid) : tx(L("مثال: 8500", "e.g. 8500"))}
+                  />
+                  <span className="absolute end-4 top-1/2 -translate-y-1/2 text-sm text-muted">
+                    {locale === "ar" ? "ر.ع" : "OMR"}
+                  </span>
+                </div>
               </label>
-              {!draft.priceHidden && (
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium">{tx(L("أضف السعر الكامل", "Add the full price"))}</span>
-                  <div className="relative">
-                    <input
-                      className="field pe-16"
-                      inputMode="decimal"
-                      value={draft.price}
-                      onChange={(event) => patch({ price: event.target.value })}
-                      placeholder={tx(L("مثال: 8500", "e.g. 8500"))}
-                    />
-                    <span className="absolute end-4 top-1/2 -translate-y-1/2 text-sm text-muted">
-                      {locale === "ar" ? "ر.ع" : "OMR"}
-                    </span>
-                  </div>
-                </label>
+
+              {priceVsMarket && (
+                <p
+                  className={`rounded-2xl px-4 py-3 text-sm ${
+                    priceVsMarket === "fair"
+                      ? "border border-teal/30 bg-teal/10 text-night"
+                      : priceVsMarket === "below"
+                        ? "border border-brass/40 bg-sand/50 text-night"
+                        : "border border-line bg-soft text-night"
+                  }`}
+                >
+                  {priceVsMarket === "fair"
+                    ? tx(L("سعرك داخل نطاق السوق المتوقع — مناسب للمشاهدات.", "Your price sits inside the expected market band — good for views."))
+                    : priceVsMarket === "below"
+                      ? tx(L("سعرك أقل من الأدنى الشائع — قد يجذب بسرعة لكن راقب العروض.", "Below the usual low — may attract fast, watch offers carefully."))
+                      : tx(L("سعرك أعلى من الأعلى الشائع — قد يقلل المشاهدات حتى يُعدَّل.", "Above the usual high — may reduce views until adjusted."))}
+                </p>
               )}
+
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                    draft.priceNegotiable ? "border-teal bg-teal/10 text-night" : "border-line bg-paper text-muted"
+                  }`}
+                  onClick={() => patch({ priceNegotiable: true })}
+                >
+                  {tx(L("قابل للنقاش", "Negotiable"))}
+                </button>
+                <button
+                  type="button"
+                  className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${
+                    !draft.priceNegotiable ? "border-teal bg-teal/10 text-night" : "border-line bg-paper text-muted"
+                  }`}
+                  onClick={() => patch({ priceNegotiable: false })}
+                >
+                  {tx(L("غير قابل للنقاش", "Not negotiable"))}
+                </button>
+              </div>
             </Question>
           )}
 
@@ -1600,20 +1737,29 @@ export function SellWizard() {
           {stepId === "publish" && (
             <Question
               title={tx(L("النشر", "Publish"))}
-              lead={tx(L("راجع الملخص ثم احفظ وانشر الإعلان.", "Review the summary, then save and publish."))}
+              lead={tx(L("راجع الملخص. عند الحفظ سنسألك إن أردت استعراض الإعلان أولًا.", "Review the summary. On save we’ll ask if you want to preview first."))}
             >
               <div className="rounded-2xl border border-line bg-soft/60 px-4 py-3 text-sm text-muted">
                 <p className="font-medium text-night">{title || tx(L("سيارتك", "Your car"))}</p>
                 <p className="mt-1">{placeLabel || "—"}</p>
                 <p className="mt-1">
-                  {draft.priceHidden
-                    ? tx(L("السعر غير محدد", "Price not specified"))
-                    : draft.price
-                      ? money(Number(draft.price) || 0)
-                      : "—"}
+                  {draft.price ? money(Number(draft.price) || 0) : "—"}
+                  {draft.price
+                    ? ` · ${draft.priceNegotiable ? tx(L("قابل للنقاش", "Negotiable")) : tx(L("غير قابل للنقاش", "Fixed"))}`
+                    : ""}
                 </p>
                 <p className="mt-1">+968 {draft.phone || "—"}</p>
               </div>
+              {previewMode && (
+                <div className="rounded-2xl border border-teal/40 bg-teal/10 px-4 py-3 text-sm text-night">
+                  {tx(
+                    L(
+                      "وضع الاستعراض مفعّل — راجع البطاقة الجانبية أو الملخص أعلاه، ثم اضغط «حفظ ونشر» مجددًا للتأكيد.",
+                      "Preview mode on — check the side card or summary above, then press Save & publish again to confirm.",
+                    ),
+                  )}
+                </div>
+              )}
               <div className="space-y-2 rounded-2xl border border-line bg-sand/40 p-4">
                 <p className="text-sm font-semibold text-night">
                   {tx(L("قوة BHD — اختر ما يُرفق بالإعلان", "BHD edge — attach to the listing"))}
@@ -1655,10 +1801,19 @@ export function SellWizard() {
               >
                 {tx(L("التالي", "Next"))}
               </button>
-            ) : (
+            ) : previewMode ? (
               <button
                 type="button"
                 onClick={publish}
+                disabled={!canNext()}
+                className={`btn-teal flex-1 ${!canNext() ? "opacity-40" : ""}`}
+              >
+                {tx(L("تأكيد النشر بعد الاستعراض", "Confirm publish after preview"))}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={requestPublish}
                 disabled={!canNext()}
                 className={`btn-teal flex-1 ${!canNext() ? "opacity-40" : ""}`}
               >
@@ -1668,10 +1823,12 @@ export function SellWizard() {
           </div>
         </div>
 
-        <aside className="hidden lg:block">
-          <div className="surface-card sticky top-28 overflow-hidden">
+        <aside className={`${previewMode ? "block" : "hidden lg:block"}`} ref={previewRef}>
+          <div className={`surface-card sticky top-28 overflow-hidden ${previewMode ? "ring-2 ring-teal/50" : ""}`}>
             <div className="bg-night px-5 py-3 text-xs font-medium tracking-[0.14em] text-brass">
-              {tx(L("معاينة مباشرة", "Live preview"))}
+              {previewMode
+                ? tx(L("استعراض الإعلان قبل النشر", "Ad preview before publish"))
+                : tx(L("معاينة مباشرة", "Live preview"))}
             </div>
             <div className="aspect-[16/10] bg-soft">
               {draft.photos[0] ? (
@@ -1693,12 +1850,15 @@ export function SellWizard() {
             </div>
             <div className="space-y-2 p-5">
               <p className="text-2xl font-bold text-night">
-                {draft.priceHidden
-                  ? tx(L("السعر غير محدد", "Price n/a"))
-                  : draft.price
-                    ? money(Number(draft.price) || 0)
-                    : "—"}
+                {draft.price ? money(Number(draft.price) || 0) : "—"}
               </p>
+              {draft.price && (
+                <p className="text-xs font-medium text-teal">
+                  {draft.priceNegotiable
+                    ? tx(L("السعر قابل للنقاش", "Price is negotiable"))
+                    : tx(L("السعر غير قابل للنقاش", "Price is fixed"))}
+                </p>
+              )}
               <p className="font-semibold text-night">{title || tx(L("سيارتك", "Your car"))}</p>
               <p className="text-sm text-muted">
                 {[
@@ -1739,6 +1899,35 @@ export function SellWizard() {
           </div>
         </aside>
       </div>
+
+      {previewAsk && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-night/50 p-4 sm:items-center" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-[1.5rem] border border-line bg-paper p-5 shadow-xl">
+            <p className="text-lg font-bold text-night">
+              {tx(L("هل تريد استعراض الإعلان قبل النشر؟", "Do you want to preview the ad before publishing?"))}
+            </p>
+            <p className="mt-2 text-sm text-muted">
+              {tx(
+                L(
+                  "يمكنك مراجعة البطاقة كما يراها المشتري، ثم تأكيد النشر. أو انشر مباشرة الآن.",
+                  "Review the card as buyers will see it, then confirm publish — or publish right away.",
+                ),
+              )}
+            </p>
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+              <button type="button" className="btn-primary flex-1" onClick={confirmPreviewThenStay}>
+                {tx(L("نعم، استعرض أولًا", "Yes, preview first"))}
+              </button>
+              <button type="button" className="btn-teal flex-1" onClick={confirmPublishNow}>
+                {tx(L("لا، انشر الآن", "No, publish now"))}
+              </button>
+            </div>
+            <button type="button" className="mt-3 w-full text-sm text-muted" onClick={() => setPreviewAsk(false)}>
+              {tx(L("إلغاء", "Cancel"))}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
