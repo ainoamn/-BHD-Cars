@@ -136,7 +136,7 @@ function makeModelFields(makePlaceholder: Copy, modelPlaceholder: Copy, labels?:
     {
       id: "model",
       label: labels?.model ?? L("الطراز", "Model"),
-      lead: L("أيقونات الطراز حسب الشركة المختارة — لغة الواجهة فقط.", "Model icons for the selected make — UI language only."),
+      lead: L("أيقونات الطراز حسب الشركة المختارة.", "Model icons for the selected make."),
       kind: "text",
       required: true,
       placeholder: modelPlaceholder,
@@ -214,10 +214,7 @@ function listingTail(opts?: {
     {
       id: "title",
       label: L("عنوان العرض", "Listing headline"),
-      lead: L(
-        "آخر الخطوات: ولّد العنوان من بياناتك بلغة الواجهة فقط، ثم عدّله إن شئت.",
-        "Final steps: generate the headline from your facts in the UI language only, then edit if you like.",
-      ),
+      lead: L("عنوان قصير يوضح ماذا تعرض — يمكنك توليده أو كتابته.", "A short headline for what you offer — generate it or write it."),
       kind: "title",
       required: true,
       maxLength: 100,
@@ -227,10 +224,7 @@ function listingTail(opts?: {
     {
       id: "note",
       label: L("تفاصيل العرض", "Listing details"),
-      lead: L(
-        "الخطوة الأخيرة: توليد نص حقيقي من المعلومات المدخلة — بلغة الواجهة الحالية فقط.",
-        "Last step: real text from the facts you entered — in the current UI language only.",
-      ),
+      lead: L("اكتب ما يحتاجه المشتري، أو اطلب صياغة من المساعد ثم عدّل.", "Write what buyers need, or ask the assistant to draft then edit."),
       kind: "textarea",
       maxLength: 4000,
       placeholder: L("الحالة، الصيانة، سبب البيع، وما يُسلَّم مع العرض…", "Condition, service history, reason for sale, what is included…"),

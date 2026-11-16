@@ -1470,19 +1470,11 @@ export function SellWizard() {
               title={tx(L("عنوان العرض", "Listing headline"))}
               lead={tx(
                 L(
-                  "قبل النشر: ولّد العنوان من بياناتك بلغة الواجهة فقط، أو اكتبه وعدّله.",
-                  "Before publish: generate the title from your facts in the UI language only, or write and edit.",
+                  "ولّد العنوان من بياناتك أو اكتبه وعدّله كما تشاء.",
+                  "Generate the title from your facts, or write and edit as you like.",
                 ),
               )}
             >
-              <div className="rounded-2xl border border-teal/30 bg-teal/5 px-4 py-3 text-sm text-night">
-                {tx(
-                  L(
-                    `لغة التوليد = لغة الواجهة (${locale === "ar" ? "العربية" : "English"}) فقط.`,
-                    `Generation language = UI language (${locale === "ar" ? "Arabic" : "English"}) only.`,
-                  ),
-                )}
-              </div>
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="btn-teal" disabled={aiBusy} onClick={() => void generateTitleAi()}>
                   {aiBusy
@@ -1517,8 +1509,8 @@ export function SellWizard() {
               title={tx(L("تفاصيل العرض", "Listing details"))}
               lead={tx(
                 L(
-                  "الخطوة الأخيرة قبل النشر: توليد نص حقيقي من المعلومات — بلغة الواجهة فقط.",
-                  "Last step before publish: real text from your facts — UI language only.",
+                  "اكتب التفاصيل بنفسك أو اطلب صياغة من المساعد ثم عدّل.",
+                  "Write the details yourself or ask the assistant to draft, then edit.",
                 ),
               )}
             >

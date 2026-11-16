@@ -58,14 +58,81 @@ function templateRoute(prompt: string, locale: "ar" | "en") {
   };
 }
 
-function templateTitle(facts: ListingAssistInput["facts"], locale: "ar" | "en", style?: ListingAssistInput["style"]) {
+function entityWord(sectionId: string | undefined, locale: "ar" | "en") {
+  const id = sectionId || "";
+  if (locale === "ar") {
+    if (id === "boats") return "الوحدة البحرية";
+    if (id === "motorcycle") return "الدراجة";
+    if (id === "heavy") return "المعدة";
+    if (id === "trucks") return "المركبة";
+    if (id === "parts" || id === "consumables" || id === "accessories" || id === "tires") return "القطعة";
+    if (id === "plates") return "اللوحة";
+    if (id === "cars-rent") return "المركبة";
+    if (id === "scrap") return "المركبة";
+    return "السيارة";
+  }
+  if (id === "boats") return "vessel";
+  if (id === "motorcycle") return "motorcycle";
+  if (id === "heavy") return "equipment";
+  if (id === "trucks") return "truck";
+  if (id === "parts" || id === "consumables" || id === "accessories" || id === "tires") return "item";
+  if (id === "plates") return "plate";
+  return "vehicle";
+}
+
+const FACT_LABELS: Record<string, { ar: string; en: string }> = {
+  make: { ar: "الشركة", en: "Make" },
+  model: { ar: "الطراز", en: "Model" },
+  year: { ar: "سنة الصنع", en: "Year" },
+  condition: { ar: "الحالة", en: "Condition" },
+  location: { ar: "الموقع", en: "Location" },
+  vesselType: { ar: "نوع الوحدة", en: "Vessel type" },
+  length: { ar: "الطول", en: "Length" },
+  engineHours: { ar: "ساعات المحرك", en: "Engine hours" },
+  trailer: { ar: "المقطورة", en: "Trailer" },
+  price: { ar: "السعر", en: "Price" },
+  payment: { ar: "أسلوب السداد", en: "Payment" },
+  phone: { ar: "التواصل", en: "Contact" },
+  mileage: { ar: "الممشى", en: "Mileage" },
+  hours: { ar: "ساعات التشغيل", en: "Operating hours" },
+  color: { ar: "اللون", en: "Colour" },
+  fuel: { ar: "الوقود", en: "Fuel" },
+  gearbox: { ar: "ناقل الحركة", en: "Gearbox" },
+  seats: { ar: "المقاعد", en: "Seats" },
+  body: { ar: "الهيكل", en: "Body" },
+  origin: { ar: "مصدر المواصفات", en: "Spec origin" },
+  trim: { ar: "التجهيز", en: "Trim" },
+  section: { ar: "القسم", en: "Section" },
+  partName: { ar: "اسم القطعة", en: "Part name" },
+  name: { ar: "الاسم", en: "Name" },
+  plateDigits: { ar: "الرقم", en: "Digits" },
+  equipType: { ar: "نوع المعدة", en: "Equipment type" },
+  rentPeriod: { ar: "مدة التأجير", en: "Hire period" },
+};
+
+const SKIP_FACT_KEYS = new Set([
+  "title",
+  "photos",
+  "note",
+  "makeId",
+  "modelId",
+  "governorate",
+  "wilayat",
+  "village",
+  "section",
+]);
+
+function templateTitle(facts: ListingAssistInput["facts"], locale: "ar" | "en", style?: ListingAssistInput["style"], sectionId?: string) {
   const f = facts ?? {};
   const bits = [f.make, f.model, f.year, f.partName, f.name, f.plateDigits, f.equipType]
     .filter(Boolean)
     .map(String);
   const base = bits.join(" ") || (locale === "ar" ? "عرض على BHD Cars" : "Listing on BHD Cars");
   if (style === "warm") {
-    return locale === "ar" ? `${base} — فرصة تفرّح العين!` : `${base} — ready to brighten your drive!`;
+    if (sectionId === "boats") {
+      return locale === "ar" ? `${base} — جاهز يفرّح البحر!` : `${base} — ready for bright days on the water!`;
+    }
+    return locale === "ar" ? `${base} — فرصة تفرّح العين!` : `${base} — ready to brighten your day!`;
   }
   return locale === "ar" ? `${base} — جاهز للمعاينة` : `${base} — ready to view`;
 }
@@ -74,27 +141,32 @@ function templateDescription(input: ListingAssistInput) {
   const f = input.facts ?? {};
   const ar = input.locale !== "en";
   const style = input.style ?? "clear";
+  const entity = entityWord(input.sectionId, ar ? "ar" : "en");
   const lines = Object.entries(f)
-    .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "")
-    .slice(0, 12)
-    .map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(", ") : v}`);
+    .filter(([k, v]) => !SKIP_FACT_KEYS.has(k) && v !== null && v !== undefined && String(v).trim() !== "")
+    .slice(0, 10)
+    .map(([k, v]) => {
+      const label = FACT_LABELS[k]?.[ar ? "ar" : "en"] ?? (ar ? k : k.replace(/([A-Z])/g, " $1").trim());
+      const value = Array.isArray(v) ? v.join(ar ? "، " : ", ") : String(v);
+      return ar ? `• ${label}: ${value}` : `• ${label}: ${value}`;
+    });
 
   if (ar) {
     const opener =
       style === "warm"
-        ? "مرحبا! هذه السيارة جاهزة تفرّح يومك عبر BHD Cars."
+        ? `مرحبا! ${entity} جاهزة تفرّح يومك عبر BHD Cars.`
         : style === "calm"
-          ? "تفاصيل العرض كما أدخلها البائع:"
-          : "ملخص العرض:";
-    return [opener, ...lines.map((l) => `• ${l}`), "المعاينة والفحص متاحان حسب الاتفاق."].join("\n");
+          ? `تفاصيل ${entity} كما أدخلها البائع:`
+          : `ملخص العرض:`;
+    return [opener, ...lines, "المعاينة والفحص متاحان حسب الاتفاق."].join("\n");
   }
   const opener =
     style === "warm"
-      ? "Hello! This vehicle is ready to brighten your day on BHD Cars."
+      ? `Hello! This ${entity} is ready to brighten your day on BHD Cars.`
       : style === "calm"
-        ? "Listing facts as entered:"
+        ? `Listing facts for this ${entity}:`
         : "Listing summary:";
-  return [opener, ...lines.map((l) => `• ${l}`), "Viewing and inspection by arrangement."].join("\n");
+  return [opener, ...lines, "Viewing and inspection by arrangement."].join("\n");
 }
 
 async function callModel(system: string, user: string) {
@@ -159,7 +231,7 @@ export async function runListingAssist(input: ListingAssistInput) {
 
   if (input.action === "title") {
     const cheerful = input.style === "warm";
-    const fallback = templateTitle(input.facts, locale, input.style);
+    const fallback = templateTitle(input.facts, locale, input.style, input.sectionId);
     const langLock =
       locale === "ar"
         ? "اكتب بالعربية فقط. ممنوع أي كلمة إنجليزية أو ترجمة مزدوجة."
@@ -195,10 +267,11 @@ export async function runListingAssist(input: ListingAssistInput) {
       locale === "ar"
         ? "اكتب بالعربية فقط. ممنوع الإنجليزية أو عرض لغتين معًا."
         : "Write in English only. Do not include Arabic or dual-language lines.";
+    const entity = entityWord(input.sectionId, locale);
     const ai = await callModel(
       locale === "ar"
-        ? `اكتب وصف عرض حقيقي ومفيد بالعربية الفصحى السهلة ${styleHint}. فقرة أو نقاط. اعتمد على البيانات المدخلة فقط. ${langLock} أرجع النص فقط.`
-        : `Write a real, useful listing description ${styleHint}. One short paragraph or bullets. Use only the given facts. ${langLock} Return text only.`,
+        ? `اكتب وصف عرض حقيقي ومفيد بالعربية الفصحى السهلة ${styleHint}. استخدم كلمة مناسبة مثل «${entity}» لا كلمة خاطئة. لا تعرض مفاتيح إنجليزية للحقول (مثل section أو vesselType)؛ اكتب تسميات عربية طبيعية. فقرة أو نقاط من البيانات فقط. ${langLock} أرجع النص فقط.`
+        : `Write a real, useful listing description ${styleHint}. Refer to it as a “${entity}” (not the wrong category). Never dump raw field keys; use natural English labels. One short paragraph or bullets from facts only. ${langLock} Return text only.`,
       JSON.stringify({ facts: input.facts, sectionId: input.sectionId, prompt: input.prompt }),
     );
     return {

@@ -122,7 +122,6 @@ export function SectionWizard({ section }: { section: ListingSection }) {
   const [sent, setSent] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
   const [modelQuery, setModelQuery] = useState("");
-  const [aiSource, setAiSource] = useState<"ai" | "template" | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const maxReached = useRef(0);
 
@@ -234,7 +233,6 @@ export function SectionWizard({ section }: { section: ListingSection }) {
 
   async function runAi(action: "title" | "description", style?: "calm" | "clear" | "warm") {
     setAiBusy(true);
-    setAiSource(null);
     try {
       const res = await fetch("/api/ai/listing-assist", {
         method: "POST",
@@ -247,9 +245,8 @@ export function SectionWizard({ section }: { section: ListingSection }) {
           facts: localizedFacts(),
         }),
       });
-      const json = (await res.json()) as { text?: string; source?: "ai" | "template" };
+      const json = (await res.json()) as { text?: string };
       if (!json.text) return;
-      setAiSource(json.source ?? "template");
       if (action === "title") patch("title", json.text.slice(0, 100));
       else patch("note", json.text.slice(0, 4000));
     } finally {
@@ -619,14 +616,6 @@ export function SectionWizard({ section }: { section: ListingSection }) {
 
             {field.kind === "title" && (
               <div className="space-y-3">
-                <div className="rounded-2xl border border-teal/30 bg-teal/5 px-4 py-3 text-sm text-night">
-                  {tx(
-                    L(
-                      `التوليد بلغة الواجهة الحالية فقط (${locale === "ar" ? "العربية" : "English"}). لن تظهر الترجمة الأخرى إلا بعد تغيير اللغة.`,
-                      `Generation uses the current UI language only (${locale === "ar" ? "Arabic" : "English"}). The other language appears only after you switch locale.`,
-                    ),
-                  )}
-                </div>
                 <button
                   type="button"
                   className="btn-teal w-full sm:w-auto"
@@ -634,8 +623,8 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                   onClick={() => void runAi("title", "warm")}
                 >
                   {aiBusy
-                    ? tx(L("جارٍ التوليد الحقيقي…", "Generating for real…"))
-                    : tx(L("توليد العنوان من البيانات المدخلة", "Generate headline from entered facts"))}
+                    ? tx(L("جارٍ الصياغة…", "Drafting…"))
+                    : tx(L("توليد العنوان من البيانات", "Generate headline from facts"))}
                 </button>
                 <label className="block space-y-2">
                   <input
@@ -647,9 +636,6 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                   />
                   <span className="block text-xs text-muted">
                     {(values.title ?? "").length} / {field.maxLength ?? 100}
-                    {aiSource
-                      ? ` · ${aiSource === "ai" ? tx(L("مولّد بالذكاء الاصطناعي", "AI generated")) : tx(L("قالب احتياطي", "Template fallback"))}`
-                      : ""}
                   </span>
                 </label>
               </div>
@@ -657,14 +643,6 @@ export function SectionWizard({ section }: { section: ListingSection }) {
 
             {field.kind === "textarea" && (
               <div className="space-y-3">
-                <div className="rounded-2xl border border-brass/30 bg-sand/40 px-4 py-3 text-sm text-night">
-                  {tx(
-                    L(
-                      "الخطوة الأخيرة: ولّد نصًا حقيقيًا من كل الحقول السابقة، بلغة الواجهة فقط، ثم عدّله يدويًا إن أردت.",
-                      "Last step: generate real text from all previous fields, in the UI language only, then edit manually if you want.",
-                    ),
-                  )}
-                </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   {(
                     [
@@ -700,9 +678,6 @@ export function SectionWizard({ section }: { section: ListingSection }) {
                   <span className="block text-xs text-muted">
                     {(values.note ?? "").length} / {field.maxLength ?? 4000}
                     {aiBusy ? ` · ${tx(L("جارٍ التوليد…", "Generating…"))}` : ""}
-                    {aiSource && !aiBusy
-                      ? ` · ${aiSource === "ai" ? tx(L("مولّد بالذكاء الاصطناعي", "AI generated")) : tx(L("قالب احتياطي (أضف مفتاح AI لجودة أعلى)", "Template fallback (add AI key for higher quality)"))}`
-                      : ""}
                   </span>
                 </label>
               </div>
